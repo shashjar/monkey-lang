@@ -10,6 +10,7 @@ import (
 
 const PROMPT = ">> "
 
+// Starts the REPL for the Monkey programming language for the user to interact with.
 func Start(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
 

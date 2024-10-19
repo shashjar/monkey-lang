@@ -7,6 +7,7 @@ import (
 	"os/user"
 )
 
+// Entrypoint for the Monkey interpreter program.
 func main() {
 	user, err := user.Current()
 	if err != nil {
