@@ -89,6 +89,33 @@ func (pe *PrefixExpression) String() string {
 	return out.String()
 }
 
+// Represents an infix expression that has some operator in the infix position acting on two
+// expressions, one to the left and one to the right.
+type InfixExpression struct {
+	Token    token.Token // the operator token, e.g. +
+	Left     Expression
+	Operator string
+	Right    Expression
+}
+
+func (ie *InfixExpression) expressionNode() {}
+
+func (ie *InfixExpression) TokenLiteral() string {
+	return ie.Token.Literal
+}
+
+func (ie *InfixExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("(")
+	out.WriteString(ie.Left.String())
+	out.WriteString(" " + ie.Operator + " ")
+	out.WriteString(ie.Right.String())
+	out.WriteString(")")
+
+	return out.String()
+}
+
 // Represents a let statement in the Monkey programming language, consisting of (1) the LET token, (2) the
 // name of the identifier in the binding, and (3) the expression that produces the value for the binding.
 type LetStatement struct {
