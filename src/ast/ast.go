@@ -133,3 +133,19 @@ func (i *Identifier) TokenLiteral() string {
 func (i *Identifier) String() string {
 	return i.Value
 }
+
+// Represents an integer, consisting of the INT token and the value of the integer.
+type IntegerLiteral struct {
+	Token token.Token // the token.INT token
+	Value int64
+}
+
+func (il *IntegerLiteral) expressionNode() {}
+
+func (il *IntegerLiteral) TokenLiteral() string {
+	return il.Token.Literal
+}
+
+func (il *IntegerLiteral) String() string {
+	return il.Token.Literal
+}
