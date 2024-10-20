@@ -46,6 +46,19 @@ func (ls *LetStatement) TokenLiteral() string {
 	return ls.Token.Literal
 }
 
+// Represents a return statement in the Monkey programming language, consisting of the RETURN token
+// and the expression providing the value that is being returned.
+type ReturnStatement struct {
+	Token       token.Token // the token.RETURN token
+	ReturnValue Expression
+}
+
+func (rs *ReturnStatement) statementNode() {}
+
+func (rs *ReturnStatement) TokenLiteral() string {
+	return rs.Token.Literal
+}
+
 // Represents an identifier, consisting of the IDENT token and the value (name of the identifier).
 type Identifier struct {
 	Token token.Token // the token.IDENT token
