@@ -65,6 +65,30 @@ func (es *ExpressionStatement) String() string {
 	return ""
 }
 
+// Represents a prefix expression that has some operator in the prefix position acting on some expression to the right.
+type PrefixExpression struct {
+	Token    token.Token // the prefix token, e.g. !
+	Operator string
+	Right    Expression
+}
+
+func (pe *PrefixExpression) expressionNode() {}
+
+func (pe *PrefixExpression) TokenLiteral() string {
+	return pe.Token.Literal
+}
+
+func (pe *PrefixExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("(")
+	out.WriteString(pe.Operator)
+	out.WriteString(pe.Right.String())
+	out.WriteString(")")
+
+	return out.String()
+}
+
 // Represents a let statement in the Monkey programming language, consisting of (1) the LET token, (2) the
 // name of the identifier in the binding, and (3) the expression that produces the value for the binding.
 type LetStatement struct {
