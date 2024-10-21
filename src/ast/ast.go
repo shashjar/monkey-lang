@@ -169,6 +169,28 @@ func (rs *ReturnStatement) String() string {
 	return out.String()
 }
 
+// Represents a series of statements, e.g. those contained within if-else expressions.
+type BlockStatement struct {
+	Token      token.Token // the { token
+	Statements []Statement
+}
+
+func (bs *BlockStatement) statementNode() {}
+
+func (bs *BlockStatement) TokenLiteral() string {
+	return bs.Token.Literal
+}
+
+func (bs *BlockStatement) String() string {
+	var out bytes.Buffer
+
+	for _, s := range bs.Statements {
+		out.WriteString(s.String())
+	}
+
+	return out.String()
+}
+
 // Represents an identifier, consisting of the IDENT token and the value (name of the identifier).
 type Identifier struct {
 	Token token.Token // the token.IDENT token
@@ -215,4 +237,34 @@ func (b *Boolean) TokenLiteral() string {
 
 func (b *Boolean) String() string {
 	return b.Token.Literal
+}
+
+// Represents an if expression in the form "if (<condition>) <consequence> else <alternative>"
+type IfExpression struct {
+	Token       token.Token // the token.IF token
+	Condition   Expression
+	Consequence *BlockStatement
+	Alternative *BlockStatement
+}
+
+func (ie *IfExpression) expressionNode() {}
+
+func (ie *IfExpression) TokenLiteral() string {
+	return ie.Token.Literal
+}
+
+func (ie *IfExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("if")
+	out.WriteString(ie.Condition.String())
+	out.WriteString(" ")
+	out.WriteString(ie.Consequence.String())
+
+	if ie.Alternative != nil {
+		out.WriteString("else ")
+		out.WriteString(ie.Alternative.String())
+	}
+
+	return out.String()
 }
