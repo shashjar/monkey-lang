@@ -19,11 +19,13 @@ const (
 
 	// Operators
 	ASSIGN = "="
-	PLUS   = "+"
-	MINUS  = "-"
-	MUL    = "*"
-	DIV    = "/"
-	BANG   = "!"
+
+	PLUS  = "+"
+	MINUS = "-"
+	MUL   = "*"
+	DIV   = "/"
+
+	BANG = "!"
 
 	EQ     = "=="
 	NOT_EQ = "!="
