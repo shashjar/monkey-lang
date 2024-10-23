@@ -15,11 +15,29 @@ func TestEvalIntegerExpression(t *testing.T) {
 		{"0", 0},
 		{"5", 5},
 		{"10", 10},
+		{"16;", 16},
 	}
 
 	for _, test := range tests {
 		evaluated := testEval(test.input)
 		testIntegerObject(t, evaluated, test.expected)
+	}
+}
+
+func TestEvalBooleanExpression(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected bool
+	}{
+		{"true", true},
+		{"true;", true},
+		{"false", false},
+		{"false;", false},
+	}
+
+	for _, test := range tests {
+		evaluated := testEval(test.input)
+		testBooleanObject(t, evaluated, test.expected)
 	}
 }
 
@@ -40,6 +58,21 @@ func testIntegerObject(t *testing.T, obj object.Object, expected int64) bool {
 
 	if result.Value != expected {
 		t.Errorf("object has wrong value. expected=%d, got=%d", expected, result.Value)
+		return false
+	}
+
+	return true
+}
+
+func testBooleanObject(t *testing.T, obj object.Object, expected bool) bool {
+	result, ok := obj.(*object.Boolean)
+	if !ok {
+		t.Errorf("object is not a Boolean. got=%T (%+v)", obj, obj)
+		return false
+	}
+
+	if result.Value != expected {
+		t.Errorf("object has wrong value. expected=%t, got=%t", expected, result.Value)
 		return false
 	}
 
