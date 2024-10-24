@@ -72,6 +72,8 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 	// Functions
 	case *ast.FunctionLiteral:
 		return &object.Function{Parameters: node.Parameters, Body: node.Body, Env: env}
+	case *ast.CallExpression:
+		return evalCallExpression(node, env)
 	}
 
 	return nil
@@ -226,6 +228,64 @@ func evalIfExpression(ie *ast.IfExpression, env *object.Environment) object.Obje
 	} else {
 		return NULL
 	}
+}
+
+func evalCallExpression(ce *ast.CallExpression, env *object.Environment) object.Object {
+	function := Eval(ce.Function, env)
+	if isError(function) {
+		return function
+	}
+
+	args := evalExpressions(ce.Arguments, env)
+	if len(args) == 1 && isError(args[0]) {
+		return args[0]
+	}
+
+	return applyFunction(function, args)
+}
+
+func evalExpressions(exps []ast.Expression, env *object.Environment) []object.Object {
+	var result []object.Object
+
+	for _, exp := range exps {
+		evaluated := Eval(exp, env)
+		if isError(evaluated) {
+			return []object.Object{evaluated}
+		}
+		result = append(result, evaluated)
+	}
+
+	return result
+}
+
+func applyFunction(fn object.Object, args []object.Object) object.Object {
+	function, ok := fn.(*object.Function)
+	if !ok {
+		return newError("not a function: %s", function.Type())
+	}
+
+	if len(args) != len(function.Parameters) {
+		return newError("wrong number of arguments provided to function. expected=%d, received=%d", len(function.Parameters), len(args))
+	}
+
+	extendedEnv := extendFunctionEnv(function, args)
+	evaluated := Eval(function.Body, extendedEnv)
+	return unwrapReturnValue(evaluated)
+}
+
+func extendFunctionEnv(function *object.Function, args []object.Object) *object.Environment {
+	env := object.NewEnclosedEnvironment(function.Env)
+	for i, param := range function.Parameters {
+		env.Set(param.Value, args[i])
+	}
+	return env
+}
+
+func unwrapReturnValue(obj object.Object) object.Object {
+	if returnValue, ok := obj.(*object.ReturnValue); ok {
+		return returnValue.Value
+	}
+	return obj
 }
 
 func isTruthy(obj object.Object) bool {

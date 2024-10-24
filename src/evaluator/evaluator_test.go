@@ -184,6 +184,14 @@ func TestErrorHandling(t *testing.T) {
 			"let a = 5; let b = a + 7; c;",
 			"identifier not found: c",
 		},
+		{
+			"fn(x, y) { return 10 * x + y - 3; }(10, 6, 7)",
+			"wrong number of arguments provided to function. expected=2, received=3",
+		},
+		{
+			"fn(x, y, z) { return 10 * x + y - 3; }(10, 6)",
+			"wrong number of arguments provided to function. expected=3, received=2",
+		},
 	}
 
 	for _, test := range tests {
@@ -236,6 +244,38 @@ func TestFunctionObject(t *testing.T) {
 	if fn.Body.String() != expectedBody {
 		t.Fatalf("function body is not %q. got=%q", expectedBody, fn.Body.String())
 	}
+}
+
+func TestFunctionApplication(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int64
+	}{
+		{"let identity = fn(x) { x; }; identity(5);", 5},
+		{"let add = fn(x, y) { return x + y; }; add(4, 3);", 7},
+		{"let double = fn(x) { x * 2; }; double(8);", 16},
+		{"let sub = fn(x, y) { return x - y; }; sub(5, -3);", 8},
+		{"let sub = fn(x, y) { return x - y; }; sub(sub(4, 1), sub(9, 20));", 14},
+		{"fn(x) { x; }(5)", 5},
+		{"fn(x, y) { return 10 * x + y - 3; }(10, 6)", 103},
+	}
+
+	for _, test := range tests {
+		testIntegerObject(t, testEval(test.input), test.expected)
+	}
+}
+
+func TestClosures(t *testing.T) {
+	input := `
+	let newAdder = fn(x) {
+		fn(y) { x + y; }
+	};
+
+	let addTwo = newAdder(2);
+	addTwo(2);
+	`
+
+	testIntegerObject(t, testEval(input), 4)
 }
 
 func testEval(input string) object.Object {
