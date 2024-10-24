@@ -1,6 +1,11 @@
 package object
 
-import "fmt"
+import (
+	"bytes"
+	"fmt"
+	"monkey/ast"
+	"strings"
+)
 
 // Represents a type of internally-represented object in the Monkey programming language.
 type ObjectType string
@@ -10,6 +15,7 @@ const (
 	INTEGER_OBJ      = "INTEGER"
 	BOOLEAN_OBJ      = "BOOLEAN"
 	RETURN_VALUE_OBJ = "RETURN_VALUE"
+	FUNCTION_OBJ     = "FUNCTION"
 	ERROR_OBJ        = "ERROR"
 )
 
@@ -67,6 +73,35 @@ func (rv *ReturnValue) Type() ObjectType {
 
 func (rv *ReturnValue) Inspect() string {
 	return rv.Value.Inspect()
+}
+
+// Represents a function.
+type Function struct {
+	Parameters []*ast.Identifier
+	Body       *ast.BlockStatement
+	Env        *Environment
+}
+
+func (f *Function) Type() ObjectType {
+	return FUNCTION_OBJ
+}
+
+func (f *Function) Inspect() string {
+	var out bytes.Buffer
+
+	params := []string{}
+	for _, p := range f.Parameters {
+		params = append(params, p.Value)
+	}
+
+	out.WriteString("fn")
+	out.WriteString("(")
+	out.WriteString(strings.Join(params, ", "))
+	out.WriteString(") {\n")
+	out.WriteString(f.Body.String())
+	out.WriteString("\n}")
+
+	return out.String()
 }
 
 // Represents an error encountered while evaluating a program.
