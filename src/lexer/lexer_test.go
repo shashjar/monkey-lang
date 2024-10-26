@@ -66,6 +66,8 @@ func TestNextToken(t *testing.T) {
 	let s = "Hello world!";
 
 	[1, 2, "3"];
+
+	{"hello": "world", 1: "me", true: 56, "false": false};
 	`
 
 	tests := []struct {
@@ -171,6 +173,25 @@ func TestNextToken(t *testing.T) {
 		{token.COMMA, ","},
 		{token.STRING, "3"},
 		{token.RBRACKET, "]"},
+		{token.SEMICOLON, ";"},
+
+		{token.LBRACE, "{"},
+		{token.STRING, "hello"},
+		{token.COLON, ":"},
+		{token.STRING, "world"},
+		{token.COMMA, ","},
+		{token.INT, "1"},
+		{token.COLON, ":"},
+		{token.STRING, "me"},
+		{token.COMMA, ","},
+		{token.TRUE, "true"},
+		{token.COLON, ":"},
+		{token.INT, "56"},
+		{token.COMMA, ","},
+		{token.STRING, "false"},
+		{token.COLON, ":"},
+		{token.FALSE, "false"},
+		{token.RBRACE, "}"},
 		{token.SEMICOLON, ";"},
 
 		{token.EOF, ""},

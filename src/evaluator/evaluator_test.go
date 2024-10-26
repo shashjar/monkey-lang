@@ -461,6 +461,47 @@ func TestArrayIndexExpressions(t *testing.T) {
 	}
 }
 
+func TestHashMapLiterals(t *testing.T) {
+	input := `
+	let two = "two";
+	{
+		"one": 10 - 9,
+		two: 1 + 1,
+		"thr" + "ee": 6 / 2,
+		4: 4,
+		true: fn(x) { x + 4 }(1),
+		false: 6,
+	}
+	`
+	evaluated := testEval(input)
+	hashmap, ok := evaluated.(*object.HashMap)
+	if !ok {
+		t.Fatalf("object is not a HashMap. got=%T (%+v)", evaluated, evaluated)
+	}
+
+	expected := map[object.HashKey]int64{
+		(&object.String{Value: "one"}).HashKey():   1,
+		(&object.String{Value: "two"}).HashKey():   2,
+		(&object.String{Value: "three"}).HashKey(): 3,
+		(&object.Integer{Value: 4}).HashKey():      4,
+		(&object.Boolean{Value: true}).HashKey():   5,
+		(&object.Boolean{Value: false}).HashKey():  6,
+	}
+
+	if len(hashmap.KVPairs) != len(expected) {
+		t.Fatalf("hashmap has wrong number of pairs. expected=%d, got=%d", len(expected), len(hashmap.KVPairs))
+	}
+
+	for expectedKey, expectedValue := range expected {
+		pair, ok := hashmap.KVPairs[expectedKey]
+		if !ok {
+			t.Errorf("no pair found for key")
+		}
+
+		testIntegerObject(t, pair.Value, expectedValue)
+	}
+}
+
 func testEval(input string) object.Object {
 	l := lexer.NewLexer(input)
 	p := parser.NewParser(l)

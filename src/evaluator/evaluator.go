@@ -50,6 +50,8 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 			return elements[0]
 		}
 		return &object.Array{Elements: elements}
+	case *ast.HashMapLiteral:
+		return evalHashMapLiteral(node, env)
 
 	// Identifiers
 	case *ast.Identifier:
@@ -272,6 +274,31 @@ func evalIfExpression(ie *ast.IfExpression, env *object.Environment) object.Obje
 	} else {
 		return NULL
 	}
+}
+
+func evalHashMapLiteral(hml *ast.HashMapLiteral, env *object.Environment) object.Object {
+	kvPairs := make(map[object.HashKey]object.HashMapPair)
+	for keyExp, valExp := range hml.KVPairs {
+		key := Eval(keyExp, env)
+		if isError(key) {
+			return key
+		}
+
+		hashKey, ok := key.(object.Hashable)
+		if !ok {
+			return newError("key is unusable as hash key: %s", key.Type())
+		}
+
+		val := Eval(valExp, env)
+		if isError(val) {
+			return val
+		}
+
+		hashed := hashKey.HashKey()
+		kvPairs[hashed] = object.HashMapPair{Key: key, Value: val}
+	}
+
+	return &object.HashMap{KVPairs: kvPairs}
 }
 
 func evalIndexExpression(left object.Object, index object.Object) object.Object {

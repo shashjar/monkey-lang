@@ -3,6 +3,7 @@ package object
 import (
 	"bytes"
 	"fmt"
+	"hash/fnv"
 	"monkey/ast"
 	"strings"
 )
@@ -16,6 +17,7 @@ const (
 	BOOLEAN_OBJ      = "BOOLEAN"
 	STRING_OBJ       = "STRING"
 	ARRAY_OBJ        = "ARRAY"
+	HASHMAP_OBJ      = "HASHMAP"
 	RETURN_VALUE_OBJ = "RETURN_VALUE"
 	FUNCTION_OBJ     = "FUNCTION"
 	BUILTIN_OBJ      = "BUILTIN"
@@ -98,6 +100,69 @@ func (a *Array) Inspect() string {
 	out.WriteString("[")
 	out.WriteString(strings.Join(elements, ", "))
 	out.WriteString("]")
+
+	return out.String()
+}
+
+// Implemented by structs that are hashable for use as keys in hashmaps.
+type Hashable interface {
+	HashKey() HashKey
+}
+
+// Represents a key for use in a hashmap.
+type HashKey struct {
+	Type  ObjectType
+	Value uint64
+}
+
+func (b *Boolean) HashKey() HashKey {
+	var value uint64
+
+	if b.Value {
+		value = 1
+	} else {
+		value = 0
+	}
+
+	return HashKey{Type: b.Type(), Value: value}
+}
+
+func (i *Integer) HashKey() HashKey {
+	return HashKey{Type: i.Type(), Value: uint64(i.Value)}
+}
+
+func (s *String) HashKey() HashKey {
+	h := fnv.New64a()
+	h.Write([]byte(s.Value))
+	return HashKey{Type: s.Type(), Value: h.Sum64()}
+}
+
+// Represents a key and value paired within a hashmap.
+type HashMapPair struct {
+	Key   Object
+	Value Object
+}
+
+// Represents a hashmap.
+type HashMap struct {
+	KVPairs map[HashKey]HashMapPair
+}
+
+func (hm *HashMap) Type() ObjectType {
+	return HASHMAP_OBJ
+}
+
+func (hm *HashMap) Inspect() string {
+	var out bytes.Buffer
+
+	pairs := []string{}
+	for _, pair := range hm.KVPairs {
+		pairs = append(pairs, pair.Key.Inspect()+": "+pair.Value.Inspect())
+	}
+
+	out.WriteString("{")
+	out.WriteString(strings.Join(pairs, ", "))
+	out.WriteString("}")
 
 	return out.String()
 }

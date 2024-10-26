@@ -373,6 +373,33 @@ func (al *ArrayLiteral) String() string {
 	return out.String()
 }
 
+// Represents a hashmap in the form {<expression>: <expression>, ...}.
+type HashMapLiteral struct {
+	Token   token.Token // the '{' token
+	KVPairs map[Expression]Expression
+}
+
+func (hml *HashMapLiteral) expressionNode() {}
+
+func (hml *HashMapLiteral) TokenLiteral() string {
+	return hml.Token.Literal
+}
+
+func (hml *HashMapLiteral) String() string {
+	var out bytes.Buffer
+
+	pairs := []string{}
+	for k, v := range hml.KVPairs {
+		pairs = append(pairs, k.String()+": "+v.String())
+	}
+
+	out.WriteString("{")
+	out.WriteString(strings.Join(pairs, ", "))
+	out.WriteString("}")
+
+	return out.String()
+}
+
 // Represents an index expression in the form "<expression>[<expression>]".
 type IndexExpression struct {
 	Token token.Token // the '[' token
