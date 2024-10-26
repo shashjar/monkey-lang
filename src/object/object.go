@@ -17,6 +17,7 @@ const (
 	STRING_OBJ       = "STRING"
 	RETURN_VALUE_OBJ = "RETURN_VALUE"
 	FUNCTION_OBJ     = "FUNCTION"
+	BUILTIN_OBJ      = "BUILTIN"
 	ERROR_OBJ        = "ERROR"
 )
 
@@ -116,6 +117,22 @@ func (f *Function) Inspect() string {
 	out.WriteString("\n}")
 
 	return out.String()
+}
+
+// Represents a function built into the Monkey programming language implementation.
+type BuiltInFunction func(args ...Object) Object
+
+// Wraps a built-in function.
+type BuiltIn struct {
+	Fn BuiltInFunction
+}
+
+func (bi *BuiltIn) Type() ObjectType {
+	return BUILTIN_OBJ
+}
+
+func (bi *BuiltIn) Inspect() string {
+	return "built-in function"
 }
 
 // Represents an error encountered while evaluating a program.

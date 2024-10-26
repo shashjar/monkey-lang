@@ -228,11 +228,15 @@ func evalStringInfixExpression(operator string, left object.Object, right object
 }
 
 func evalIdentifier(i *ast.Identifier, env *object.Environment) object.Object {
-	obj, ok := env.Get(i.Value)
-	if !ok {
-		return newError("identifier not found: %s", i.Value)
+	if obj, ok := env.Get(i.Value); ok {
+		return obj
 	}
-	return obj
+
+	if builtin, ok := builtins[i.Value]; ok {
+		return builtin
+	}
+
+	return newError("identifier not found: %s", i.Value)
 }
 
 func evalIfExpression(ie *ast.IfExpression, env *object.Environment) object.Object {
@@ -279,18 +283,21 @@ func evalExpressions(exps []ast.Expression, env *object.Environment) []object.Ob
 }
 
 func applyFunction(fn object.Object, args []object.Object) object.Object {
-	function, ok := fn.(*object.Function)
-	if !ok {
+	switch function := fn.(type) {
+	case *object.Function:
+		if len(args) != len(function.Parameters) {
+			return newError("wrong number of arguments provided to function. expected=%d, received=%d", len(function.Parameters), len(args))
+		}
+
+		extendedEnv := extendFunctionEnv(function, args)
+		evaluated := Eval(function.Body, extendedEnv)
+		return unwrapReturnValue(evaluated)
+	case *object.BuiltIn:
+		return function.Fn(args...)
+	default:
 		return newError("not a function: %s", function.Type())
-	}
 
-	if len(args) != len(function.Parameters) {
-		return newError("wrong number of arguments provided to function. expected=%d, received=%d", len(function.Parameters), len(args))
 	}
-
-	extendedEnv := extendFunctionEnv(function, args)
-	evaluated := Eval(function.Body, extendedEnv)
-	return unwrapReturnValue(evaluated)
 }
 
 func extendFunctionEnv(function *object.Function, args []object.Object) *object.Environment {

@@ -122,8 +122,7 @@ func (l *Lexer) readNumber() string {
 }
 
 func (l *Lexer) readString() string {
-	l.readChar()
-	startPosition := l.position
+	startPosition := l.position + 1
 	for {
 		l.readChar()
 		if l.char == '"' || l.char == 0 {

@@ -70,6 +70,7 @@ func TestEvalBooleanExpression(t *testing.T) {
 		{"4 > 3;", true},
 		{"-9 > 72", false},
 
+		{`"" == ""`, true},
 		{`"foo" == "foo"`, true},
 		{`"foo" == "bar"`, false},
 		{`"bar" != "bar"`, false},
@@ -310,6 +311,38 @@ func TestClosures(t *testing.T) {
 	`
 
 	testIntegerObject(t, testEval(input), 4)
+}
+
+func TestBuiltInFunctions(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`len("")`, 0},
+		// {`len("hello")`, 5},
+		// {`len("Hello world!")`, 12},
+		// {`let a = "hi"; let b = " there"; len(a + b)`, 8},
+		// {`len(1)`, "argument to `len` not supported, got INTEGER"},
+		// {`len("one", "two")`, "wrong number of arguments. got=2, want=1"},
+	}
+
+	for _, test := range tests {
+		evaluated := testEval(test.input)
+
+		switch expected := test.expected.(type) {
+		case int:
+			testIntegerObject(t, evaluated, int64(expected))
+		case string:
+			errorObj, ok := evaluated.(*object.Error)
+			if !ok {
+				t.Errorf("object is not an Error. got=%T (%+v)", evaluated, evaluated)
+				continue
+			}
+			if errorObj.Message != expected {
+				t.Errorf("wrong error message. expected=%q, got=%q", expected, errorObj.Message)
+			}
+		}
+	}
 }
 
 func testEval(input string) object.Object {
