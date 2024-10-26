@@ -314,18 +314,60 @@ func TestBuiltInFunctions(t *testing.T) {
 		{`len("hello")`, 5},
 		{`len("Hello world!")`, 12},
 		{`let a = "hi"; let b = " there"; len(a + b)`, 8},
-		{`len(1)`, "argument to `len` not supported, got INTEGER"},
+
+		{`len([])`, 0},
+		{`len([1, 2])`, 2},
+		{`len([-4, "hello world!", 65, fn(x) { 2 * x }])`, 4},
+
+		{`len(1)`, "argument to `len` is not supported, got INTEGER"},
 		{`len("one", "two")`, "wrong number of arguments. expected=1, got=2"},
+
+		{`first([])`, "array is empty; no first element"},
+		{`first([3])`, 3},
+		{`first([-8, 7, -4, 20])`, -8},
+		{`first("hello world")`, "argument to `first` is not supported, got STRING"},
+
+		{`last([])`, "array is empty; no last element"},
+		{`last([3])`, 3},
+		{`last([-8, 7, -4, 20])`, 20},
+		{`last("hello world")`, "argument to `last` is not supported, got STRING"},
+
+		{`rest([])`, nil},
+		{`rest([3])`, []int{}},
+		{`rest([-8, 7, -4, 20])`, []int{7, -4, 20}},
+		{`rest("hello world")`, "argument to `rest` is not supported, got STRING"},
+
+		{`append([], 3)`, []int{3}},
+		{`append([3], 21)`, []int{3, 21}},
+		{`append([4, -10])`, "wrong number of arguments. expected=2, got=1"},
+		{`append("hello world", "hi")`, "argument to `append` is not supported, got STRING"},
 	}
 
 	for _, test := range tests {
 		evaluated := testEval(test.input)
 
 		switch expected := test.expected.(type) {
+		case nil:
+			testNullObject(t, evaluated)
 		case int:
 			testIntegerObject(t, evaluated, int64(expected))
 		case string:
 			testErrorObject(t, evaluated, expected)
+		case []int:
+			array, ok := evaluated.(*object.Array)
+			if !ok {
+				t.Errorf("object is not an Array. got=%T (%+v)", evaluated, evaluated)
+				continue
+			}
+
+			if len(array.Elements) != len(expected) {
+				t.Errorf("wrong number of elements. expected=%d, got=%d", len(expected), len(array.Elements))
+				continue
+			}
+
+			for i, expectedElement := range expected {
+				testIntegerObject(t, array.Elements[i], int64(expectedElement))
+			}
 		}
 	}
 }
