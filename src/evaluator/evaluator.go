@@ -43,6 +43,14 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 	case *ast.StringLiteral:
 		return &object.String{Value: node.Value}
 
+	// Other Data Types
+	case *ast.ArrayLiteral:
+		elements := evalExpressions(node.Elements, env)
+		if len(elements) == 1 && isError(elements[0]) {
+			return elements[0]
+		}
+		return &object.Array{Elements: elements}
+
 	// Identifiers
 	case *ast.Identifier:
 		return evalIdentifier(node, env)
@@ -70,6 +78,18 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 	// If Expressions
 	case *ast.IfExpression:
 		return evalIfExpression(node, env)
+
+	// Other Expressions
+	case *ast.IndexExpression:
+		left := Eval(node.Left, env)
+		if isError(left) {
+			return left
+		}
+		index := Eval(node.Index, env)
+		if isError(index) {
+			return index
+		}
+		return evalIndexExpression(left, index)
 
 	// Functions
 	case *ast.FunctionLiteral:
@@ -252,6 +272,26 @@ func evalIfExpression(ie *ast.IfExpression, env *object.Environment) object.Obje
 	} else {
 		return NULL
 	}
+}
+
+func evalIndexExpression(left object.Object, index object.Object) object.Object {
+	switch {
+	case left.Type() == object.ARRAY_OBJ && index.Type() == object.INTEGER_OBJ:
+		return evalArrayIndexExpression(left, index)
+	default:
+		return newError("index operator not supported: %s[%s]", left.Type(), index.Type())
+	}
+}
+
+func evalArrayIndexExpression(array object.Object, index object.Object) object.Object {
+	arrayObject := array.(*object.Array)
+	i := index.(*object.Integer)
+
+	if i.Value < 0 || i.Value >= int64(len(arrayObject.Elements)) {
+		return newError("index is out-of-bounds for array")
+	}
+
+	return arrayObject.Elements[i.Value]
 }
 
 func evalCallExpression(ce *ast.CallExpression, env *object.Environment) object.Object {

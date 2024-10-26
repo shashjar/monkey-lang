@@ -375,6 +375,14 @@ func TestOperatorPrecedenceParsing(t *testing.T) {
 			"add(a + b + c * d / f + g)",
 			"add((((a + b) + ((c * d) / f)) + g))",
 		},
+		{
+			"a * [1, 2, 3, 4][b * c] * d",
+			"((a * ([1, 2, 3, 4][(b * c)])) * d)",
+		},
+		{
+			"add(a * b[2], b[1], 2 * [1, 2][1])",
+			"add((a * (b[2])), (b[1]), (2 * ([1, 2][1])))",
+		},
 	}
 
 	for _, test := range tests {
@@ -673,6 +681,66 @@ func TestCallExpressionParameterParsing(t *testing.T) {
 	}
 }
 
+func TestParsingArrayLiterals(t *testing.T) {
+	input := `[1, 2 * 2, "hello"]`
+
+	l := lexer.NewLexer(input)
+	p := NewParser(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+	if len(program.Statements) != 1 {
+		t.Fatalf("program contains wrong number of statements. expected=%d, got=%d", 1, len(program.Statements))
+	}
+
+	statement, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not an *ast.ExpressionStatement. got=%T", program.Statements[0])
+	}
+
+	array, ok := statement.Expression.(*ast.ArrayLiteral)
+	if !ok {
+		t.Fatalf("statement.Expression is not an ast.ArrayLiteral. got=%T", statement.Expression)
+	}
+
+	if len(array.Elements) != 3 {
+		t.Fatalf("len(array.Elements) is wrong. expected=3, got=%d", len(array.Elements))
+	}
+
+	testIntegerLiteral(t, array.Elements[0], 1)
+	testInfixExpression(t, array.Elements[1], 2, "*", 2)
+	testStringLiteral(t, array.Elements[2], "hello")
+}
+
+func TestParsingIndexExpressions(t *testing.T) {
+	input := `myArray[1 * 3]`
+
+	l := lexer.NewLexer(input)
+	p := NewParser(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+	if len(program.Statements) != 1 {
+		t.Fatalf("program contains wrong number of statements. expected=%d, got=%d", 1, len(program.Statements))
+	}
+
+	statement, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not an *ast.ExpressionStatement. got=%T", program.Statements[0])
+	}
+
+	indexExp, ok := statement.Expression.(*ast.IndexExpression)
+	if !ok {
+		t.Fatalf("statement.Expression is not an ast.IndexExpression. got=%T", statement.Expression)
+	}
+
+	if !testIdentifier(t, indexExp.Left, "myArray") {
+		return
+	}
+
+	if !testInfixExpression(t, indexExp.Index, 1, "*", 3) {
+		return
+	}
+}
+
 func testLetStatement(t *testing.T, statement ast.Statement, name string) bool {
 	if statement.TokenLiteral() != "let" {
 		t.Errorf("statement.TokenLiteral not 'let'. got=%q", statement.TokenLiteral())
@@ -755,26 +823,6 @@ func testIntegerLiteral(t *testing.T, il ast.Expression, value int64) bool {
 	return true
 }
 
-func testIdentifier(t *testing.T, exp ast.Expression, value string) bool {
-	ident, ok := exp.(*ast.Identifier)
-	if !ok {
-		t.Errorf("exp is not an *ast.Identifier. got=%T", exp)
-		return false
-	}
-
-	if ident.Value != value {
-		t.Errorf("ident.Value is not %s. got=%s", value, ident.Value)
-		return false
-	}
-
-	if ident.TokenLiteral() != value {
-		t.Errorf("ident.TokenLiteral is not %s. got=%s", value, ident.TokenLiteral())
-		return false
-	}
-
-	return true
-}
-
 func testBooleanLiteral(t *testing.T, exp ast.Expression, value bool) bool {
 	bo, ok := exp.(*ast.Boolean)
 	if !ok {
@@ -789,6 +837,41 @@ func testBooleanLiteral(t *testing.T, exp ast.Expression, value bool) bool {
 
 	if bo.TokenLiteral() != fmt.Sprintf("%t", value) {
 		t.Errorf("bo.TokenLiteral is not %t. got=%s", value, bo.TokenLiteral())
+		return false
+	}
+
+	return true
+}
+
+func testStringLiteral(t *testing.T, exp ast.Expression, value string) bool {
+	sl, ok := exp.(*ast.StringLiteral)
+	if !ok {
+		t.Errorf("exp is not an *ast.StringLiteral. got=%T", sl)
+		return false
+	}
+
+	if sl.Value != value {
+		t.Errorf("sl.Value is not %q. got=%q", value, sl.Value)
+		return false
+	}
+
+	return true
+}
+
+func testIdentifier(t *testing.T, exp ast.Expression, value string) bool {
+	ident, ok := exp.(*ast.Identifier)
+	if !ok {
+		t.Errorf("exp is not an *ast.Identifier. got=%T", exp)
+		return false
+	}
+
+	if ident.Value != value {
+		t.Errorf("ident.Value is not %s. got=%s", value, ident.Value)
+		return false
+	}
+
+	if ident.TokenLiteral() != value {
+		t.Errorf("ident.TokenLiteral is not %s. got=%s", value, ident.TokenLiteral())
 		return false
 	}
 

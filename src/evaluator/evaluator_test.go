@@ -231,15 +231,7 @@ func TestErrorHandling(t *testing.T) {
 
 	for _, test := range tests {
 		evaluated := testEval(test.input)
-		errorObj, ok := evaluated.(*object.Error)
-		if !ok {
-			t.Errorf("no error object returned. got=%T (%+v)", evaluated, evaluated)
-			continue
-		}
-
-		if errorObj.Message != test.expectedMessage {
-			t.Errorf("wrong error message. expected=%q, got=%q", test.expectedMessage, errorObj.Message)
-		}
+		testErrorObject(t, evaluated, test.expectedMessage)
 	}
 }
 
@@ -319,11 +311,11 @@ func TestBuiltInFunctions(t *testing.T) {
 		expected interface{}
 	}{
 		{`len("")`, 0},
-		// {`len("hello")`, 5},
-		// {`len("Hello world!")`, 12},
-		// {`let a = "hi"; let b = " there"; len(a + b)`, 8},
-		// {`len(1)`, "argument to `len` not supported, got INTEGER"},
-		// {`len("one", "two")`, "wrong number of arguments. got=2, want=1"},
+		{`len("hello")`, 5},
+		{`len("Hello world!")`, 12},
+		{`let a = "hi"; let b = " there"; len(a + b)`, 8},
+		{`len(1)`, "argument to `len` not supported, got INTEGER"},
+		{`len("one", "two")`, "wrong number of arguments. expected=1, got=2"},
 	}
 
 	for _, test := range tests {
@@ -333,14 +325,96 @@ func TestBuiltInFunctions(t *testing.T) {
 		case int:
 			testIntegerObject(t, evaluated, int64(expected))
 		case string:
-			errorObj, ok := evaluated.(*object.Error)
-			if !ok {
-				t.Errorf("object is not an Error. got=%T (%+v)", evaluated, evaluated)
-				continue
-			}
-			if errorObj.Message != expected {
-				t.Errorf("wrong error message. expected=%q, got=%q", expected, errorObj.Message)
-			}
+			testErrorObject(t, evaluated, expected)
+		}
+	}
+}
+
+func TestArrayLiterals(t *testing.T) {
+	input := `[1, 2 * 2, 3 + 3, "hi there"]`
+	evaluated := testEval(input)
+	array, ok := evaluated.(*object.Array)
+	if !ok {
+		t.Fatalf("object is not an Array. got=%T (%+v)", evaluated, evaluated)
+	}
+
+	if len(array.Elements) != 4 {
+		t.Fatalf("array has wrong number of elements. expected=%d, got=%d", 4, len(array.Elements))
+	}
+
+	testIntegerObject(t, array.Elements[0], 1)
+	testIntegerObject(t, array.Elements[1], 4)
+	testIntegerObject(t, array.Elements[2], 6)
+	testStringObject(t, array.Elements[3], "hi there")
+}
+
+func TestArrayIndexExpressions(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{
+			"[1, 2, 3][0]",
+			1,
+		},
+		{
+			"[1, 2, 3][1]",
+			2,
+		},
+		{
+			"[1, 2, 3][2]",
+			3,
+		},
+		{
+			"let i = 0; [1][i];",
+			1,
+		},
+		{
+			"[1, 2, 3][1 + 1];",
+			3,
+		},
+		{
+			"let myArray = [1, 2, 3]; myArray[2];",
+			3,
+		},
+		{
+			"let myArray = [1, 2, 3]; myArray[0] + myArray[1] + myArray[2];",
+			6,
+		},
+		{
+			"let myArray = [1, 2, 3]; let i = myArray[0]; myArray[i]",
+			2,
+		},
+		{
+			"3[3]",
+			"index operator not supported: INTEGER[INTEGER]",
+		},
+		{
+			`[1, 2, 3][fn(x) { 2 * x }]`,
+			"index operator not supported: ARRAY[FUNCTION]",
+		},
+		{
+			`let a = "s"; [1, 2, 3][a]`,
+			"index operator not supported: ARRAY[STRING]",
+		},
+		{
+			"[1, 2, 3][3]",
+			"index is out-of-bounds for array",
+		},
+		{
+			"[1, 2, 3][-1]",
+			"index is out-of-bounds for array",
+		},
+	}
+
+	for _, test := range tests {
+		evaluated := testEval(test.input)
+
+		switch expected := test.expected.(type) {
+		case int:
+			testIntegerObject(t, evaluated, int64(expected))
+		case string:
+			testErrorObject(t, evaluated, expected)
 		}
 	}
 }
@@ -401,6 +475,20 @@ func testStringObject(t *testing.T, obj object.Object, expected string) bool {
 
 	if result.Value != expected {
 		t.Errorf("object has wrong value. expected=%q, got=%q", expected, result.Value)
+		return false
+	}
+
+	return true
+}
+
+func testErrorObject(t *testing.T, obj object.Object, expected string) bool {
+	errorObj, ok := obj.(*object.Error)
+	if !ok {
+		t.Errorf("object is not an Error. got=%T (%+v)", obj, obj)
+		return false
+	}
+	if errorObj.Message != expected {
+		t.Errorf("wrong error message. expected=%q, got=%q", expected, errorObj.Message)
 		return false
 	}
 
