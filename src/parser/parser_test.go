@@ -139,6 +139,39 @@ func TestIntegerLiteralExpression(t *testing.T) {
 	}
 }
 
+func TestStringExpression(t *testing.T) {
+	input := `"Hello world!"`
+
+	l := lexer.NewLexer(input)
+	p := NewParser(l)
+
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+	if program == nil {
+		t.Fatalf("ParseProgram() returned nil")
+	}
+	if len(program.Statements) != 1 {
+		t.Fatalf("program contains wrong number of statements. expected=%d, got=%d", 1, len(program.Statements))
+	}
+
+	statement, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not an *ast.ExpressionStatement. got=%T", program.Statements[0])
+	}
+
+	literal, ok := statement.Expression.(*ast.StringLiteral)
+	if !ok {
+		t.Fatalf("expression is not an *ast.String. got=%T", statement.Expression)
+	}
+
+	if literal.Value != "Hello world!" {
+		t.Errorf("literal.Value is not %q. got=%q", "Hello world!", literal.Value)
+	}
+	if literal.TokenLiteral() != "Hello world!" {
+		t.Errorf("literal.TokenLiteral is not %q. got=%q", "Hello world!", literal.TokenLiteral())
+	}
+}
+
 func TestParsingPrefixExpressions(t *testing.T) {
 	prefixTests := []struct {
 		input    string

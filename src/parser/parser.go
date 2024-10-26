@@ -57,6 +57,7 @@ func NewParser(l *lexer.Lexer) *Parser {
 	p.prefixParseFns = make(map[token.TokenType]prefixParseFn)
 	p.registerPrefix(token.IDENT, p.parseIdentifier)
 	p.registerPrefix(token.INT, p.parseIntegerLiteral)
+	p.registerPrefix(token.STRING, p.parseString)
 	p.registerPrefix(token.BANG, p.parsePrefixExpression)
 	p.registerPrefix(token.MINUS, p.parsePrefixExpression)
 	p.registerPrefix(token.TRUE, p.parseBoolean)
@@ -81,6 +82,21 @@ func NewParser(l *lexer.Lexer) *Parser {
 	p.nextToken()
 
 	return p
+}
+
+func (p *Parser) ParseProgram() *ast.Program {
+	program := &ast.Program{}
+	program.Statements = []ast.Statement{}
+
+	for !p.currTokenIs(token.EOF) {
+		statement := p.parseStatement()
+		if statement != nil {
+			program.Statements = append(program.Statements, statement)
+		}
+		p.nextToken()
+	}
+
+	return program
 }
 
 func (p *Parser) Errors() []string {
@@ -114,21 +130,6 @@ func (p *Parser) registerPrefix(tokenType token.TokenType, fn prefixParseFn) {
 
 func (p *Parser) registerInfix(tokenType token.TokenType, fn infixParseFn) {
 	p.infixParseFns[tokenType] = fn
-}
-
-func (p *Parser) ParseProgram() *ast.Program {
-	program := &ast.Program{}
-	program.Statements = []ast.Statement{}
-
-	for !p.currTokenIs(token.EOF) {
-		statement := p.parseStatement()
-		if statement != nil {
-			program.Statements = append(program.Statements, statement)
-		}
-		p.nextToken()
-	}
-
-	return program
 }
 
 func (p *Parser) parseStatement() ast.Statement {
@@ -272,6 +273,10 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 	literal.Value = value
 
 	return literal
+}
+
+func (p *Parser) parseString() ast.Expression {
+	return &ast.StringLiteral{Token: p.currToken, Value: p.currToken.Literal}
 }
 
 func (p *Parser) parseBoolean() ast.Expression {

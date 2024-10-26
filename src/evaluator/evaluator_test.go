@@ -69,11 +69,37 @@ func TestEvalBooleanExpression(t *testing.T) {
 		{"16 < 10;", false},
 		{"4 > 3;", true},
 		{"-9 > 72", false},
+
+		{`"foo" == "foo"`, true},
+		{`"foo" == "bar"`, false},
+		{`"bar" != "bar"`, false},
+		{`"baz" != "baz "`, true},
+		{`"baz" != "foo"`, true},
+		{`let s = "hello " + "there" + "!"; s == "hello there!"`, true},
+		{`let s = "hello " + "there" + "!"; s == "hi there!;"`, false},
 	}
 
 	for _, test := range tests {
 		evaluated := testEval(test.input)
 		testBooleanObject(t, evaluated, test.expected)
+	}
+}
+
+func TestEvalStringExpression(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{`"hello world!"`, "hello world!"},
+		{`"hello world!";`, "hello world!"},
+		{`let s = "3 + 9;"; s;`, "3 + 9;"},
+		{`let s = "foo" + "bar"; s;`, "foobar"},
+		{`let s = "foo " + "bar " + "baz"; s;`, "foo bar baz"},
+	}
+
+	for _, test := range tests {
+		evaluated := testEval(test.input)
+		testStringObject(t, evaluated, test.expected)
 	}
 }
 
@@ -191,6 +217,14 @@ func TestErrorHandling(t *testing.T) {
 		{
 			"fn(x, y, z) { return 10 * x + y - 3; }(10, 6)",
 			"wrong number of arguments provided to function. expected=3, received=2",
+		},
+		{
+			`5; "true" + "false"; "true" + 5;`,
+			"type mismatch: STRING + INTEGER",
+		},
+		{
+			`"hello" - "there";`,
+			"unknown operator: STRING - STRING",
 		},
 	}
 
@@ -319,6 +353,21 @@ func testBooleanObject(t *testing.T, obj object.Object, expected bool) bool {
 
 	if result.Value != expected {
 		t.Errorf("object has wrong value. expected=%t, got=%t", expected, result.Value)
+		return false
+	}
+
+	return true
+}
+
+func testStringObject(t *testing.T, obj object.Object, expected string) bool {
+	result, ok := obj.(*object.String)
+	if !ok {
+		t.Errorf("object is not a String. got=%T (%+v)", obj, obj)
+		return false
+	}
+
+	if result.Value != expected {
+		t.Errorf("object has wrong value. expected=%q, got=%q", expected, result.Value)
 		return false
 	}
 

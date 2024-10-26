@@ -240,6 +240,22 @@ func (b *Boolean) String() string {
 	return b.Token.Literal
 }
 
+// Represents a string, consisting of the token.STRING token and the value of the string.
+type StringLiteral struct {
+	Token token.Token // the token.STRING token
+	Value string
+}
+
+func (sl *StringLiteral) expressionNode() {}
+
+func (sl *StringLiteral) TokenLiteral() string {
+	return sl.Token.Literal
+}
+
+func (sl *StringLiteral) String() string {
+	return sl.Token.Literal
+}
+
 // Represents an if expression in the form "if (<condition>) <consequence> else <alternative>"
 type IfExpression struct {
 	Token       token.Token // the token.IF token

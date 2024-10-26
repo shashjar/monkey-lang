@@ -14,6 +14,7 @@ const (
 	NULL_OBJ         = "NULL"
 	INTEGER_OBJ      = "INTEGER"
 	BOOLEAN_OBJ      = "BOOLEAN"
+	STRING_OBJ       = "STRING"
 	RETURN_VALUE_OBJ = "RETURN_VALUE"
 	FUNCTION_OBJ     = "FUNCTION"
 	ERROR_OBJ        = "ERROR"
@@ -60,6 +61,19 @@ func (b *Boolean) Type() ObjectType {
 
 func (b *Boolean) Inspect() string {
 	return fmt.Sprintf("%t", b.Value)
+}
+
+// Represents a string.
+type String struct {
+	Value string
+}
+
+func (s *String) Type() ObjectType {
+	return STRING_OBJ
+}
+
+func (s *String) Inspect() string {
+	return s.Value
 }
 
 // Represents a value that should be returned by a given return statement.

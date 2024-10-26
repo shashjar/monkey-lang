@@ -14,8 +14,11 @@ const (
 	EOF     = "EOF"
 
 	// Identifiers & Literals
-	IDENT = "IDENT"
-	INT   = "INT"
+	IDENT  = "IDENT"
+	INT    = "INT"
+	TRUE   = "TRUE"
+	FALSE  = "FALSE"
+	STRING = "STRING"
 
 	// Operators
 	ASSIGN = "="
@@ -45,8 +48,6 @@ const (
 	// Keywords
 	FUNCTION = "FUNCTION"
 	LET      = "LET"
-	TRUE     = "TRUE"
-	FALSE    = "FALSE"
 	IF       = "IF"
 	ELSE     = "ELSE"
 	RETURN   = "RETURN"
