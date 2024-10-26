@@ -305,6 +305,8 @@ func evalIndexExpression(left object.Object, index object.Object) object.Object 
 	switch {
 	case left.Type() == object.ARRAY_OBJ && index.Type() == object.INTEGER_OBJ:
 		return evalArrayIndexExpression(left, index)
+	case left.Type() == object.HASHMAP_OBJ && isHashable(index):
+		return evalHashMapIndexExpression(left, index)
 	default:
 		return newError("index operator not supported: %s[%s]", left.Type(), index.Type())
 	}
@@ -319,6 +321,19 @@ func evalArrayIndexExpression(array object.Object, index object.Object) object.O
 	}
 
 	return arrayObject.Elements[i.Value]
+}
+
+func evalHashMapIndexExpression(hashmap object.Object, index object.Object) object.Object {
+	hashmapObject := hashmap.(*object.HashMap)
+	i := index.(object.Hashable)
+
+	hashed := i.HashKey()
+	val, ok := hashmapObject.KVPairs[hashed]
+	if !ok {
+		return newError("key not found in hashmap")
+	}
+
+	return val.Value
 }
 
 func evalCallExpression(ce *ast.CallExpression, env *object.Environment) object.Object {
@@ -393,6 +408,11 @@ func isTruthy(obj object.Object) bool {
 	default:
 		return true
 	}
+}
+
+func isHashable(obj object.Object) bool {
+	_, ok := obj.(object.Hashable)
+	return ok
 }
 
 func isError(obj object.Object) bool {

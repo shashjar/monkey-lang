@@ -502,6 +502,80 @@ func TestHashMapLiterals(t *testing.T) {
 	}
 }
 
+func TestHashMapIndexExpressions(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{
+			`{1: "o" + "n" + "e", "two": 2, true: 3}[1]`,
+			"one",
+		},
+		{
+			`{1: "one", "two": 3 * 5 - 13, true: 3}["two"]`,
+			2,
+		},
+		{
+			`{1: "one", "two": 2, true: 3}[true != false]`,
+			3,
+		},
+		{
+			`let m = {"hi": "there", true: false, false: true, 30 * 10: 40 - 20}; m[10 == 10]`,
+			false,
+		},
+		{
+			`{-4: 4}[-4]`,
+			4,
+		},
+	}
+
+	for _, test := range tests {
+		evaluated := testEval(test.input)
+
+		switch expected := test.expected.(type) {
+		case int:
+			testIntegerObject(t, evaluated, int64(expected))
+		case string:
+			testStringObject(t, evaluated, expected)
+		case bool:
+			testBooleanObject(t, evaluated, expected)
+		}
+	}
+}
+
+func TestHashMapIndexExpressionErrors(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{
+			`{fn(x) { x }: "Monkey"}[true]`,
+			"key is unusable as hash key: FUNCTION",
+		},
+		{
+			`{"name": "Monkey"}[fn(x) { x }]`,
+			"index operator not supported: HASHMAP[FUNCTION]",
+		},
+		{
+			`{}["foo"]`,
+			"key not found in hashmap",
+		},
+		{
+			`{1: "one", "two": 2, true: 3}[0]`,
+			"key not found in hashmap",
+		},
+		{
+			`{1: "one", "two": 2, true: 3}[false]`,
+			"key not found in hashmap",
+		},
+	}
+
+	for _, test := range tests {
+		evaluated := testEval(test.input)
+		testErrorObject(t, evaluated, test.expected)
+	}
+}
+
 func testEval(input string) object.Object {
 	l := lexer.NewLexer(input)
 	p := parser.NewParser(l)
