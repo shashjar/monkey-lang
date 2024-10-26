@@ -1,17 +1,33 @@
 package evaluator
 
 import (
+	"fmt"
 	"monkey/object"
 )
 
 // TODO: could add more built-ins here, e.g. list comprehensions from Python (map, sum, filter, etc.)
 
 var builtins = map[string]*object.BuiltIn{
+	"puts":   puts,
 	"len":    length,
 	"first":  first,
 	"last":   last,
 	"rest":   rest,
 	"append": appendBI,
+}
+
+var puts = &object.BuiltIn{
+	Fn: func(args ...object.Object) object.Object {
+		if len(args) == 0 {
+			return newError("need at least one argument provided to puts")
+		}
+
+		for _, arg := range args {
+			fmt.Println(arg.Inspect())
+		}
+
+		return NULL
+	},
 }
 
 var length = &object.BuiltIn{
