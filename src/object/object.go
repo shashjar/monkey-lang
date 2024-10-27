@@ -21,6 +21,7 @@ const (
 	RETURN_VALUE_OBJ = "RETURN_VALUE"
 	FUNCTION_OBJ     = "FUNCTION"
 	BUILTIN_OBJ      = "BUILTIN"
+	QUOTE_OBJ        = "QUOTE"
 	ERROR_OBJ        = "ERROR"
 )
 
@@ -223,6 +224,19 @@ func (bi *BuiltIn) Type() ObjectType {
 
 func (bi *BuiltIn) Inspect() string {
 	return "built-in function"
+}
+
+// Represents some code (an AST node) that is quoted & not yet evaluated.
+type Quote struct {
+	Node ast.Node
+}
+
+func (q *Quote) Type() ObjectType {
+	return QUOTE_OBJ
+}
+
+func (q *Quote) Inspect() string {
+	return "QUOTE(" + q.Node.String() + ")"
 }
 
 // Represents an error encountered while evaluating a program.
