@@ -22,6 +22,7 @@ const (
 	FUNCTION_OBJ     = "FUNCTION"
 	BUILTIN_OBJ      = "BUILTIN"
 	QUOTE_OBJ        = "QUOTE"
+	MACRO_OBJ        = "MACRO"
 	ERROR_OBJ        = "ERROR"
 )
 
@@ -237,6 +238,35 @@ func (q *Quote) Type() ObjectType {
 
 func (q *Quote) Inspect() string {
 	return "QUOTE(" + q.Node.String() + ")"
+}
+
+// Represents a macro.
+type Macro struct {
+	Parameters []*ast.Identifier
+	Body       *ast.BlockStatement
+	Env        *Environment
+}
+
+func (m *Macro) Type() ObjectType {
+	return MACRO_OBJ
+}
+
+func (m *Macro) Inspect() string {
+	var out bytes.Buffer
+
+	params := []string{}
+	for _, p := range m.Parameters {
+		params = append(params, p.Value)
+	}
+
+	out.WriteString("fn")
+	out.WriteString("(")
+	out.WriteString(strings.Join(params, ", "))
+	out.WriteString(") {\n")
+	out.WriteString(m.Body.String())
+	out.WriteString("\n}")
+
+	return out.String()
 }
 
 // Represents an error encountered while evaluating a program.
