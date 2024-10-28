@@ -68,6 +68,8 @@ func TestNextToken(t *testing.T) {
 	[1, 2, "3"];
 
 	{"hello": "world", 1: "me", true: 56, "false": false};
+
+	macro(x, y) { x + y; };
 	`
 
 	tests := []struct {
@@ -191,6 +193,20 @@ func TestNextToken(t *testing.T) {
 		{token.STRING, "false"},
 		{token.COLON, ":"},
 		{token.FALSE, "false"},
+		{token.RBRACE, "}"},
+		{token.SEMICOLON, ";"},
+
+		{token.MACRO, "macro"},
+		{token.LPAREN, "("},
+		{token.IDENT, "x"},
+		{token.COMMA, ","},
+		{token.IDENT, "y"},
+		{token.RPAREN, ")"},
+		{token.LBRACE, "{"},
+		{token.IDENT, "x"},
+		{token.PLUS, "+"},
+		{token.IDENT, "y"},
+		{token.SEMICOLON, ";"},
 		{token.RBRACE, "}"},
 		{token.SEMICOLON, ";"},
 
