@@ -97,6 +97,10 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 	case *ast.FunctionLiteral:
 		return &object.Function{Parameters: node.Parameters, Body: node.Body, Env: env}
 	case *ast.CallExpression:
+		if node.Function.TokenLiteral() == "quote" {
+			return quote(node.Arguments, env)
+		}
+
 		return evalCallExpression(node, env)
 	}
 
