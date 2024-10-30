@@ -382,7 +382,6 @@ func applyFunction(fn object.Object, args []object.Object) object.Object {
 		return function.Fn(args...)
 	default:
 		return newError("not a function: %s", function.Type())
-
 	}
 }
 
