@@ -1,12 +1,10 @@
 package bytecode
 
 import (
+	"bytes"
 	"encoding/binary"
 	"fmt"
 )
-
-// Represents a set of instructions as a slice of bytes.
-type Instructions []byte
 
 // Represents an opcode of size 1 byte, indicating some operation with some number of operands.
 type Opcode byte
@@ -14,6 +12,43 @@ type Opcode byte
 const (
 	OpConstant Opcode = iota
 )
+
+// Represents a set of instructions as a slice of bytes.
+type Instructions []byte
+
+func (instr Instructions) String() string {
+	var out bytes.Buffer
+
+	i := 0
+	for i < len(instr) {
+		def, err := LookUp(instr[i])
+		if err != nil {
+			fmt.Fprintf(&out, "ERROR: %s\n", err)
+			continue
+		}
+
+		operands, read := ReadOperands(def, instr[i+1:])
+		fmt.Fprintf(&out, "%04d %s\n", i, instr.fmtInstruction(def, operands))
+		i += 1 + read
+	}
+
+	return out.String()
+}
+
+func (instr Instructions) fmtInstruction(def *Definition, operands []int) string {
+	operandCount := len(def.OperandWidths)
+
+	if len(operands) != operandCount {
+		return fmt.Sprintf("ERROR: operand length %d does not match defined %d\n", len(operands), operandCount)
+	}
+
+	switch operandCount {
+	case 1:
+		return fmt.Sprintf("%s %d", def.Name, operands[0])
+	}
+
+	return fmt.Sprintf("ERROR: unhandled operandCount for %s\n", def.Name)
+}
 
 // Represents the definition for an Opcode, with some readable name and the number of
 // bytes that each operand takes up.
@@ -60,4 +95,23 @@ func Make(op Opcode, operands ...int) []byte {
 	}
 
 	return instruction
+}
+
+func ReadOperands(def *Definition, instr Instructions) ([]int, int) {
+	operands := make([]int, len(def.OperandWidths))
+	offset := 0
+
+	for i, width := range def.OperandWidths {
+		switch width {
+		case 2:
+			operands[i] = int(ReadUint16(instr[offset:]))
+		}
+		offset += width
+	}
+
+	return operands, offset
+}
+
+func ReadUint16(instr Instructions) uint16 {
+	return binary.BigEndian.Uint16(instr)
 }
