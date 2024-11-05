@@ -4,7 +4,7 @@
 
 TODO: write README documenting language & interpreter/compiler implementation
 
-Monkey Programming Language, Interpreter, & Compiler written in Go. Inspired by [Writing An Interpreter in Go](https://interpreterbook.com/) & [Writing a Compiler in Go](https://compilerbook.com/) by [Thorsten Ball](https://thorstenball.com/).
+Monkey Programming Language, Interpreter, Compiler, & Virtual Machine written in Go. Inspired by [Writing An Interpreter in Go](https://interpreterbook.com/) & [Writing a Compiler in Go](https://compilerbook.com/) by [Thorsten Ball](https://thorstenball.com/).
 
 ## The Monkey Programming Language
 
