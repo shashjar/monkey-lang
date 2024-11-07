@@ -19,6 +19,16 @@ type compilerTestCase struct {
 func TestIntegerArithmetic(t *testing.T) {
 	tests := []compilerTestCase{
 		{
+			input: "1; 2;",
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpPop),
+				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{1, 2},
+		},
+		{
 			input: "1 + 2",
 			expectedInstructions: []bytecode.Instructions{
 				bytecode.Make(bytecode.OpConstant, 0),
@@ -29,14 +39,34 @@ func TestIntegerArithmetic(t *testing.T) {
 			expectedConstants: []interface{}{1, 2},
 		},
 		{
-			input: "1; 2;",
+			input: "3 - 4",
 			expectedInstructions: []bytecode.Instructions{
 				bytecode.Make(bytecode.OpConstant, 0),
-				bytecode.Make(bytecode.OpPop),
 				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpSub),
 				bytecode.Make(bytecode.OpPop),
 			},
-			expectedConstants: []interface{}{1, 2},
+			expectedConstants: []interface{}{3, 4},
+		},
+		{
+			input: "2 * 8",
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpMul),
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{2, 8},
+		},
+		{
+			input: "15 / 5",
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpDiv),
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{15, 5},
 		},
 	}
 

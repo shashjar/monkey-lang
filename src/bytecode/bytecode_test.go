@@ -54,6 +54,7 @@ func TestReadOperands(t *testing.T) {
 		operands  []int
 	}{
 		{OpConstant, 2, []int{65535}},
+		{OpAdd, 0, []int{}},
 	}
 
 	for _, test := range tests {
