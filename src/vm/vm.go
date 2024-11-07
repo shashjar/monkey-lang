@@ -63,6 +63,11 @@ func (vm *VM) Run() error {
 			if err != nil {
 				return err
 			}
+		case bytecode.OpEqual, bytecode.OpNotEqual, bytecode.OpGreaterThan:
+			err := vm.executeComparison(op)
+			if err != nil {
+				return err
+			}
 
 		default:
 			return fmt.Errorf("invalid opcode received: %d", op)
@@ -100,6 +105,14 @@ func (vm *VM) pop() object.Object {
 	return obj
 }
 
+func nativeBoolToBooleanObject(input bool) *object.Boolean {
+	if input {
+		return True
+	} else {
+		return False
+	}
+}
+
 func (vm *VM) executeBinaryOperation(op bytecode.Opcode) error {
 	right := vm.pop()
 	left := vm.pop()
@@ -134,4 +147,49 @@ func (vm *VM) executeBinaryIntegerOperation(op bytecode.Opcode, left object.Obje
 	}
 
 	return vm.push(&object.Integer{Value: result})
+}
+
+func (vm *VM) executeComparison(op bytecode.Opcode) error {
+	right := vm.pop()
+	left := vm.pop()
+
+	leftType := left.Type()
+	rightType := right.Type()
+
+	if leftType == object.INTEGER_OBJ && rightType == object.INTEGER_OBJ {
+		return vm.executeIntegerComparison(op, left, right)
+	} else if leftType == object.BOOLEAN_OBJ && rightType == object.BOOLEAN_OBJ {
+		return vm.executeBooleanComparison(op, left, right)
+	}
+
+	return fmt.Errorf("unsupported types for binary comparison: %s %s", leftType, rightType)
+}
+
+func (vm *VM) executeIntegerComparison(op bytecode.Opcode, left object.Object, right object.Object) error {
+	leftValue := left.(*object.Integer).Value
+	rightValue := right.(*object.Integer).Value
+
+	switch op {
+	case bytecode.OpEqual:
+		return vm.push(nativeBoolToBooleanObject(leftValue == rightValue))
+	case bytecode.OpNotEqual:
+		return vm.push(nativeBoolToBooleanObject(leftValue != rightValue))
+	case bytecode.OpGreaterThan:
+		return vm.push(nativeBoolToBooleanObject(leftValue > rightValue))
+	default:
+		return fmt.Errorf("unknown binary integer comparison operator: %d", op)
+	}
+}
+
+func (vm *VM) executeBooleanComparison(op bytecode.Opcode, left object.Object, right object.Object) error {
+	leftValue := left.(*object.Boolean).Value
+	rightValue := right.(*object.Boolean).Value
+	switch op {
+	case bytecode.OpEqual:
+		return vm.push(nativeBoolToBooleanObject(leftValue == rightValue))
+	case bytecode.OpNotEqual:
+		return vm.push(nativeBoolToBooleanObject(leftValue != rightValue))
+	default:
+		return fmt.Errorf("unknown binary boolean comparison operator: %d", op)
+	}
 }

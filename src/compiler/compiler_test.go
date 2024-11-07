@@ -91,6 +91,96 @@ func TestBooleanExpressions(t *testing.T) {
 			},
 			expectedConstants: []interface{}{},
 		},
+		{
+			input: "3 == 3",
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpEqual),
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{3, 3},
+		},
+		{
+			input: "3 == 7",
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpEqual),
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{3, 7},
+		},
+		{
+			input: "18 != 16",
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpNotEqual),
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{18, 16},
+		},
+		{
+			input: "1 != 1",
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpNotEqual),
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{1, 1},
+		},
+		{
+			input: "1 > 2",
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpGreaterThan),
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{1, 2},
+		},
+		{
+			input: "4 > 4",
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpGreaterThan),
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{4, 4},
+		},
+		{
+			input: "6 < 8",
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpGreaterThan),
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{8, 6},
+		},
+		{
+			input: "true == false",
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpTrue),
+				bytecode.Make(bytecode.OpFalse),
+				bytecode.Make(bytecode.OpEqual),
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{},
+		},
+		{
+			input: "true != false",
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpTrue),
+				bytecode.Make(bytecode.OpFalse),
+				bytecode.Make(bytecode.OpNotEqual),
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{},
+		},
 	}
 
 	runCompilerTests(t, tests)

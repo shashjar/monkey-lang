@@ -20,6 +20,10 @@ const (
 	OpSub
 	OpMul
 	OpDiv
+
+	OpEqual
+	OpNotEqual
+	OpGreaterThan
 )
 
 // Represents a set of instructions as a slice of bytes.
@@ -79,6 +83,10 @@ var definitions = map[Opcode]*Definition{
 	OpSub: {"OpSub", []int{}},
 	OpMul: {"OpMul", []int{}},
 	OpDiv: {"OpDiv", []int{}},
+
+	OpEqual:       {"OpEqual", []int{}},
+	OpNotEqual:    {"OpNotEqual", []int{}},
+	OpGreaterThan: {"OpGreaterThan", []int{}},
 }
 
 func LookUp(op byte) (*Definition, error) {
