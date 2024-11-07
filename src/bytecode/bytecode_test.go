@@ -13,6 +13,7 @@ func TestMake(t *testing.T) {
 		{OpFalse, []int{}, []byte{byte(OpFalse)}},
 		{OpAdd, []int{}, []byte{byte(OpAdd)}},
 		{OpEqual, []int{}, []byte{byte(OpEqual)}},
+		{OpMinus, []int{}, []byte{byte(OpMinus)}},
 	}
 
 	for _, test := range tests {
@@ -62,6 +63,7 @@ func TestReadOperands(t *testing.T) {
 		{OpFalse, 0, []int{}},
 		{OpAdd, 0, []int{}},
 		{OpGreaterThan, 0, []int{}},
+		{OpBang, 0, []int{}},
 	}
 
 	for _, test := range tests {

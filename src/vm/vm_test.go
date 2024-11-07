@@ -19,15 +19,19 @@ func TestIntegerArithmetic(t *testing.T) {
 	tests := []vmTestCase{
 		{"1", 1},
 		{"2", 2},
+		{"-4", -4},
 		{"1 + 2", 3},
 		{"4 - 9", -5},
 		{"0 * 6", 0},
+		{"0 * -6", 0},
+		{"-2 * 4", -8},
 		{"5 * 12", 60},
 		{"21 / 7", 3},
 		{"50 / 2 * 2 + 10 - 5", 55},
 		{"2 * 2 * 2 * 2 * 2", 32},
 		{"5 + 2 * 10", 25},
 		{"5 * (2 + 10)", 60},
+		{"3 * -(2 + 10) + 4", -32},
 	}
 
 	runVMTests(t, tests)
@@ -37,6 +41,12 @@ func TestBooleanExpressions(t *testing.T) {
 	tests := []vmTestCase{
 		{"true", true},
 		{"false", false},
+		{"!true", false},
+		{"!false", true},
+		{"!!true", true},
+		{"!!false", false},
+		{"!5", false},
+		{"!!5", true},
 		{"1 > 2", false},
 		{"1 < 2", true},
 		{"1 < 1", false},

@@ -19,6 +19,15 @@ type compilerTestCase struct {
 func TestIntegerArithmetic(t *testing.T) {
 	tests := []compilerTestCase{
 		{
+			input: "-2",
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpMinus),
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{2},
+		},
+		{
 			input: "1; 2;",
 			expectedInstructions: []bytecode.Instructions{
 				bytecode.Make(bytecode.OpConstant, 0),
@@ -87,6 +96,24 @@ func TestBooleanExpressions(t *testing.T) {
 			input: "false",
 			expectedInstructions: []bytecode.Instructions{
 				bytecode.Make(bytecode.OpFalse),
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{},
+		},
+		{
+			input: "!true",
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpTrue),
+				bytecode.Make(bytecode.OpBang),
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{},
+		},
+		{
+			input: "!false",
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpFalse),
+				bytecode.Make(bytecode.OpBang),
 				bytecode.Make(bytecode.OpPop),
 			},
 			expectedConstants: []interface{}{},
