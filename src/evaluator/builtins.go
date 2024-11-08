@@ -5,8 +5,6 @@ import (
 	"monkey/object"
 )
 
-// TODO: could add more built-ins here, e.g. list comprehensions from Python (map, sum, filter, etc.)
-
 var builtins = map[string]*object.BuiltIn{
 	"puts":   puts,
 	"len":    length,

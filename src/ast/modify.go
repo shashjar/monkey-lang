@@ -3,7 +3,6 @@ package ast
 // Represents a function that optionally modifies an AST node in some way.
 type ModifierFunc func(Node) Node
 
-// TODO: perform error checking for modifications
 func Modify(node Node, modifier ModifierFunc) Node {
 	switch node := node.(type) {
 

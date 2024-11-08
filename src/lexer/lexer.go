@@ -100,7 +100,6 @@ func (l *Lexer) skipWhitespace() {
 	}
 }
 
-// TODO: currently only supports ASCII. Maybe extend to Unicode later (see p. 19-20 in WAIIG).
 func (l *Lexer) readChar() {
 	if l.readPosition >= len(l.input) {
 		l.char = 0
