@@ -213,6 +213,33 @@ func TestBooleanExpressions(t *testing.T) {
 	runCompilerTests(t, tests)
 }
 
+func TestConditions(t *testing.T) {
+	tests := []compilerTestCase{
+		{
+			input: `
+			if (true) { 10 }; 3333;
+			`,
+			expectedInstructions: []bytecode.Instructions{
+				// 0000
+				bytecode.Make(bytecode.OpTrue),
+				// 0001
+				bytecode.Make(bytecode.OpJumpNotTruthy, 7),
+				// 0004
+				bytecode.Make(bytecode.OpConstant, 0),
+				// 0007
+				bytecode.Make(bytecode.OpPop),
+				// 0008
+				bytecode.Make(bytecode.OpConstant, 1),
+				// 0011
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{10, 3333},
+		},
+	}
+
+	runCompilerTests(t, tests)
+}
+
 func parse(input string) *ast.Program {
 	l := lexer.NewLexer(input)
 	p := parser.NewParser(l)
