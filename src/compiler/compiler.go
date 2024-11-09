@@ -142,16 +142,15 @@ func (c *Compiler) Compile(node ast.Node) error {
 			c.removeLastPop()
 		}
 
+		// Emit an `OpJump` with a bogus offset to be updated below with the position following the alternative
+		jumpPos := c.emit(bytecode.OpJump, 9999)
+
+		afterConsequencePos := len(c.instructions)
+		c.changeOperand(jumpNotTruthyPos, afterConsequencePos)
+
 		if node.Alternative == nil {
-			afterConsequencePos := len(c.instructions)
-			c.changeOperand(jumpNotTruthyPos, afterConsequencePos)
+			c.emit(bytecode.OpNull)
 		} else {
-			// Emit an `OpJump` with a bogus offset to be updated below with the position following the alternative
-			jumpPos := c.emit(bytecode.OpJump, 9999)
-
-			afterConsequencePos := len(c.instructions)
-			c.changeOperand(jumpNotTruthyPos, afterConsequencePos)
-
 			err = c.Compile(node.Alternative)
 			if err != nil {
 				return err
@@ -160,10 +159,10 @@ func (c *Compiler) Compile(node ast.Node) error {
 			if c.lastInstructionIsPop() {
 				c.removeLastPop()
 			}
-
-			afterAlternativePos := len(c.instructions)
-			c.changeOperand(jumpPos, afterAlternativePos)
 		}
+
+		afterAlternativePos := len(c.instructions)
+		c.changeOperand(jumpPos, afterAlternativePos)
 
 	case *ast.IntegerLiteral:
 		integer := &object.Integer{Value: node.Value}
@@ -215,9 +214,6 @@ func (c *Compiler) replaceInstruction(pos int, newInstr []byte) {
 }
 
 func (c *Compiler) changeOperand(opPos int, operand int) {
-	fmt.Printf("Changing operand at pos %d to %d\n", opPos, operand)
-	fmt.Printf("Instructions length: %d\n", len(c.instructions))
-
 	op := bytecode.Opcode(c.instructions[opPos])
 	newInstruction := bytecode.Make(op, operand)
 
