@@ -26,6 +26,8 @@ type Compiler struct {
 
 	lastInstruction         EmittedInstruction // The latest instruction emitted by the compiler.
 	previousLastInstruction EmittedInstruction // The second-to-latest instruction emitted by the compiler.
+
+	symbolTable *SymbolTable // The symbol table for the compiler to use for identifier associations (bindings).
 }
 
 func NewCompiler() *Compiler {
@@ -35,6 +37,8 @@ func NewCompiler() *Compiler {
 
 		lastInstruction:         EmittedInstruction{},
 		previousLastInstruction: EmittedInstruction{},
+
+		symbolTable: NewSymbolTable(),
 	}
 }
 
@@ -62,6 +66,23 @@ func (c *Compiler) Compile(node ast.Node) error {
 			return err
 		}
 		c.emit(bytecode.OpPop)
+
+	case *ast.LetStatement:
+		err := c.Compile(node.Value)
+		if err != nil {
+			return err
+		}
+
+		symbol := c.symbolTable.Define(node.Name.Value)
+		c.emit(bytecode.OpSetGlobal, symbol.Index)
+
+	case *ast.Identifier:
+		symbol, ok := c.symbolTable.Resolve(node.Value)
+		if !ok {
+			return fmt.Errorf("undefined variable: %s", node.Value) // Compile-time error
+		}
+
+		c.emit(bytecode.OpGetGlobal, symbol.Index)
 
 	case *ast.PrefixExpression:
 		err := c.Compile(node.Right)

@@ -30,6 +30,9 @@ const (
 
 	OpMinus
 	OpBang
+
+	OpGetGlobal
+	OpSetGlobal
 )
 
 // Represents a set of instructions as a slice of bytes.
@@ -99,6 +102,9 @@ var definitions = map[Opcode]*Definition{
 
 	OpMinus: {"OpMinus", []int{}},
 	OpBang:  {"OpBang", []int{}},
+
+	OpGetGlobal: {"OpGetGlobal", []int{2}},
+	OpSetGlobal: {"OpSetGlobal", []int{2}},
 }
 
 func LookUp(op byte) (*Definition, error) {
