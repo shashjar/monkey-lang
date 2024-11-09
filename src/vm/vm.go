@@ -57,6 +57,17 @@ func (vm *VM) Run() error {
 
 		case bytecode.OpPop:
 			vm.pop()
+		case bytecode.OpJumpNotTruthy:
+			jumpToPos := int(bytecode.ReadUint16(vm.instructions[ip+1:]))
+			ip += 2
+
+			condition := vm.pop()
+			if !isTruthy(condition) {
+				ip = jumpToPos - 1 // Set to `pos - 1` since this loop increments ip on each iteration
+			}
+		case bytecode.OpJump:
+			jumpToPos := int(bytecode.ReadUint16(vm.instructions[ip+1:]))
+			ip = jumpToPos - 1 // Set to `pos - 1` since this loop increments ip on each iteration
 
 		case bytecode.OpAdd, bytecode.OpSub, bytecode.OpMul, bytecode.OpDiv:
 			err := vm.executeBinaryOperation(op)
@@ -121,6 +132,15 @@ func nativeBoolToBooleanObject(input bool) *object.Boolean {
 		return True
 	} else {
 		return False
+	}
+}
+
+func isTruthy(obj object.Object) bool {
+	switch obj := obj.(type) {
+	case *object.Boolean:
+		return obj.Value
+	default:
+		return true
 	}
 }
 
