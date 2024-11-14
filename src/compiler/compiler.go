@@ -5,6 +5,7 @@ import (
 	"monkey/ast"
 	"monkey/bytecode"
 	"monkey/object"
+	"sort"
 )
 
 // Represents bytecode generated and constants evaluated by the compiler.
@@ -215,6 +216,28 @@ func (c *Compiler) Compile(node ast.Node) error {
 			}
 		}
 		c.emit(bytecode.OpArray, len(node.Elements))
+
+	case *ast.HashMapLiteral:
+		keys := []ast.Expression{}
+		for k := range node.KVPairs {
+			keys = append(keys, k)
+		}
+		sort.Slice(keys, func(i int, j int) bool {
+			return keys[i].String() < keys[j].String()
+		})
+
+		for _, k := range keys {
+			err := c.Compile(k)
+			if err != nil {
+				return err
+			}
+
+			err = c.Compile(node.KVPairs[k])
+			if err != nil {
+				return err
+			}
+		}
+		c.emit(bytecode.OpHashMap, len(node.KVPairs)*2)
 	}
 
 	return nil

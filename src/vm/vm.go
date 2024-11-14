@@ -133,6 +133,20 @@ func (vm *VM) Run() error {
 			if err != nil {
 				return err
 			}
+		case bytecode.OpHashMap:
+			numElements := int(bytecode.ReadUint16(vm.instructions[ip+1:]))
+			ip += 2
+
+			hashmap, err := vm.buildHashMap(vm.sp-numElements, vm.sp)
+			if err != nil {
+				return err
+			}
+			vm.sp -= numElements
+
+			err = vm.push(hashmap)
+			if err != nil {
+				return err
+			}
 
 		default:
 			return fmt.Errorf("invalid opcode received: %d", op)
@@ -319,4 +333,23 @@ func (vm *VM) buildArray(startIndex int, endIndex int) object.Object {
 	}
 
 	return &object.Array{Elements: elements}
+}
+
+func (vm *VM) buildHashMap(startIndex int, endIndex int) (object.Object, error) {
+	kvPairs := make(map[object.HashKey]object.HashMapPair)
+
+	for i := startIndex; i < endIndex; i += 2 {
+		key := vm.stack[i]
+		value := vm.stack[i+1]
+
+		hashKey, ok := key.(object.Hashable)
+		if !ok {
+			return nil, fmt.Errorf("unusable as hash key: %s", key.Type())
+		}
+
+		pair := object.HashMapPair{Key: key, Value: value}
+		kvPairs[hashKey.HashKey()] = pair
+	}
+
+	return &object.HashMap{KVPairs: kvPairs}, nil
 }

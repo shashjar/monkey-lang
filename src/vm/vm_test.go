@@ -116,6 +116,22 @@ func TestArrayLiterals(t *testing.T) {
 	runVMTests(t, tests)
 }
 
+func TestHashMapLiterals(t *testing.T) {
+	tests := []vmTestCase{
+		{"{}", map[object.HashKey]int64{}},
+		{"{1: 2, 2: 3}", map[object.HashKey]int64{
+			(&object.Integer{Value: 1}).HashKey(): 2,
+			(&object.Integer{Value: 2}).HashKey(): 3,
+		}},
+		{"{1 + 1: 2 * 2, 3 + 3: 4 * 4}", map[object.HashKey]int64{
+			(&object.Integer{Value: 2}).HashKey(): 4,
+			(&object.Integer{Value: 6}).HashKey(): 16,
+		}},
+	}
+
+	runVMTests(t, tests)
+}
+
 func runVMTests(t *testing.T, tests []vmTestCase) {
 	t.Helper()
 
@@ -172,12 +188,35 @@ func testExpectedObject(t *testing.T, expected interface{}, actual object.Object
 		}
 
 		if len(array.Elements) != len(expected) {
-			t.Errorf("wrong number of elements. expected=%d, got=%d", len(expected), len(array.Elements))
+			t.Errorf("array has wrong number of elements. expected=%d, got=%d", len(expected), len(array.Elements))
 			return
 		}
 
 		for i, expectedElem := range expected {
 			err := testIntegerObject(int64(expectedElem), array.Elements[i])
+			if err != nil {
+				t.Errorf("testIntegerObject failed: %s", err)
+			}
+		}
+	case map[object.HashKey]int64:
+		hashmap, ok := actual.(*object.HashMap)
+		if !ok {
+			t.Errorf("object is not a HashMap. got=%T (%+v)", actual, actual)
+			return
+		}
+
+		if len(hashmap.KVPairs) != len(expected) {
+			t.Errorf("hashmap has wrong number of elements. expected=%d, got=%d", len(expected), len(hashmap.KVPairs))
+			return
+		}
+
+		for expectedKey, expectedValue := range expected {
+			pair, ok := hashmap.KVPairs[expectedKey]
+			if !ok {
+				t.Errorf("no pair for given key in Pairs: %q", expectedKey)
+			}
+
+			err := testIntegerObject(expectedValue, pair.Value)
 			if err != nil {
 				t.Errorf("testIntegerObject failed: %s", err)
 			}

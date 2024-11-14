@@ -385,6 +385,51 @@ func TestArrayLiterals(t *testing.T) {
 	runCompilerTests(t, tests)
 }
 
+func TestHashMapLiterals(t *testing.T) {
+	tests := []compilerTestCase{
+		{
+			input: "{}",
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpHashMap, 0),
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{},
+		},
+		{
+			input: "{1: 2, 3: 4, 5: 6}",
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpConstant, 2),
+				bytecode.Make(bytecode.OpConstant, 3),
+				bytecode.Make(bytecode.OpConstant, 4),
+				bytecode.Make(bytecode.OpConstant, 5),
+				bytecode.Make(bytecode.OpHashMap, 6),
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{1, 2, 3, 4, 5, 6},
+		},
+		{
+			input: "{1: 2 + 3, 4: 5 * 6}",
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpConstant, 2),
+				bytecode.Make(bytecode.OpAdd),
+				bytecode.Make(bytecode.OpConstant, 3),
+				bytecode.Make(bytecode.OpConstant, 4),
+				bytecode.Make(bytecode.OpConstant, 5),
+				bytecode.Make(bytecode.OpMul),
+				bytecode.Make(bytecode.OpHashMap, 4),
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{1, 2, 3, 4, 5, 6},
+		},
+	}
+
+	runCompilerTests(t, tests)
+}
+
 func parse(input string) *ast.Program {
 	l := lexer.NewLexer(input)
 	p := parser.NewParser(l)
