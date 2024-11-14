@@ -123,6 +123,17 @@ func (vm *VM) Run() error {
 
 			vm.globals[globalIndex] = vm.pop()
 
+		case bytecode.OpArray:
+			numElements := int(bytecode.ReadUint16(vm.instructions[ip+1:]))
+			ip += 2
+
+			array := vm.buildArray(vm.sp-numElements, vm.sp)
+
+			err := vm.push(array)
+			if err != nil {
+				return err
+			}
+
 		default:
 			return fmt.Errorf("invalid opcode received: %d", op)
 		}
@@ -298,4 +309,14 @@ func (vm *VM) executeBangOperator() error {
 	default:
 		return vm.push(False)
 	}
+}
+
+func (vm *VM) buildArray(startIndex int, endIndex int) object.Object {
+	elements := make([]object.Object, endIndex-startIndex)
+
+	for i := startIndex; i < endIndex; i++ {
+		elements[i-startIndex] = vm.stack[i]
+	}
+
+	return &object.Array{Elements: elements}
 }
