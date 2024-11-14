@@ -147,6 +147,14 @@ func (vm *VM) Run() error {
 			if err != nil {
 				return err
 			}
+		case bytecode.OpIndex:
+			index := vm.pop()
+			left := vm.pop()
+
+			err := vm.executeIndexExpression(left, index)
+			if err != nil {
+				return err
+			}
 
 		default:
 			return fmt.Errorf("invalid opcode received: %d", op)
@@ -352,4 +360,43 @@ func (vm *VM) buildHashMap(startIndex int, endIndex int) (object.Object, error) 
 	}
 
 	return &object.HashMap{KVPairs: kvPairs}, nil
+}
+
+func (vm *VM) executeIndexExpression(left object.Object, index object.Object) error {
+	switch {
+	case left.Type() == object.ARRAY_OBJ && index.Type() == object.INTEGER_OBJ:
+		return vm.executeArrayIndex(left, index)
+	case left.Type() == object.HASHMAP_OBJ:
+		return vm.executeHashMapIndex(left, index)
+	default:
+		return fmt.Errorf("index operator not supported: %s", left.Type())
+	}
+}
+
+func (vm *VM) executeArrayIndex(array object.Object, index object.Object) error {
+	arrayObject := array.(*object.Array)
+	i := index.(*object.Integer).Value
+	max := int64(len(arrayObject.Elements) - 1)
+
+	if i < 0 || i > max {
+		return vm.push(Null)
+	}
+
+	return vm.push(arrayObject.Elements[i])
+}
+
+func (vm *VM) executeHashMapIndex(hashmap object.Object, index object.Object) error {
+	hashmapObject := hashmap.(*object.HashMap)
+
+	key, ok := index.(object.Hashable)
+	if !ok {
+		return fmt.Errorf("unusable as hash key: %s", index.Type())
+	}
+
+	pair, ok := hashmapObject.KVPairs[key.HashKey()]
+	if !ok {
+		return vm.push(Null)
+	}
+
+	return vm.push(pair.Value)
 }

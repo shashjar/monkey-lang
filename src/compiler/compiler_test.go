@@ -430,6 +430,42 @@ func TestHashMapLiterals(t *testing.T) {
 	runCompilerTests(t, tests)
 }
 
+func TestIndexExpressions(t *testing.T) {
+	tests := []compilerTestCase{
+		{
+			input: "[1, 2, 3][1 + 1]",
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpConstant, 2),
+				bytecode.Make(bytecode.OpArray, 3),
+				bytecode.Make(bytecode.OpConstant, 3),
+				bytecode.Make(bytecode.OpConstant, 4),
+				bytecode.Make(bytecode.OpAdd),
+				bytecode.Make(bytecode.OpIndex),
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{1, 2, 3, 1, 1},
+		},
+		{
+			input: "{1: 2}[2 - 1]",
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpHashMap, 2),
+				bytecode.Make(bytecode.OpConstant, 2),
+				bytecode.Make(bytecode.OpConstant, 3),
+				bytecode.Make(bytecode.OpSub),
+				bytecode.Make(bytecode.OpIndex),
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{1, 2, 2, 1},
+		},
+	}
+
+	runCompilerTests(t, tests)
+}
+
 func parse(input string) *ast.Program {
 	l := lexer.NewLexer(input)
 	p := parser.NewParser(l)

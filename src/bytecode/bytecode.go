@@ -36,6 +36,7 @@ const (
 
 	OpArray
 	OpHashMap
+	OpIndex
 )
 
 // Represents a set of instructions as a slice of bytes.
@@ -111,6 +112,7 @@ var definitions = map[Opcode]*Definition{
 
 	OpArray:   {"OpArray", []int{2}},
 	OpHashMap: {"OpHashMap", []int{2}},
+	OpIndex:   {"OpIndex", []int{}},
 }
 
 func LookUp(op byte) (*Definition, error) {
