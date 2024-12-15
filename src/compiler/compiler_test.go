@@ -512,6 +512,76 @@ func TestCompilerScopes(t *testing.T) {
 	}
 }
 
+func TestFunctions(t *testing.T) {
+	tests := []compilerTestCase{
+		{
+			input: "fn() { }",
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{
+				[]bytecode.Instructions{
+					bytecode.Make(bytecode.OpReturn),
+				},
+			},
+		},
+		{
+			input: "fn() { return 5 + 10; }",
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 2),
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{
+				5,
+				10,
+				[]bytecode.Instructions{
+					bytecode.Make(bytecode.OpConstant, 0),
+					bytecode.Make(bytecode.OpConstant, 1),
+					bytecode.Make(bytecode.OpAdd),
+					bytecode.Make(bytecode.OpReturnValue),
+				},
+			},
+		},
+		{
+			input: "fn() { 5 + 10; }",
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 2),
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{
+				5,
+				10,
+				[]bytecode.Instructions{
+					bytecode.Make(bytecode.OpConstant, 0),
+					bytecode.Make(bytecode.OpConstant, 1),
+					bytecode.Make(bytecode.OpAdd),
+					bytecode.Make(bytecode.OpReturnValue),
+				},
+			},
+		},
+		{
+			input: "fn() { 1; 2 }",
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 2),
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{
+				1,
+				2,
+				[]bytecode.Instructions{
+					bytecode.Make(bytecode.OpConstant, 0),
+					bytecode.Make(bytecode.OpPop),
+					bytecode.Make(bytecode.OpConstant, 1),
+					bytecode.Make(bytecode.OpReturnValue),
+				},
+			},
+		},
+	}
+
+	runCompilerTests(t, tests)
+}
+
 func parse(input string) *ast.Program {
 	l := lexer.NewLexer(input)
 	p := parser.NewParser(l)
@@ -576,6 +646,16 @@ func testConstants(expected []interface{}, actual []object.Object) error {
 			err := testStringObject(expConst, actual[i])
 			if err != nil {
 				return fmt.Errorf("constant %d - testStringObject failed: %s", i, err)
+			}
+		case []bytecode.Instructions:
+			fn, ok := actual[i].(*object.CompiledFunction)
+			if !ok {
+				return fmt.Errorf("constant %d - not a function: %T", i, actual[i])
+			}
+
+			err := testInstructions(expConst, fn.Instructions)
+			if err != nil {
+				return fmt.Errorf("constant %d - testInstructions failed: %s", i, err)
 			}
 		}
 	}

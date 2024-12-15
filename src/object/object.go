@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"hash/fnv"
 	"monkey/ast"
+	"monkey/bytecode"
 	"strings"
 )
 
@@ -12,18 +13,19 @@ import (
 type ObjectType string
 
 const (
-	NULL_OBJ         = "NULL"
-	INTEGER_OBJ      = "INTEGER"
-	BOOLEAN_OBJ      = "BOOLEAN"
-	STRING_OBJ       = "STRING"
-	ARRAY_OBJ        = "ARRAY"
-	HASHMAP_OBJ      = "HASHMAP"
-	RETURN_VALUE_OBJ = "RETURN_VALUE"
-	FUNCTION_OBJ     = "FUNCTION"
-	BUILTIN_OBJ      = "BUILTIN"
-	QUOTE_OBJ        = "QUOTE"
-	MACRO_OBJ        = "MACRO"
-	ERROR_OBJ        = "ERROR"
+	NULL_OBJ              = "NULL"
+	INTEGER_OBJ           = "INTEGER"
+	BOOLEAN_OBJ           = "BOOLEAN"
+	STRING_OBJ            = "STRING"
+	ARRAY_OBJ             = "ARRAY"
+	HASHMAP_OBJ           = "HASHMAP"
+	RETURN_VALUE_OBJ      = "RETURN_VALUE"
+	FUNCTION_OBJ          = "FUNCTION"
+	COMPILED_FUNCTION_OBJ = "COMPILED_FUNCTION_OBJ"
+	BUILTIN_OBJ           = "BUILTIN"
+	QUOTE_OBJ             = "QUOTE"
+	MACRO_OBJ             = "MACRO"
+	ERROR_OBJ             = "ERROR"
 )
 
 // Represents an object in the Monkey programming language.
@@ -209,6 +211,19 @@ func (f *Function) Inspect() string {
 	out.WriteString("\n}")
 
 	return out.String()
+}
+
+// Represents a compiled function, containing some bytecode instructions.
+type CompiledFunction struct {
+	Instructions bytecode.Instructions
+}
+
+func (cf *CompiledFunction) Type() ObjectType {
+	return COMPILED_FUNCTION_OBJ
+}
+
+func (cf *CompiledFunction) Inspect() string {
+	return fmt.Sprintf("CompiledFunction[%p]", cf)
 }
 
 // Represents a function built into the Monkey programming language implementation.

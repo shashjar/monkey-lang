@@ -178,7 +178,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 			return err
 		}
 
-		if c.lastInstructionIsPop() {
+		if c.lastInstructionIs(bytecode.OpPop) {
 			c.removeLastPop()
 		}
 
@@ -196,7 +196,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 				return err
 			}
 
-			if c.lastInstructionIsPop() {
+			if c.lastInstructionIs(bytecode.OpPop) {
 				c.removeLastPop()
 			}
 		}
@@ -262,6 +262,34 @@ func (c *Compiler) Compile(node ast.Node) error {
 		}
 
 		c.emit(bytecode.OpIndex)
+
+	case *ast.FunctionLiteral:
+		c.enterScope()
+
+		err := c.Compile(node.Body)
+		if err != nil {
+			return err
+		}
+
+		if c.lastInstructionIs(bytecode.OpPop) {
+			c.replaceLastPopWithReturn()
+		}
+		if !c.lastInstructionIs(bytecode.OpReturnValue) {
+			c.emit(bytecode.OpReturn)
+		}
+
+		instructions := c.leaveScope()
+
+		compiledFunction := &object.CompiledFunction{Instructions: instructions}
+		c.emit(bytecode.OpConstant, c.addConstant(compiledFunction))
+
+	case *ast.ReturnStatement:
+		err := c.Compile(node.ReturnValue)
+		if err != nil {
+			return err
+		}
+
+		c.emit(bytecode.OpReturnValue)
 	}
 
 	return nil
@@ -310,6 +338,12 @@ func (c *Compiler) replaceInstruction(pos int, newInstr []byte) {
 	}
 }
 
+func (c *Compiler) replaceLastPopWithReturn() {
+	lastPos := c.scopes[c.scopeIndex].lastInstruction.Position
+	c.replaceInstruction(lastPos, bytecode.Make(bytecode.OpReturnValue))
+	c.scopes[c.scopeIndex].lastInstruction.Opcode = bytecode.OpReturnValue
+}
+
 func (c *Compiler) currentInstructions() bytecode.Instructions {
 	return c.scopes[c.scopeIndex].instructions
 }
@@ -321,8 +355,12 @@ func (c *Compiler) changeOperand(opPos int, operand int) {
 	c.replaceInstruction(opPos, newInstruction)
 }
 
-func (c *Compiler) lastInstructionIsPop() bool {
-	return c.scopes[c.scopeIndex].lastInstruction.Opcode == bytecode.OpPop
+func (c *Compiler) lastInstructionIs(op bytecode.Opcode) bool {
+	if len(c.currentInstructions()) == 0 {
+		return false
+	}
+
+	return c.scopes[c.scopeIndex].lastInstruction.Opcode == op
 }
 
 func (c *Compiler) removeLastPop() {
