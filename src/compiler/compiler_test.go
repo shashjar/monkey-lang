@@ -466,6 +466,52 @@ func TestIndexExpressions(t *testing.T) {
 	runCompilerTests(t, tests)
 }
 
+func TestCompilerScopes(t *testing.T) {
+	compiler := NewCompiler()
+	if compiler.scopeIndex != 0 {
+		t.Errorf("scopeIndex is wrong. expected=%d, got=%d", 0, compiler.scopeIndex)
+	}
+
+	compiler.emit(bytecode.OpMul)
+
+	compiler.enterScope()
+	if compiler.scopeIndex != 1 {
+		t.Errorf("scopeIndex is wrong. expected=%d, got=%d", 1, compiler.scopeIndex)
+	}
+
+	compiler.emit(bytecode.OpSub)
+
+	if len(compiler.scopes[compiler.scopeIndex].instructions) != 1 {
+		t.Errorf("length of instructions is wrong. expected=%d, got=%d", 1, len(compiler.scopes[compiler.scopeIndex].instructions))
+	}
+
+	last := compiler.scopes[compiler.scopeIndex].lastInstruction
+	if last.Opcode != bytecode.OpSub {
+		t.Errorf("lastInstruction.Opcode is wrong. expected=%d, got=%d", bytecode.OpSub, last.Opcode)
+	}
+
+	compiler.leaveScope()
+	if compiler.scopeIndex != 0 {
+		t.Errorf("scopeIndex is wrong. expected=%d, got=%d", 0, compiler.scopeIndex)
+	}
+
+	compiler.emit(bytecode.OpAdd)
+
+	if len(compiler.scopes[compiler.scopeIndex].instructions) != 2 {
+		t.Errorf("length of instructions is wrong. expected=%d, got=%d", 2, len(compiler.scopes[compiler.scopeIndex].instructions))
+	}
+
+	last = compiler.scopes[compiler.scopeIndex].lastInstruction
+	if last.Opcode != bytecode.OpAdd {
+		t.Errorf("lastInstruction.Opcode is wrong. expected=%d, got=%d", bytecode.OpAdd, last.Opcode)
+	}
+
+	previous := compiler.scopes[compiler.scopeIndex].previousLastInstruction
+	if previous.Opcode != bytecode.OpMul {
+		t.Errorf("lastInstruction.Opcode is wrong. expected=%d, got=%d", bytecode.OpMul, last.Opcode)
+	}
+}
+
 func parse(input string) *ast.Program {
 	l := lexer.NewLexer(input)
 	p := parser.NewParser(l)
