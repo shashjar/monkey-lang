@@ -33,6 +33,8 @@ const (
 
 	OpGetGlobal
 	OpSetGlobal
+	OpGetLocal
+	OpSetLocal
 
 	OpArray
 	OpHashMap
@@ -113,6 +115,8 @@ var definitions = map[Opcode]*Definition{
 
 	OpGetGlobal: {"OpGetGlobal", []int{2}},
 	OpSetGlobal: {"OpSetGlobal", []int{2}},
+	OpGetLocal:  {"OpGetLocal", []int{1}},
+	OpSetLocal:  {"OpSetLocal", []int{1}},
 
 	OpArray:   {"OpArray", []int{2}},
 	OpHashMap: {"OpHashMap", []int{2}},
@@ -150,6 +154,8 @@ func Make(op Opcode, operands ...int) []byte {
 	for i, o := range operands {
 		width := def.OperandWidths[i]
 		switch width {
+		case 1:
+			instruction[offset] = byte(o)
 		case 2:
 			binary.BigEndian.PutUint16(instruction[offset:], uint16(o))
 		}
@@ -165,6 +171,8 @@ func ReadOperands(def *Definition, instr Instructions) ([]int, int) {
 
 	for i, width := range def.OperandWidths {
 		switch width {
+		case 1:
+			operands[i] = int(ReadUint8(instr[offset:]))
 		case 2:
 			operands[i] = int(ReadUint16(instr[offset:]))
 		}
@@ -176,4 +184,8 @@ func ReadOperands(def *Definition, instr Instructions) ([]int, int) {
 
 func ReadUint16(instr Instructions) uint16 {
 	return binary.BigEndian.Uint16(instr)
+}
+
+func ReadUint8(instr Instructions) uint8 {
+	return uint8(instr[0])
 }

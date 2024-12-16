@@ -31,7 +31,7 @@ type VM struct {
 
 func NewVM(bytecode *compiler.Bytecode) *VM {
 	mainFn := &object.CompiledFunction{Instructions: bytecode.Instructions}
-	mainFrame := NewFrame(mainFn)
+	mainFrame := NewFrame(mainFn, 0)
 
 	frames := make([]*Frame, MaxFrames)
 	frames[0] = mainFrame
@@ -141,6 +141,21 @@ func (vm *VM) Run() error {
 			vm.currentFrame().ip += 2
 
 			vm.globals[globalIndex] = vm.pop()
+		case bytecode.OpGetLocal:
+			localIndex := int(bytecode.ReadUint8(instr[ip+1:]))
+			vm.currentFrame().ip += 1
+
+			frame := vm.currentFrame()
+			err := vm.push(vm.stack[frame.basePointer+localIndex])
+			if err != nil {
+				return err
+			}
+		case bytecode.OpSetLocal:
+			localIndex := int(bytecode.ReadUint8(instr[ip+1:]))
+			vm.currentFrame().ip += 1
+
+			frame := vm.currentFrame()
+			vm.stack[frame.basePointer+localIndex] = vm.pop()
 
 		case bytecode.OpArray:
 			numElements := int(bytecode.ReadUint16(instr[ip+1:]))
@@ -181,20 +196,22 @@ func (vm *VM) Run() error {
 				return fmt.Errorf("attempted to call non-function object")
 			}
 
-			frame := NewFrame(fn)
+			frame := NewFrame(fn, vm.sp)
 			vm.pushFrame(frame)
+			vm.sp = frame.basePointer + fn.NumLocals
 		case bytecode.OpReturnValue:
 			returnValue := vm.pop()
-			vm.popFrame() // Pop the function frame that has just finished execution
-			vm.pop()      // Pop the compiled function (just finished execution) off the stack
+
+			frame := vm.popFrame()        // Pop the function frame that has just finished execution
+			vm.sp = frame.basePointer - 1 // Reset the stack pointer to where it was prior to entering this function (-1 to pop off the function itself as well)
 
 			err := vm.push(returnValue) // Put the function return value at the top of the stack
 			if err != nil {
 				return err
 			}
 		case bytecode.OpReturn:
-			vm.popFrame()
-			vm.pop()
+			frame := vm.popFrame()
+			vm.sp = frame.basePointer - 1
 
 			err := vm.push(Null)
 			if err != nil {

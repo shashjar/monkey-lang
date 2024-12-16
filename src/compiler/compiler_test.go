@@ -471,6 +471,7 @@ func TestCompilerScopes(t *testing.T) {
 	if compiler.scopeIndex != 0 {
 		t.Errorf("scopeIndex is wrong. expected=%d, got=%d", 0, compiler.scopeIndex)
 	}
+	globalSymbolTable := compiler.symbolTable
 
 	compiler.emit(bytecode.OpMul)
 
@@ -490,9 +491,20 @@ func TestCompilerScopes(t *testing.T) {
 		t.Errorf("lastInstruction.Opcode is wrong. expected=%d, got=%d", bytecode.OpSub, last.Opcode)
 	}
 
+	if compiler.symbolTable.outer != globalSymbolTable {
+		t.Errorf("compiler did not enclose symbol table when entering scope")
+	}
+
 	compiler.leaveScope()
 	if compiler.scopeIndex != 0 {
 		t.Errorf("scopeIndex is wrong. expected=%d, got=%d", 0, compiler.scopeIndex)
+	}
+
+	if compiler.symbolTable != globalSymbolTable {
+		t.Errorf("compiler did not restore global symbol table after leaving scope")
+	}
+	if compiler.symbolTable.outer != nil {
+		t.Errorf("compiler modified global symbol table incorrectly - is enclosed")
 	}
 
 	compiler.emit(bytecode.OpAdd)
@@ -615,6 +627,80 @@ func TestFunctionCalls(t *testing.T) {
 				42,
 				[]bytecode.Instructions{
 					bytecode.Make(bytecode.OpConstant, 0),
+					bytecode.Make(bytecode.OpReturnValue),
+				},
+			},
+		},
+	}
+
+	runCompilerTests(t, tests)
+}
+
+func TestLetStatementScopes(t *testing.T) {
+	tests := []compilerTestCase{
+		{
+			input: `
+			let num = 55;
+			fn() { num; }
+			`,
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpSetGlobal, 0),
+				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{
+				55,
+				[]bytecode.Instructions{
+					bytecode.Make(bytecode.OpGetGlobal, 0),
+					bytecode.Make(bytecode.OpReturnValue),
+				},
+			},
+		},
+		{
+			input: `
+			fn() {
+				let num = 55;
+				num;
+			}
+			`,
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{
+				55,
+				[]bytecode.Instructions{
+					bytecode.Make(bytecode.OpConstant, 0),
+					bytecode.Make(bytecode.OpSetLocal, 0),
+					bytecode.Make(bytecode.OpGetLocal, 0),
+					bytecode.Make(bytecode.OpReturnValue),
+				},
+			},
+		},
+		{
+			input: `
+			fn() {
+				let a = 55;
+				let b = 77;
+				a + b
+			}
+			`,
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 2),
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{
+				55,
+				77,
+				[]bytecode.Instructions{
+					bytecode.Make(bytecode.OpConstant, 0),
+					bytecode.Make(bytecode.OpSetLocal, 0),
+					bytecode.Make(bytecode.OpConstant, 1),
+					bytecode.Make(bytecode.OpSetLocal, 1),
+					bytecode.Make(bytecode.OpGetLocal, 0),
+					bytecode.Make(bytecode.OpGetLocal, 1),
+					bytecode.Make(bytecode.OpAdd),
 					bytecode.Make(bytecode.OpReturnValue),
 				},
 			},
