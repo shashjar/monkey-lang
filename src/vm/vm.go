@@ -175,6 +175,32 @@ func (vm *VM) Run() error {
 				return err
 			}
 
+		case bytecode.OpCall:
+			fn, ok := vm.stack[vm.sp-1].(*object.CompiledFunction)
+			if !ok {
+				return fmt.Errorf("attempted to call non-function object")
+			}
+
+			frame := NewFrame(fn)
+			vm.pushFrame(frame)
+		case bytecode.OpReturnValue:
+			returnValue := vm.pop()
+			vm.popFrame() // Pop the function frame that has just finished execution
+			vm.pop()      // Pop the compiled function (just finished execution) off the stack
+
+			err := vm.push(returnValue) // Put the function return value at the top of the stack
+			if err != nil {
+				return err
+			}
+		case bytecode.OpReturn:
+			vm.popFrame()
+			vm.pop()
+
+			err := vm.push(Null)
+			if err != nil {
+				return err
+			}
+
 		default:
 			return fmt.Errorf("invalid opcode received: %d", op)
 		}
@@ -220,7 +246,7 @@ func (vm *VM) pushFrame(f *Frame) {
 	vm.framesIndex += 1
 }
 
-func (vm *VM) popFrame(f *Frame) *Frame {
+func (vm *VM) popFrame() *Frame {
 	vm.framesIndex -= 1
 	return vm.frames[vm.framesIndex]
 }
