@@ -287,6 +287,121 @@ func TestCallingFunctionsWithBindings(t *testing.T) {
 	runVMTests(t, tests)
 }
 
+func TestCallingFunctionsWithArgumentsAndBindings(t *testing.T) {
+	tests := []vmTestCase{
+		{
+			input: `
+			let identity = fn(a) { a; };
+			identity(42);
+			`,
+			expected: 42,
+		},
+		{
+			input: `
+			let sum = fn(a, b) { a + b; };
+			sum(1, 2);
+			`,
+			expected: 3,
+		},
+		{
+			input: `
+			let sum = fn(a, b) {
+				let c = a + b;
+				return c;
+			};
+			sum(1, 2);
+			`,
+			expected: 3,
+		},
+		{
+			input: `
+			let sum = fn(a, b) {
+				let c = a + b;
+				return c;
+			};
+			sum(1, 2) + sum(3, 4);
+			`,
+			expected: 10,
+		},
+		{
+			input: `
+			let sum = fn(a, b) {
+				let c = a + b;
+				c;
+			};
+			let outer = fn() {
+				sum(1, 2) + sum(3, 4);
+			};
+			outer();
+			`,
+			expected: 10,
+		},
+		{
+			input: `
+			let globalNum = 10;
+
+			let sum = fn(a, b) {
+				let c = a + b;
+				return c + globalNum;
+			};
+
+			let outer = fn() {
+				sum(1, 2) + sum(3, 4) + globalNum;
+			};
+
+			outer() + globalNum;
+			`,
+			expected: 50,
+		},
+	}
+
+	runVMTests(t, tests)
+}
+
+func TestCallingFunctionsWithWrongArguments(t *testing.T) {
+	tests := []vmTestCase{
+		{
+			input: `
+			let identity = fn(a) { a; };
+			identity(42, 5);
+			`,
+			expected: `wrong number of arguments: expected=1, got=2`,
+		},
+		{
+			input:    `fn() { 1; }(1)`,
+			expected: `wrong number of arguments: expected=0, got=1`,
+		},
+		{
+			input:    `fn(a) { a; }()`,
+			expected: `wrong number of arguments: expected=1, got=0`,
+		},
+		{
+			input:    `fn(a, b) { a + b; }(1)`,
+			expected: `wrong number of arguments: expected=2, got=1`,
+		},
+	}
+
+	for _, test := range tests {
+		program := parse(test.input)
+
+		compiler := compiler.NewCompiler()
+		err := compiler.Compile(program)
+		if err != nil {
+			t.Fatalf("compiler error: %s", err)
+		}
+
+		vm := NewVM(compiler.Bytecode())
+		err = vm.Run()
+		if err == nil {
+			t.Fatalf("expected VM error but didn't receive one")
+		}
+
+		if err.Error() != test.expected {
+			t.Fatalf("wrong VM error: expected=%q, got=%q", test.expected, err)
+		}
+	}
+}
+
 func runVMTests(t *testing.T, tests []vmTestCase) {
 	t.Helper()
 

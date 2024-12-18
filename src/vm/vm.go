@@ -191,14 +191,13 @@ func (vm *VM) Run() error {
 			}
 
 		case bytecode.OpCall:
-			fn, ok := vm.stack[vm.sp-1].(*object.CompiledFunction)
-			if !ok {
-				return fmt.Errorf("attempted to call non-function object")
-			}
+			numArgs := int(bytecode.ReadUint8(instr[ip+1:]))
+			vm.currentFrame().ip += 1
 
-			frame := NewFrame(fn, vm.sp)
-			vm.pushFrame(frame)
-			vm.sp = frame.basePointer + fn.NumLocals
+			err := vm.callFunction(numArgs)
+			if err != nil {
+				return err
+			}
 		case bytecode.OpReturnValue:
 			returnValue := vm.pop()
 
@@ -475,4 +474,21 @@ func (vm *VM) executeHashMapIndex(hashmap object.Object, index object.Object) er
 	}
 
 	return vm.push(pair.Value)
+}
+
+func (vm *VM) callFunction(numArgs int) error {
+	fn, ok := vm.stack[vm.sp-1-numArgs].(*object.CompiledFunction)
+	if !ok {
+		return fmt.Errorf("attempted to call non-function object")
+	}
+
+	if numArgs != fn.NumParameters {
+		return fmt.Errorf("wrong number of arguments: expected=%d, got=%d", fn.NumParameters, numArgs)
+	}
+
+	frame := NewFrame(fn, vm.sp-numArgs)
+	vm.pushFrame(frame)
+	vm.sp = frame.basePointer + fn.NumLocals
+
+	return nil
 }

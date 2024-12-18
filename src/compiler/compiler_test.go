@@ -600,7 +600,7 @@ func TestFunctionCalls(t *testing.T) {
 			input: "fn() { 42; }()",
 			expectedInstructions: []bytecode.Instructions{
 				bytecode.Make(bytecode.OpConstant, 1),
-				bytecode.Make(bytecode.OpCall),
+				bytecode.Make(bytecode.OpCall, 0),
 				bytecode.Make(bytecode.OpPop),
 			},
 			expectedConstants: []interface{}{
@@ -620,7 +620,7 @@ func TestFunctionCalls(t *testing.T) {
 				bytecode.Make(bytecode.OpConstant, 1),
 				bytecode.Make(bytecode.OpSetGlobal, 0),
 				bytecode.Make(bytecode.OpGetGlobal, 0),
-				bytecode.Make(bytecode.OpCall),
+				bytecode.Make(bytecode.OpCall, 0),
 				bytecode.Make(bytecode.OpPop),
 			},
 			expectedConstants: []interface{}{
@@ -629,6 +629,56 @@ func TestFunctionCalls(t *testing.T) {
 					bytecode.Make(bytecode.OpConstant, 0),
 					bytecode.Make(bytecode.OpReturnValue),
 				},
+			},
+		},
+		{
+			input: `
+			let oneArg = fn(a) { a; };
+			oneArg(24);
+			`,
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpSetGlobal, 0),
+				bytecode.Make(bytecode.OpGetGlobal, 0),
+				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpCall, 1),
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{
+				[]bytecode.Instructions{
+					bytecode.Make(bytecode.OpGetLocal, 0),
+					bytecode.Make(bytecode.OpReturnValue),
+				},
+				24,
+			},
+		},
+		{
+			input: `
+			let manyArg = fn(a, b, c) { a; b; c; };
+			manyArg(24, 25, 26);
+			`,
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpSetGlobal, 0),
+				bytecode.Make(bytecode.OpGetGlobal, 0),
+				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpConstant, 2),
+				bytecode.Make(bytecode.OpConstant, 3),
+				bytecode.Make(bytecode.OpCall, 3),
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{
+				[]bytecode.Instructions{
+					bytecode.Make(bytecode.OpGetLocal, 0),
+					bytecode.Make(bytecode.OpPop),
+					bytecode.Make(bytecode.OpGetLocal, 1),
+					bytecode.Make(bytecode.OpPop),
+					bytecode.Make(bytecode.OpGetLocal, 2),
+					bytecode.Make(bytecode.OpReturnValue),
+				},
+				24,
+				25,
+				26,
 			},
 		},
 	}

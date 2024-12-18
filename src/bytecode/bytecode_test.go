@@ -14,6 +14,7 @@ func TestMake(t *testing.T) {
 		{OpAdd, []int{}, []byte{byte(OpAdd)}},
 		{OpEqual, []int{}, []byte{byte(OpEqual)}},
 		{OpMinus, []int{}, []byte{byte(OpMinus)}},
+		{OpCall, []int{2}, []byte{byte(OpCall), 2}},
 		{OpGetLocal, []int{255}, []byte{byte(OpGetLocal), 255}},
 	}
 
