@@ -162,6 +162,7 @@ func (vm *VM) Run() error {
 			vm.currentFrame().ip += 2
 
 			array := vm.buildArray(vm.sp-numElements, vm.sp)
+			vm.sp = vm.sp - numElements
 
 			err := vm.push(array)
 			if err != nil {
@@ -194,7 +195,7 @@ func (vm *VM) Run() error {
 			numArgs := int(bytecode.ReadUint8(instr[ip+1:]))
 			vm.currentFrame().ip += 1
 
-			err := vm.callFunction(numArgs)
+			err := vm.executeCall(numArgs)
 			if err != nil {
 				return err
 			}
@@ -213,6 +214,16 @@ func (vm *VM) Run() error {
 			vm.sp = frame.basePointer - 1
 
 			err := vm.push(Null)
+			if err != nil {
+				return err
+			}
+		case bytecode.OpGetBuiltIn:
+			builtInIndex := int(bytecode.ReadUint8(instr[ip+1:]))
+			vm.currentFrame().ip += 1
+
+			definition := object.BuiltIns[builtInIndex]
+
+			err := vm.push(definition.BuiltIn)
 			if err != nil {
 				return err
 			}
@@ -476,12 +487,19 @@ func (vm *VM) executeHashMapIndex(hashmap object.Object, index object.Object) er
 	return vm.push(pair.Value)
 }
 
-func (vm *VM) callFunction(numArgs int) error {
-	fn, ok := vm.stack[vm.sp-1-numArgs].(*object.CompiledFunction)
-	if !ok {
-		return fmt.Errorf("attempted to call non-function object")
+func (vm *VM) executeCall(numArgs int) error {
+	callee := vm.stack[vm.sp-1-numArgs]
+	switch callee := callee.(type) {
+	case *object.CompiledFunction:
+		return vm.callFunction(callee, numArgs)
+	case *object.BuiltIn:
+		return vm.callBuiltIn(callee, numArgs)
+	default:
+		return fmt.Errorf("attempted to call non-function and non-builtin")
 	}
+}
 
+func (vm *VM) callFunction(fn *object.CompiledFunction, numArgs int) error {
 	if numArgs != fn.NumParameters {
 		return fmt.Errorf("wrong number of arguments: expected=%d, got=%d", fn.NumParameters, numArgs)
 	}
@@ -489,6 +507,21 @@ func (vm *VM) callFunction(numArgs int) error {
 	frame := NewFrame(fn, vm.sp-numArgs)
 	vm.pushFrame(frame)
 	vm.sp = frame.basePointer + fn.NumLocals
+
+	return nil
+}
+
+func (vm *VM) callBuiltIn(builtin *object.BuiltIn, numArgs int) error {
+	args := vm.stack[vm.sp-numArgs : vm.sp]
+
+	result := builtin.Fn(args...)
+	vm.sp = vm.sp - numArgs - 1
+
+	if result != nil {
+		vm.push(result)
+	} else {
+		vm.push(Null)
+	}
 
 	return nil
 }
