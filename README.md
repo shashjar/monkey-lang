@@ -13,3 +13,7 @@ Monkey is a programming language designed to help teach programming language the
 ![Monkey Logo](./docs/assets/monkey-lang.png)
 
 Read more about Monkey at the [official site](https://monkeylang.org/).
+
+## Binary
+
+You can generate and interact with the Monkey binary on the REPL via `go build -o monkey && ./monkey`.
