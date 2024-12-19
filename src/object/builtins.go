@@ -7,12 +7,12 @@ var BuiltIns = []struct {
 	BuiltIn *BuiltIn
 }{
 	{
-		"puts",
-		puts,
-	},
-	{
 		"len",
 		length,
+	},
+	{
+		"puts",
+		puts,
 	},
 	{
 		"first",
@@ -45,20 +45,6 @@ func newError(format string, a ...interface{}) *Error {
 	return &Error{Message: fmt.Sprintf(format, a...)}
 }
 
-var puts = &BuiltIn{
-	Fn: func(args ...Object) Object {
-		if len(args) == 0 {
-			return newError("need at least one argument provided to puts")
-		}
-
-		for _, arg := range args {
-			fmt.Println(arg.Inspect())
-		}
-
-		return nil
-	},
-}
-
 var length = &BuiltIn{
 	Fn: func(args ...Object) Object {
 		if len(args) != 1 {
@@ -73,6 +59,20 @@ var length = &BuiltIn{
 		default:
 			return newError("argument to `len` is not supported, got %s", arg.Type())
 		}
+	},
+}
+
+var puts = &BuiltIn{
+	Fn: func(args ...Object) Object {
+		if len(args) == 0 {
+			return newError("need at least one argument provided to puts")
+		}
+
+		for _, arg := range args {
+			fmt.Println(arg.Inspect())
+		}
+
+		return nil
 	},
 }
 
