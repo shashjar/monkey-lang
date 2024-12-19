@@ -4,8 +4,9 @@ package compiler
 type SymbolScope string
 
 const (
-	GlobalScope SymbolScope = "GLOBAL"
-	LocalScope  SymbolScope = "LOCAL"
+	GlobalScope  SymbolScope = "GLOBAL"
+	LocalScope   SymbolScope = "LOCAL"
+	BuiltInScope SymbolScope = "BUILTIN"
 )
 
 // Represents a symbol stored in the symbol table, associated with some scope.
@@ -45,6 +46,12 @@ func (st *SymbolTable) Define(name string) Symbol {
 
 	st.store[name] = sym
 	st.numDefinitions += 1
+	return sym
+}
+
+func (st *SymbolTable) DefineBuiltIn(index int, name string) Symbol {
+	sym := Symbol{Name: name, Scope: BuiltInScope, Index: index}
+	st.store[name] = sym
 	return sym
 }
 

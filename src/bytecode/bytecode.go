@@ -43,6 +43,7 @@ const (
 	OpCall
 	OpReturnValue
 	OpReturn
+	OpGetBuiltIn
 )
 
 // Represents a set of instructions as a slice of bytes.
@@ -125,6 +126,7 @@ var definitions = map[Opcode]*Definition{
 	OpCall:        {"OpCall", []int{1}},
 	OpReturnValue: {"OpReturnValue", []int{}},
 	OpReturn:      {"OpReturn", []int{}},
+	OpGetBuiltIn:  {"OpGetBuiltIn", []int{1}},
 }
 
 func LookUp(op byte) (*Definition, error) {

@@ -760,6 +760,48 @@ func TestLetStatementScopes(t *testing.T) {
 	runCompilerTests(t, tests)
 }
 
+func TestBuiltIns(t *testing.T) {
+	tests := []compilerTestCase{
+		{
+			input: `
+			len([]);
+			append([], 1);
+			`,
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpGetBuiltIn, 0),
+				bytecode.Make(bytecode.OpArray, 0),
+				bytecode.Make(bytecode.OpCall, 1),
+				bytecode.Make(bytecode.OpPop),
+				bytecode.Make(bytecode.OpGetBuiltIn, 5),
+				bytecode.Make(bytecode.OpArray, 0),
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpCall, 2),
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{
+				1,
+			},
+		},
+		{
+			input: `fn() { len([]); };`,
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{
+				[]bytecode.Instructions{
+					bytecode.Make(bytecode.OpGetBuiltIn, 0),
+					bytecode.Make(bytecode.OpArray, 0),
+					bytecode.Make(bytecode.OpCall, 1),
+					bytecode.Make(bytecode.OpReturnValue),
+				},
+			},
+		},
+	}
+
+	runCompilerTests(t, tests)
+}
+
 func parse(input string) *ast.Program {
 	l := lexer.NewLexer(input)
 	p := parser.NewParser(l)

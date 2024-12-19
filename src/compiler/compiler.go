@@ -44,13 +44,18 @@ func NewCompiler() *Compiler {
 		previousLastInstruction: EmittedInstruction{},
 	}
 
+	symbolTable := NewSymbolTable()
+	for i, builtIn := range object.BuiltIns {
+		symbolTable.DefineBuiltIn(i, builtIn.Name)
+	}
+
 	return &Compiler{
 		constants: []object.Object{},
 
 		scopes:     []CompilationScope{mainScope},
 		scopeIndex: 0,
 
-		symbolTable: NewSymbolTable(),
+		symbolTable: symbolTable,
 	}
 }
 
@@ -105,10 +110,13 @@ func (c *Compiler) Compile(node ast.Node) error {
 			return fmt.Errorf("undefined variable: %s", node.Value) // Compile-time error
 		}
 
-		if symbol.Scope == GlobalScope {
+		switch symbol.Scope {
+		case GlobalScope:
 			c.emit(bytecode.OpGetGlobal, symbol.Index)
-		} else {
+		case LocalScope:
 			c.emit(bytecode.OpGetLocal, symbol.Index)
+		case BuiltInScope:
+			c.emit(bytecode.OpGetBuiltIn, symbol.Index)
 		}
 
 	case *ast.PrefixExpression:
