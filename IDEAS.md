@@ -13,6 +13,10 @@ TODO: this is a living document storing some ideas for extensions & improvements
 
 - Rely on an intermediate representation (IR) between the AST and bytecode, potentially to improve performance or simplify operations
 
+## Benchmarking
+
+- Can potentially implement a different/additional type of benchmark for comparing the interpreter to compiler/VM. The `benchmark` directory currently only uses Fibonacci to benchmark the two engines against each other.
+
 ## Housekeeping
 
 - In the AST modification functionality (`ast/modify.go`), implement thorough error-checking

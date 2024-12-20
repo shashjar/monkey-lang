@@ -17,3 +17,15 @@ Read more about Monkey at the [official site](https://monkeylang.org/).
 ## Binary
 
 You can generate and interact with the Monkey binary on the REPL via `go build -o monkey && ./monkey`.
+
+## Benchmarking
+
+The `benchmark/` directory implements a Fibonacci benchmark of the interpreter & compiler/VM engines. To generate the benchmarking binary:
+
+`go build -o fibonacci-benchmark ./benchmark`
+
+To run the benchmark binary on each engine:
+
+`./fibonacci-benchmark -engine=eval`
+
+`./fibonacci-benchmark -engine=vm`
