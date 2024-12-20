@@ -929,6 +929,75 @@ func TestClosures(t *testing.T) {
 	runCompilerTests(t, tests)
 }
 
+func TestRecursiveFunctions(t *testing.T) {
+	tests := []compilerTestCase{
+		{
+			input: `
+			let countDown = fn(x) { countDown(x - 1); };
+			countDown(1);
+			`,
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpClosure, 1, 0),
+				bytecode.Make(bytecode.OpSetGlobal, 0),
+				bytecode.Make(bytecode.OpGetGlobal, 0),
+				bytecode.Make(bytecode.OpConstant, 2),
+				bytecode.Make(bytecode.OpCall, 1),
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{
+				1,
+				[]bytecode.Instructions{
+					bytecode.Make(bytecode.OpCurrentClosure),
+					bytecode.Make(bytecode.OpGetLocal, 0),
+					bytecode.Make(bytecode.OpConstant, 0),
+					bytecode.Make(bytecode.OpSub),
+					bytecode.Make(bytecode.OpCall, 1),
+					bytecode.Make(bytecode.OpReturnValue),
+				},
+				1,
+			},
+		},
+		{
+			input: `
+			let wrapper = fn() {
+				let countDown = fn(x) { countDown(x - 1); };
+				countDown(1);
+			};
+			wrapper();
+			`,
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpClosure, 3, 0),
+				bytecode.Make(bytecode.OpSetGlobal, 0),
+				bytecode.Make(bytecode.OpGetGlobal, 0),
+				bytecode.Make(bytecode.OpCall, 0),
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{
+				1,
+				[]bytecode.Instructions{
+					bytecode.Make(bytecode.OpCurrentClosure),
+					bytecode.Make(bytecode.OpGetLocal, 0),
+					bytecode.Make(bytecode.OpConstant, 0),
+					bytecode.Make(bytecode.OpSub),
+					bytecode.Make(bytecode.OpCall, 1),
+					bytecode.Make(bytecode.OpReturnValue),
+				},
+				1,
+				[]bytecode.Instructions{
+					bytecode.Make(bytecode.OpClosure, 1, 0),
+					bytecode.Make(bytecode.OpSetLocal, 0),
+					bytecode.Make(bytecode.OpGetLocal, 0),
+					bytecode.Make(bytecode.OpConstant, 2),
+					bytecode.Make(bytecode.OpCall, 1),
+					bytecode.Make(bytecode.OpReturnValue),
+				},
+			},
+		},
+	}
+
+	runCompilerTests(t, tests)
+}
+
 func parse(input string) *ast.Program {
 	l := lexer.NewLexer(input)
 	p := parser.NewParser(l)

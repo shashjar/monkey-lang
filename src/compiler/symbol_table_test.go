@@ -150,7 +150,7 @@ func TestResolveNestedLocal(t *testing.T) {
 	}
 }
 
-func TestDefineResolveBuiltIns(t *testing.T) {
+func TestDefineAndResolveBuiltIns(t *testing.T) {
 	global := NewSymbolTable()
 	firstLocal := NewEnclosedSymbolTable(global)
 	secondLocal := NewEnclosedSymbolTable(firstLocal)
@@ -286,5 +286,21 @@ func TestResolveUnresolvableFree(t *testing.T) {
 		if ok {
 			t.Errorf("name %s resolved, but was expected not to", name)
 		}
+	}
+}
+
+func TestDefineAndResolveFunctionName(t *testing.T) {
+	global := NewSymbolTable()
+	global.DefineFunctionName("a")
+
+	expected := Symbol{Name: "a", Scope: FunctionScope, Index: 0}
+
+	result, ok := global.Resolve(expected.Name)
+	if !ok {
+		t.Fatalf("function name %s did not resolve", expected.Name)
+	}
+
+	if result != expected {
+		t.Errorf("expected %s to resolve to %+v, got=%+v", expected.Name, expected, result)
 	}
 }

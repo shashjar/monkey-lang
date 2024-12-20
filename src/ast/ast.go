@@ -290,6 +290,7 @@ func (ie *IfExpression) String() string {
 // Represents a function literal in the form "fn <parameters> <block statement>".
 type FunctionLiteral struct {
 	Token      token.Token // the 'fn' token
+	Name       string
 	Parameters []*Identifier
 	Body       *BlockStatement
 }
@@ -309,6 +310,9 @@ func (fl *FunctionLiteral) String() string {
 	}
 
 	out.WriteString(fl.TokenLiteral())
+	if fl.Name != "" {
+		out.WriteString(fmt.Sprintf("<%s>", fl.Name))
+	}
 	out.WriteString("(")
 	out.WriteString(strings.Join(params, ", "))
 	out.WriteString(") ")
