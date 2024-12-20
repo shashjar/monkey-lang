@@ -802,6 +802,133 @@ func TestBuiltIns(t *testing.T) {
 	runCompilerTests(t, tests)
 }
 
+func TestClosures(t *testing.T) {
+	tests := []compilerTestCase{
+		{
+			input: `
+			fn(a) {
+				fn(b) {
+					a + b;
+				}
+			}
+			`,
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpClosure, 1, 0),
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{
+				[]bytecode.Instructions{
+					bytecode.Make(bytecode.OpGetFreeVar, 0),
+					bytecode.Make(bytecode.OpGetLocal, 0),
+					bytecode.Make(bytecode.OpAdd),
+					bytecode.Make(bytecode.OpReturnValue),
+				},
+				[]bytecode.Instructions{
+					bytecode.Make(bytecode.OpGetLocal, 0),
+					bytecode.Make(bytecode.OpClosure, 0, 1),
+					bytecode.Make(bytecode.OpReturnValue),
+				},
+			},
+		},
+		{
+			input: `
+			fn(a) {
+				fn(b) {
+					fn(c) {
+						a + b + c;
+					}
+				}
+			}
+			`,
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpClosure, 2, 0),
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{
+				[]bytecode.Instructions{
+					bytecode.Make(bytecode.OpGetFreeVar, 0),
+					bytecode.Make(bytecode.OpGetFreeVar, 1),
+					bytecode.Make(bytecode.OpAdd),
+					bytecode.Make(bytecode.OpGetLocal, 0),
+					bytecode.Make(bytecode.OpAdd),
+					bytecode.Make(bytecode.OpReturnValue),
+				},
+				[]bytecode.Instructions{
+					bytecode.Make(bytecode.OpGetFreeVar, 0),
+					bytecode.Make(bytecode.OpGetLocal, 0),
+					bytecode.Make(bytecode.OpClosure, 0, 2),
+					bytecode.Make(bytecode.OpReturnValue),
+				},
+				[]bytecode.Instructions{
+					bytecode.Make(bytecode.OpGetLocal, 0),
+					bytecode.Make(bytecode.OpClosure, 1, 1),
+					bytecode.Make(bytecode.OpReturnValue),
+				},
+			},
+		},
+		{
+			input: `
+			let global = 55;
+
+			fn() {
+				let a = 66;
+
+				fn() {
+					let b = 77;
+
+					fn() {
+						let c = 88;
+						
+						return global + a + b + c;
+					}
+				}
+			}
+			`,
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpSetGlobal, 0),
+				bytecode.Make(bytecode.OpClosure, 6, 0),
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{
+				55,
+				66,
+				77,
+				88,
+				[]bytecode.Instructions{
+					bytecode.Make(bytecode.OpConstant, 3),
+					bytecode.Make(bytecode.OpSetLocal, 0),
+					bytecode.Make(bytecode.OpGetGlobal, 0),
+					bytecode.Make(bytecode.OpGetFreeVar, 0),
+					bytecode.Make(bytecode.OpAdd),
+					bytecode.Make(bytecode.OpGetFreeVar, 1),
+					bytecode.Make(bytecode.OpAdd),
+					bytecode.Make(bytecode.OpGetLocal, 0),
+					bytecode.Make(bytecode.OpAdd),
+					bytecode.Make(bytecode.OpReturnValue),
+				},
+				[]bytecode.Instructions{
+					bytecode.Make(bytecode.OpConstant, 2),
+					bytecode.Make(bytecode.OpSetLocal, 0),
+					bytecode.Make(bytecode.OpGetFreeVar, 0),
+					bytecode.Make(bytecode.OpGetLocal, 0),
+					bytecode.Make(bytecode.OpClosure, 4, 2),
+					bytecode.Make(bytecode.OpReturnValue),
+				},
+				[]bytecode.Instructions{
+					bytecode.Make(bytecode.OpConstant, 1),
+					bytecode.Make(bytecode.OpSetLocal, 0),
+					bytecode.Make(bytecode.OpGetLocal, 0),
+					bytecode.Make(bytecode.OpClosure, 5, 1),
+					bytecode.Make(bytecode.OpReturnValue),
+				},
+			},
+		},
+	}
+
+	runCompilerTests(t, tests)
+}
+
 func parse(input string) *ast.Program {
 	l := lexer.NewLexer(input)
 	p := parser.NewParser(l)

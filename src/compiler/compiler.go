@@ -110,14 +110,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 			return fmt.Errorf("undefined variable: %s", node.Value) // Compile-time error
 		}
 
-		switch symbol.Scope {
-		case GlobalScope:
-			c.emit(bytecode.OpGetGlobal, symbol.Index)
-		case LocalScope:
-			c.emit(bytecode.OpGetLocal, symbol.Index)
-		case BuiltInScope:
-			c.emit(bytecode.OpGetBuiltIn, symbol.Index)
-		}
+		c.loadSymbol(symbol)
 
 	case *ast.PrefixExpression:
 		err := c.Compile(node.Right)
@@ -298,8 +291,13 @@ func (c *Compiler) Compile(node ast.Node) error {
 			c.emit(bytecode.OpReturn)
 		}
 
+		freeSymbols := c.symbolTable.FreeSymbols
 		numLocals := c.symbolTable.numDefinitions
 		instructions := c.leaveScope()
+
+		for _, fs := range freeSymbols {
+			c.loadSymbol(fs)
+		}
 
 		compiledFunction := &object.CompiledFunction{
 			Instructions:  instructions,
@@ -307,7 +305,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 			NumParameters: len(node.Parameters),
 		}
 		fnIndex := c.addConstant(compiledFunction)
-		c.emit(bytecode.OpClosure, fnIndex, 0)
+		c.emit(bytecode.OpClosure, fnIndex, len(freeSymbols))
 
 	case *ast.ReturnStatement:
 		err := c.Compile(node.ReturnValue)
@@ -436,4 +434,17 @@ func (c *Compiler) leaveScope() bytecode.Instructions {
 	c.symbolTable = c.symbolTable.outer
 
 	return instructions
+}
+
+func (c *Compiler) loadSymbol(symbol Symbol) {
+	switch symbol.Scope {
+	case GlobalScope:
+		c.emit(bytecode.OpGetGlobal, symbol.Index)
+	case LocalScope:
+		c.emit(bytecode.OpGetLocal, symbol.Index)
+	case FreeScope:
+		c.emit(bytecode.OpGetFreeVar, symbol.Index)
+	case BuiltInScope:
+		c.emit(bytecode.OpGetBuiltIn, symbol.Index)
+	}
 }

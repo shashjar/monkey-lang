@@ -45,6 +45,7 @@ const (
 	OpReturn
 	OpGetBuiltIn
 	OpClosure
+	OpGetFreeVar
 )
 
 // Represents a set of instructions as a slice of bytes.
@@ -131,6 +132,7 @@ var definitions = map[Opcode]*Definition{
 	OpReturn:      {"OpReturn", []int{}},
 	OpGetBuiltIn:  {"OpGetBuiltIn", []int{1}},
 	OpClosure:     {"OpClosure", []int{2, 1}}, // First operand: constant index of *object.CompiledFunction. Second operand: number of free variables in the closure.
+	OpGetFreeVar:  {"OpGetFreeVar", []int{1}},
 }
 
 func LookUp(op byte) (*Definition, error) {
