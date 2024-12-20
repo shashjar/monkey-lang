@@ -306,7 +306,8 @@ func (c *Compiler) Compile(node ast.Node) error {
 			NumLocals:     numLocals,
 			NumParameters: len(node.Parameters),
 		}
-		c.emit(bytecode.OpConstant, c.addConstant(compiledFunction))
+		fnIndex := c.addConstant(compiledFunction)
+		c.emit(bytecode.OpClosure, fnIndex, 0)
 
 	case *ast.ReturnStatement:
 		err := c.Compile(node.ReturnValue)

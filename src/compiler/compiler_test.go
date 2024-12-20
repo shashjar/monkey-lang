@@ -529,7 +529,7 @@ func TestFunctions(t *testing.T) {
 		{
 			input: "fn() { }",
 			expectedInstructions: []bytecode.Instructions{
-				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpClosure, 0, 0),
 				bytecode.Make(bytecode.OpPop),
 			},
 			expectedConstants: []interface{}{
@@ -541,7 +541,7 @@ func TestFunctions(t *testing.T) {
 		{
 			input: "fn() { return 5 + 10; }",
 			expectedInstructions: []bytecode.Instructions{
-				bytecode.Make(bytecode.OpConstant, 2),
+				bytecode.Make(bytecode.OpClosure, 2, 0),
 				bytecode.Make(bytecode.OpPop),
 			},
 			expectedConstants: []interface{}{
@@ -558,7 +558,7 @@ func TestFunctions(t *testing.T) {
 		{
 			input: "fn() { 5 + 10; }",
 			expectedInstructions: []bytecode.Instructions{
-				bytecode.Make(bytecode.OpConstant, 2),
+				bytecode.Make(bytecode.OpClosure, 2, 0),
 				bytecode.Make(bytecode.OpPop),
 			},
 			expectedConstants: []interface{}{
@@ -575,7 +575,7 @@ func TestFunctions(t *testing.T) {
 		{
 			input: "fn() { 1; 2 }",
 			expectedInstructions: []bytecode.Instructions{
-				bytecode.Make(bytecode.OpConstant, 2),
+				bytecode.Make(bytecode.OpClosure, 2, 0),
 				bytecode.Make(bytecode.OpPop),
 			},
 			expectedConstants: []interface{}{
@@ -599,7 +599,7 @@ func TestFunctionCalls(t *testing.T) {
 		{
 			input: "fn() { 42; }()",
 			expectedInstructions: []bytecode.Instructions{
-				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpClosure, 1, 0),
 				bytecode.Make(bytecode.OpCall, 0),
 				bytecode.Make(bytecode.OpPop),
 			},
@@ -617,7 +617,7 @@ func TestFunctionCalls(t *testing.T) {
 			noArg();
 			`,
 			expectedInstructions: []bytecode.Instructions{
-				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpClosure, 1, 0),
 				bytecode.Make(bytecode.OpSetGlobal, 0),
 				bytecode.Make(bytecode.OpGetGlobal, 0),
 				bytecode.Make(bytecode.OpCall, 0),
@@ -637,7 +637,7 @@ func TestFunctionCalls(t *testing.T) {
 			oneArg(24);
 			`,
 			expectedInstructions: []bytecode.Instructions{
-				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpClosure, 0, 0),
 				bytecode.Make(bytecode.OpSetGlobal, 0),
 				bytecode.Make(bytecode.OpGetGlobal, 0),
 				bytecode.Make(bytecode.OpConstant, 1),
@@ -658,7 +658,7 @@ func TestFunctionCalls(t *testing.T) {
 			manyArg(24, 25, 26);
 			`,
 			expectedInstructions: []bytecode.Instructions{
-				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpClosure, 0, 0),
 				bytecode.Make(bytecode.OpSetGlobal, 0),
 				bytecode.Make(bytecode.OpGetGlobal, 0),
 				bytecode.Make(bytecode.OpConstant, 1),
@@ -696,7 +696,7 @@ func TestLetStatementScopes(t *testing.T) {
 			expectedInstructions: []bytecode.Instructions{
 				bytecode.Make(bytecode.OpConstant, 0),
 				bytecode.Make(bytecode.OpSetGlobal, 0),
-				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpClosure, 1, 0),
 				bytecode.Make(bytecode.OpPop),
 			},
 			expectedConstants: []interface{}{
@@ -715,7 +715,7 @@ func TestLetStatementScopes(t *testing.T) {
 			}
 			`,
 			expectedInstructions: []bytecode.Instructions{
-				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpClosure, 1, 0),
 				bytecode.Make(bytecode.OpPop),
 			},
 			expectedConstants: []interface{}{
@@ -737,7 +737,7 @@ func TestLetStatementScopes(t *testing.T) {
 			}
 			`,
 			expectedInstructions: []bytecode.Instructions{
-				bytecode.Make(bytecode.OpConstant, 2),
+				bytecode.Make(bytecode.OpClosure, 2, 0),
 				bytecode.Make(bytecode.OpPop),
 			},
 			expectedConstants: []interface{}{
@@ -785,7 +785,7 @@ func TestBuiltIns(t *testing.T) {
 		{
 			input: `fn() { len([]); };`,
 			expectedInstructions: []bytecode.Instructions{
-				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpClosure, 0, 0),
 				bytecode.Make(bytecode.OpPop),
 			},
 			expectedConstants: []interface{}{

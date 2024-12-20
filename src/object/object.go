@@ -23,6 +23,7 @@ const (
 	FUNCTION_OBJ          = "FUNCTION"
 	COMPILED_FUNCTION_OBJ = "COMPILED_FUNCTION_OBJ"
 	BUILTIN_OBJ           = "BUILTIN"
+	CLOSURE_OBJ           = "CLOSURE"
 	QUOTE_OBJ             = "QUOTE"
 	MACRO_OBJ             = "MACRO"
 	ERROR_OBJ             = "ERROR"
@@ -242,6 +243,20 @@ func (bi *BuiltIn) Type() ObjectType {
 
 func (bi *BuiltIn) Inspect() string {
 	return "built-in function"
+}
+
+// Represents a closure, which consists of a compiled function and some free variables that it carries around.
+type Closure struct {
+	Fn       *CompiledFunction
+	FreeVars []Object
+}
+
+func (c *Closure) Type() ObjectType {
+	return CLOSURE_OBJ
+}
+
+func (c *Closure) Inspect() string {
+	return fmt.Sprintf("Closure[%p]", c)
 }
 
 // Represents some code (an AST node) that is quoted & not yet evaluated.

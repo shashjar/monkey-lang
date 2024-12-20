@@ -44,6 +44,7 @@ const (
 	OpReturnValue
 	OpReturn
 	OpGetBuiltIn
+	OpClosure
 )
 
 // Represents a set of instructions as a slice of bytes.
@@ -80,6 +81,8 @@ func (instr Instructions) fmtInstruction(def *Definition, operands []int) string
 		return def.Name
 	case 1:
 		return fmt.Sprintf("%s %d", def.Name, operands[0])
+	case 2:
+		return fmt.Sprintf("%s %d %d", def.Name, operands[0], operands[1])
 	}
 
 	return fmt.Sprintf("ERROR: unhandled operandCount for %s\n", def.Name)
@@ -127,6 +130,7 @@ var definitions = map[Opcode]*Definition{
 	OpReturnValue: {"OpReturnValue", []int{}},
 	OpReturn:      {"OpReturn", []int{}},
 	OpGetBuiltIn:  {"OpGetBuiltIn", []int{1}},
+	OpClosure:     {"OpClosure", []int{2, 1}}, // First operand: constant index of *object.CompiledFunction. Second operand: number of free variables in the closure.
 }
 
 func LookUp(op byte) (*Definition, error) {
