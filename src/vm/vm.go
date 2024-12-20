@@ -230,10 +230,19 @@ func (vm *VM) Run() error {
 			}
 		case bytecode.OpClosure:
 			constIndex := int(bytecode.ReadUint16(instr[ip+1:]))
-			// numFreeVars := bytecode.ReadUint8(instr[ip+3:])
+			numFreeVars := int(bytecode.ReadUint8(instr[ip+3:]))
 			vm.currentFrame().ip += 3
 
-			err := vm.pushClosure(constIndex)
+			err := vm.pushClosure(constIndex, numFreeVars)
+			if err != nil {
+				return err
+			}
+		case bytecode.OpGetFreeVar:
+			freeVarIndex := int(bytecode.ReadUint8(instr[ip+1:]))
+			vm.currentFrame().ip += 1
+
+			currentClosure := vm.currentFrame().cl
+			err := vm.push(currentClosure.FreeVars[freeVarIndex])
 			if err != nil {
 				return err
 			}
@@ -268,14 +277,20 @@ func (vm *VM) push(obj object.Object) error {
 	return nil
 }
 
-func (vm *VM) pushClosure(constIndex int) error {
+func (vm *VM) pushClosure(constIndex int, numFreeVars int) error {
 	constant := vm.constants[constIndex]
 	function, ok := constant.(*object.CompiledFunction)
 	if !ok {
 		return fmt.Errorf("not a function: %+v", function)
 	}
 
-	closure := &object.Closure{Fn: function}
+	freeVars := make([]object.Object, numFreeVars)
+	for i := 0; i < numFreeVars; i++ {
+		freeVars[i] = vm.stack[vm.sp-numFreeVars+i]
+	}
+	vm.sp = vm.sp - numFreeVars
+
+	closure := &object.Closure{Fn: function, FreeVars: freeVars}
 	return vm.push(closure)
 }
 
