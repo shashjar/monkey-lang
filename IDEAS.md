@@ -5,7 +5,7 @@ This is a living document storing some ideas for extensions & improvements that 
 ## Language Features
 
 - [ ] The lexer (`lexer/lexer.go`) currently only supports ASCII characters. Maybe extend this to Unicode (see p. 19-20 in WAIIG).
-- [ ] Add support for more language built-ins (`evaluator/builtins.go`), e.g. list comprehensions from Python - map, sum, filter, etc.
+- [ ] Support floating-point numbers (currently only integers are supported)
 - [ ] Add support for `else if` within conditional expressions
 - [ ] Support `const` binding declarations in addition to `let`
 - [ ] Boolean operations (`&&`, `||`)
@@ -13,10 +13,17 @@ This is a living document storing some ideas for extensions & improvements that 
 - [ ] Additional comparison operators (`>=` & `<=`)
 - [ ] String operations: split, comparison with `==` & `!=`
 - [ ] Array operations: join, `+` operator
+- [ ] Add support for `switch` statements
+
+# Builtin Functions
+
+- [ ] Add support for hashmaps in the `len` builtin function
+- [ ] Add support for more language built-ins (`evaluator/builtins.go`), e.g. list comprehensions from Python - map, sum, filter, etc.
 
 ## REPL Features
 
 - [ ] When opening a REPL, ability to select interpreter/evaluator or compiler/VM engine
+- [ ] Implement better printing of functions to the console (currently looks like: `Closure[0x140000ce160]`)
 - [ ] Ability to navigate back and forth in REPL input with arrow keys & do multi-line input (look into [readline package](https://github.com/chzyer/readline))
 
 ## Additional Features
