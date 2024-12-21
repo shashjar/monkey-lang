@@ -45,17 +45,51 @@ To run the benchmark binary on each engine:
 ./fibonacci-benchmark -engine=vm
 ```
 
+The tree-walking interpreter/evaluator engine took 9.004286 seconds for completion on average. The compiler/VM engine took 2.879004 seconds for completion on average, so it is roughly 3.13 times faster.
+
 ## Implementation Details
 
-### Interpreter
+## Interpreter & Evaluator
 
-### Compiler & Virtual Machine
+The first implementation of Monkey relies on a tree-walking interpreter. In order, the stages are reading input, lexing (tokenization), parsing into an abstract syntax tree (AST), evaluation by traversing the nodes of the AST, and printing output.
+
+## Compiler & Virtual Machine
+
+The more advanced implementation of Monkey relies on a compiler & virtual machine. In order, the stages are reading input, lexing (tokenization), parsing into an AST, traversing the AST to compile it into a flat series of bytecode instructions, running the VM on the bytecode, and printing output. 
 
 ## Language Documentation
 
 ### Table of Contents
 
+- [Summary][#summary]
+- [Integers \& Arithmetic Operations](#integers--arithmetic-operations)
+- [Booleans](#booleans)
+- [Comparison Operators](#comparison-operators)
+- [Conditionals](#conditionals)
+- [Bindings](#bindings)
+- [Strings](#strings)
+- [Arrays](#arrays)
+- [Hashmaps](#hashmaps)
+- [Functions](#functions)
+- [Built-In Functions](#built-in-functions)
+  - [len](#len)
+  - [puts](#puts)
+  - [first](#first)
+  - [last](#last)
+  - [rest](#rest)
+  - [append](#append)
+
 ### Summary
+
+- Syntax inspired by JavaScript, Python, and C
+- Primitives: integers, booleans, strings
+- Arrays, hashmaps
+- Prefix-, infix-, and index operators
+- Global & local bindings
+- First-class & higher-order functions
+- Built-in functions
+- Closures
+- Recursion
 
 ### Integers & Arithmetic Operations
 

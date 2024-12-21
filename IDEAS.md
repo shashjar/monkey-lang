@@ -12,6 +12,7 @@ This is a living document storing some ideas for extensions & improvements that 
 - [ ] Modulo operator (`%`)
 - [ ] Additional comparison operators (`>=` & `<=`)
 - [ ] String operations: split, comparison with `==` & `!=`
+- [ ] Add support for macros into the compiler/VM engine (supported in interpreter but not yet compiler/VM)
 - [ ] Array operations: join, `+` operator
 - [ ] Add support for `switch` statements
 
