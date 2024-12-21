@@ -44,5 +44,5 @@ This is a living document storing some ideas for extensions & improvements that 
 
 ## Housekeeping
 
-- [ ] Write [README](README.md) documenting language features & implementation
+- [ ] Keep [README](README.md) documenting language features & implementation up-to-date
 - [ ] In the AST modification functionality (`ast/modify.go`), implement thorough error-checking
