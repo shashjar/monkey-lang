@@ -21,9 +21,7 @@ To use the Monkey REPL, run:
 ```
 go build -o monkey && ./monkey
 ```
-
 <img src="./docs/assets/monkey-usage.png" alt="Monkey Usage" style="box-shadow: 5px 5px 15px rgba(0,0,0,0.3); border-radius: 10px;">
-
 By default, this runs the Monkey compiler & virtual machine, with entrypoint `main.go` into `repl/repl.go`. The `StartInterpreter` function can be used to instead spin up the interpreter-driven REPL.
 
 ## Benchmarks
@@ -60,7 +58,7 @@ The more advanced implementation of Monkey relies on a compiler & virtual machin
 
 ### Table of Contents
 
-- [Summary][#summary]
+- [Summary](#summary)
 - [Integers \& Arithmetic Operations](#integers--arithmetic-operations)
 - [Booleans](#booleans)
 - [Comparison Operators](#comparison-operators)
@@ -71,12 +69,12 @@ The more advanced implementation of Monkey relies on a compiler & virtual machin
 - [Hashmaps](#hashmaps)
 - [Functions](#functions)
 - [Built-In Functions](#built-in-functions)
-  - [len](#len)
-  - [puts](#puts)
-  - [first](#first)
-  - [last](#last)
-  - [rest](#rest)
-  - [append](#append)
+    - [len](#len)
+    - [puts](#puts)
+    - [first](#first)
+    - [last](#last)
+    - [rest](#rest)
+    - [append](#append)
 
 ### Summary
 
