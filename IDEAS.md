@@ -11,10 +11,11 @@ This is a living document storing some ideas for extensions & improvements that 
 - [ ] Modulo operator (`%`)
 - [ ] Additional comparison operators (`>=` & `<=`)
 - [ ] String operations: split, comparison with `==` & `!=`
+- [ ] Array operations: join, `+` operator
+- [ ] Implement loops: `for` and/or `while`
+- [ ] Add support for `switch` statements
 - [ ] The lexer (`lexer/lexer.go`) currently only supports ASCII characters. Maybe extend this to Unicode (see p. 19-20 in WAIIG).
 - [ ] Add support for macros into the compiler/VM engine (supported in interpreter but not yet compiler/VM)
-- [ ] Array operations: join, `+` operator
-- [ ] Add support for `switch` statements
 
 # Builtin Functions
 
@@ -40,7 +41,7 @@ This is a living document storing some ideas for extensions & improvements that 
 
 ## Benchmarking
 
-- [ ] Can potentially implement a different/additional type of benchmark for comparing the interpreter/evaluator to compiler/VM. The `benchmark` directory currently only uses Fibonacci to benchmark the two engines against each other.
+- [ ] Can potentially implement additional benchmarks for comparing the interpreter/evaluator to compiler/VM: arithmetic operations, string concatenation, Sieve of Eratosthenes, etc.
 
 ## Housekeeping
 

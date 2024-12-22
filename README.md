@@ -34,20 +34,20 @@ Note that the features listed in this document are all supported in the compiler
 
 ## Benchmarks
 
-The `benchmark/` directory implements a Fibonacci benchmark of the interpreter/evaluator & compiler/VM engines. To generate the benchmarking binary:
+The `benchmark/` directory implements some benchmarks of the interpreter/evaluator & compiler/VM engines. To generate the benchmarking binary:
 
 ```
-go build -o fibonacci-benchmark ./benchmark
+go build -o benchmark-binary ./benchmark
 ```
 
 To run the benchmark binary on each engine:
 
 ```
-./fibonacci-benchmark -engine=eval
+./benchmark-binary -engine=eval
 ```
 
 ```
-./fibonacci-benchmark -engine=vm
+./benchmark-binary -engine=vm
 ```
 
 The tree-walking interpreter/evaluator engine took 9.004286 seconds for completion on average. The compiler/VM engine took 2.879004 seconds for completion on average, so it is roughly 3.13 times faster.
