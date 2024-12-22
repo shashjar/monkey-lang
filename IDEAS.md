@@ -23,7 +23,7 @@ This is a living document storing some ideas for extensions & improvements that 
 
 ## REPL Features
 
-- [ ] When opening a REPL, ability to select interpreter/evaluator or compiler/VM engine
+- [x] When opening a REPL, ability to select interpreter/evaluator or compiler/VM engine
 - [ ] Implement better printing of functions to the console (currently looks like: `Closure[0x140000ce160]`)
 - [ ] Ability to navigate back and forth in REPL input with arrow keys & do multi-line input (look into [readline package](https://github.com/chzyer/readline))
 

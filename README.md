@@ -24,7 +24,13 @@ go build -o monkey && ./monkey
 
 <img src="./docs/assets/monkey-usage.png" alt="Monkey Usage" style="box-shadow: 5px 5px 15px rgba(0,0,0,0.3); border-radius: 10px;">
 
-By default, this runs the Monkey compiler & virtual machine, with entrypoint `main.go` into `repl/repl.go`. The `StartInterpreter` function can be used to instead spin up the interpreter-driven REPL.
+By default, this runs the Monkey compiler & virtual machine, with entrypoint `main.go` into `repl/repl.go`. The engine can be specified via a command-line argument if you want to use the interpreter/evaluator engine instead:
+
+```
+go build -o monkey && ./monkey -engine=eval
+```
+
+Note that the features listed in this document are all supported in the compiler/VM engine, but the interpreter/evaluator implementation may not be fully up-to-date.
 
 ## Benchmarks
 
