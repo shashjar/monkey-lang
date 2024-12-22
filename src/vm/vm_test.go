@@ -433,6 +433,14 @@ func TestBuiltInFunctions(t *testing.T) {
 			expected: 3,
 		},
 		{
+			input:    `len({})`,
+			expected: 0,
+		},
+		{
+			input:    `len({1: 2, "hi": "there", true: false})`,
+			expected: 3,
+		},
+		{
 			input:    `puts("hello", "world!")`,
 			expected: Null,
 		},

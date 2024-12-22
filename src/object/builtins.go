@@ -56,6 +56,8 @@ var length = &BuiltIn{
 			return &Integer{Value: int64(len(arg.Value))}
 		case *Array:
 			return &Integer{Value: int64(len(arg.Elements))}
+		case *HashMap:
+			return &Integer{Value: int64(len(arg.KVPairs))}
 		default:
 			return newError("argument to `len` is not supported, got %s", arg.Type())
 		}

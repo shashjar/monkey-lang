@@ -4,7 +4,6 @@ This is a living document storing some ideas for extensions & improvements that 
 
 ## Language Features
 
-- [ ] The lexer (`lexer/lexer.go`) currently only supports ASCII characters. Maybe extend this to Unicode (see p. 19-20 in WAIIG).
 - [ ] Support floating-point numbers (currently only integers are supported)
 - [ ] Add support for `else if` within conditional expressions
 - [ ] Support `const` binding declarations in addition to `let`
@@ -12,13 +11,14 @@ This is a living document storing some ideas for extensions & improvements that 
 - [ ] Modulo operator (`%`)
 - [ ] Additional comparison operators (`>=` & `<=`)
 - [ ] String operations: split, comparison with `==` & `!=`
+- [ ] The lexer (`lexer/lexer.go`) currently only supports ASCII characters. Maybe extend this to Unicode (see p. 19-20 in WAIIG).
 - [ ] Add support for macros into the compiler/VM engine (supported in interpreter but not yet compiler/VM)
 - [ ] Array operations: join, `+` operator
 - [ ] Add support for `switch` statements
 
 # Builtin Functions
 
-- [ ] Add support for hashmaps in the `len` builtin function
+- [x] Add support for hashmaps in the `len` builtin function
 - [ ] Add support for more language built-ins (`evaluator/builtins.go`), e.g. list comprehensions from Python - map, sum, filter, etc.
 
 ## REPL Features

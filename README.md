@@ -21,7 +21,9 @@ To use the Monkey REPL, run:
 ```
 go build -o monkey && ./monkey
 ```
+
 <img src="./docs/assets/monkey-usage.png" alt="Monkey Usage" style="box-shadow: 5px 5px 15px rgba(0,0,0,0.3); border-radius: 10px;">
+
 By default, this runs the Monkey compiler & virtual machine, with entrypoint `main.go` into `repl/repl.go`. The `StartInterpreter` function can be used to instead spin up the interpreter-driven REPL.
 
 ## Benchmarks
@@ -58,23 +60,32 @@ The more advanced implementation of Monkey relies on a compiler & virtual machin
 
 ### Table of Contents
 
-- [Summary](#summary)
-- [Integers \& Arithmetic Operations](#integers--arithmetic-operations)
-- [Booleans](#booleans)
-- [Comparison Operators](#comparison-operators)
-- [Conditionals](#conditionals)
-- [Bindings](#bindings)
-- [Strings](#strings)
-- [Arrays](#arrays)
-- [Hashmaps](#hashmaps)
-- [Functions](#functions)
-- [Built-In Functions](#built-in-functions)
-    - [len](#len)
-    - [puts](#puts)
-    - [first](#first)
-    - [last](#last)
-    - [rest](#rest)
-    - [append](#append)
+- [monkey-lang](#monkey-lang)
+  - [The Monkey Programming Language](#the-monkey-programming-language)
+  - [Usage](#usage)
+  - [Benchmarks](#benchmarks)
+  - [Implementation Details](#implementation-details)
+  - [Interpreter \& Evaluator](#interpreter--evaluator)
+  - [Compiler \& Virtual Machine](#compiler--virtual-machine)
+  - [Language Documentation](#language-documentation)
+    - [Table of Contents](#table-of-contents)
+    - [Summary](#summary)
+    - [Integers \& Arithmetic Operations](#integers--arithmetic-operations)
+    - [Booleans](#booleans)
+    - [Comparison Operators](#comparison-operators)
+    - [Conditionals](#conditionals)
+    - [Bindings](#bindings)
+    - [Strings](#strings)
+    - [Arrays](#arrays)
+    - [Hashmaps](#hashmaps)
+    - [Functions](#functions)
+    - [Built-In Functions](#built-in-functions)
+      - [len](#len)
+      - [puts](#puts)
+      - [first](#first)
+      - [last](#last)
+      - [rest](#rest)
+      - [append](#append)
 
 ### Summary
 
@@ -242,11 +253,12 @@ There are several built-in functions within this implementation, with more to be
 
 #### len
 
-Calculates the number of characters in the provided string or the number of elements in the provided array.
+Calculates the number of characters in the provided string, the number of elements in the provided array, or the number of key-value pairs in the provided hashmap.
 
 ```
 len("Hello world!");
 len([1, 2, 3]);
+len({1: 2, "hi": "there", true: false});
 ```
 
 #### puts
