@@ -436,6 +436,8 @@ func (vm *VM) executeComparison(op bytecode.Opcode) error {
 		return vm.executeIntegerComparison(op, left, right)
 	} else if leftType == object.BOOLEAN_OBJ && rightType == object.BOOLEAN_OBJ {
 		return vm.executeBooleanComparison(op, left, right)
+	} else if leftType == object.STRING_OBJ && rightType == object.STRING_OBJ {
+		return vm.executeStringComparison(op, left, right)
 	}
 
 	return fmt.Errorf("unsupported types for binary comparison: %s %s", leftType, rightType)
@@ -467,6 +469,19 @@ func (vm *VM) executeBooleanComparison(op bytecode.Opcode, left object.Object, r
 		return vm.push(nativeBoolToBooleanObject(leftValue != rightValue))
 	default:
 		return fmt.Errorf("unknown binary boolean comparison operator: %d", op)
+	}
+}
+
+func (vm *VM) executeStringComparison(op bytecode.Opcode, left object.Object, right object.Object) error {
+	leftValue := left.(*object.String).Value
+	rightValue := right.(*object.String).Value
+	switch op {
+	case bytecode.OpEqual:
+		return vm.push(nativeBoolToBooleanObject(leftValue == rightValue))
+	case bytecode.OpNotEqual:
+		return vm.push(nativeBoolToBooleanObject(leftValue != rightValue))
+	default:
+		return fmt.Errorf("unknown binary string comparison operator: %d", op)
 	}
 }
 

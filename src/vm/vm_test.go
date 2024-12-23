@@ -66,6 +66,11 @@ func TestBooleanExpressions(t *testing.T) {
 		{"true != true", false},
 		{"true != false", true},
 		{"false != false", false},
+		{`"" == ""`, true},
+		{`"d" == ""`, false},
+		{`"hello" == "hello"`, true},
+		{`"hello" != "world"`, true},
+		{`"ten" != "ten"`, false},
 		{"(1 < 2) == true", true},
 		{"(1 < 2) == false", false},
 		{"(1 > 2) == true", false},
@@ -76,6 +81,7 @@ func TestBooleanExpressions(t *testing.T) {
 		{"false || false", false},
 		{"(6 < 8) && true", true},
 		{"(8 < 6) || (9 + 9 < 20)", true},
+		{`"world" + "s" == "worlds"`, true},
 	}
 
 	runVMTests(t, tests)
