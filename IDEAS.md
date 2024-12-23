@@ -12,7 +12,7 @@ This is a living document storing some ideas for extensions & improvements that 
 - [ ] Additional comparison operators (`>=` & `<=`)
 - [x] Strings: comparison with `==` & `!=`
 - [ ] Strings: `split` operation
-- [ ] Arrays: `+` operator
+- [x] Arrays: `+` operator
 - [ ] Arrays: `join` operation
 - [ ] Implement loops: `for` and/or `while`
 - [ ] Add support for `switch` statements

@@ -356,6 +356,8 @@ func (vm *VM) executeBinaryOperation(op bytecode.Opcode) error {
 		return vm.executeBinaryIntegerOperation(op, left, right)
 	case leftType == object.STRING_OBJ && rightType == object.STRING_OBJ:
 		return vm.executeBinaryStringOperation(op, left, right)
+	case leftType == object.ARRAY_OBJ && rightType == object.ARRAY_OBJ:
+		return vm.executeBinaryArrayOperation(op, left, right)
 	default:
 		return fmt.Errorf("unsupported types for binary operation: %s %s", leftType, rightType)
 	}
@@ -394,6 +396,18 @@ func (vm *VM) executeBinaryStringOperation(op bytecode.Opcode, left object.Objec
 		return vm.push(&object.String{Value: leftValue + rightValue})
 	default:
 		return fmt.Errorf("unknown binary string operator: %d", op)
+	}
+}
+
+func (vm *VM) executeBinaryArrayOperation(op bytecode.Opcode, left object.Object, right object.Object) error {
+	leftElements := left.(*object.Array).Elements
+	rightElements := right.(*object.Array).Elements
+
+	switch op {
+	case bytecode.OpAdd:
+		return vm.push(&object.Array{Elements: append(leftElements, rightElements...)})
+	default:
+		return fmt.Errorf("unknown binary array operator: %d", op)
 	}
 }
 
