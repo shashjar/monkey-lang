@@ -30,6 +30,9 @@ const (
 
 	BANG = "!"
 
+	AND = "&&"
+	OR  = "||"
+
 	EQ     = "=="
 	NOT_EQ = "!="
 	LT     = "<"

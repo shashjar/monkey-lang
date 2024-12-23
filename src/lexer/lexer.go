@@ -26,11 +26,21 @@ func (l *Lexer) NextToken() token.Token {
 	switch l.char {
 	case '=':
 		if l.peekChar() == '=' {
-			char1 := l.char
-			l.readChar()
-			tok = token.Token{Type: token.EQ, Literal: string(char1) + string(l.char)}
+			tok = l.readTwoCharacterToken(token.EQ)
 		} else {
 			tok = newToken(token.ASSIGN, l.char)
+		}
+	case '&':
+		if l.peekChar() == '&' {
+			tok = l.readTwoCharacterToken(token.AND)
+		} else {
+			tok = newToken(token.ILLEGAL, l.char)
+		}
+	case '|':
+		if l.peekChar() == '|' {
+			tok = l.readTwoCharacterToken(token.OR)
+		} else {
+			tok = newToken(token.ILLEGAL, l.char)
 		}
 	case '+':
 		tok = newToken(token.PLUS, l.char)
@@ -108,6 +118,13 @@ func (l *Lexer) readChar() {
 	}
 	l.position = l.readPosition
 	l.readPosition += 1
+}
+
+func (l *Lexer) readTwoCharacterToken(tokenType token.TokenType) token.Token {
+	char1 := l.char
+	l.readChar()
+	tok := token.Token{Type: tokenType, Literal: string(char1) + string(l.char)}
+	return tok
 }
 
 func (l *Lexer) readIdentifier() string {

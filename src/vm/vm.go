@@ -112,6 +112,11 @@ func (vm *VM) Run() error {
 			if err != nil {
 				return err
 			}
+		case bytecode.OpAnd, bytecode.OpOr:
+			err := vm.executeLogicalOperation(op)
+			if err != nil {
+				return err
+			}
 		case bytecode.OpEqual, bytecode.OpNotEqual, bytecode.OpGreaterThan:
 			err := vm.executeComparison(op)
 			if err != nil {
@@ -387,6 +392,34 @@ func (vm *VM) executeBinaryStringOperation(op bytecode.Opcode, left object.Objec
 		return vm.push(&object.String{Value: leftValue + rightValue})
 	default:
 		return fmt.Errorf("unknown binary string operator: %d", op)
+	}
+}
+
+func (vm *VM) executeLogicalOperation(op bytecode.Opcode) error {
+	right := vm.pop()
+	left := vm.pop()
+
+	leftType := left.Type()
+	rightType := right.Type()
+
+	if leftType == object.BOOLEAN_OBJ && rightType == object.BOOLEAN_OBJ {
+		return vm.executeLogicalBooleanOperation(op, left, right)
+	}
+
+	return fmt.Errorf("unsupported types for logical operation: %s %s", leftType, rightType)
+}
+
+func (vm *VM) executeLogicalBooleanOperation(op bytecode.Opcode, left object.Object, right object.Object) error {
+	leftValue := left.(*object.Boolean).Value
+	rightValue := right.(*object.Boolean).Value
+
+	switch op {
+	case bytecode.OpAnd:
+		return vm.push(nativeBoolToBooleanObject(leftValue && rightValue))
+	case bytecode.OpOr:
+		return vm.push(nativeBoolToBooleanObject(leftValue || rightValue))
+	default:
+		return fmt.Errorf("unknown logical boolean operator: %d", op)
 	}
 }
 

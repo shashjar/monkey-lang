@@ -164,6 +164,11 @@ func (c *Compiler) Compile(node ast.Node) error {
 		case "/":
 			c.emit(bytecode.OpDiv)
 
+		case "&&":
+			c.emit(bytecode.OpAnd)
+		case "||":
+			c.emit(bytecode.OpOr)
+
 		case "==":
 			c.emit(bytecode.OpEqual)
 		case "!=":

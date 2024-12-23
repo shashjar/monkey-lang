@@ -208,6 +208,26 @@ func TestBooleanExpressions(t *testing.T) {
 			},
 			expectedConstants: []interface{}{},
 		},
+		{
+			input: "true && false",
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpTrue),
+				bytecode.Make(bytecode.OpFalse),
+				bytecode.Make(bytecode.OpAnd),
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{},
+		},
+		{
+			input: "false || true",
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpFalse),
+				bytecode.Make(bytecode.OpTrue),
+				bytecode.Make(bytecode.OpOr),
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{},
+		},
 	}
 
 	runCompilerTests(t, tests)

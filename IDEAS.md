@@ -7,7 +7,7 @@ This is a living document storing some ideas for extensions & improvements that 
 - [ ] Support floating-point numbers (currently only integers are supported)
 - [ ] Add support for `else if` within conditional expressions
 - [ ] Support `const` binding declarations in addition to `let`
-- [ ] Boolean operations (`&&`, `||`)
+- [x] Logical boolean operators (`&&`, `||`)
 - [ ] Modulo operator (`%`)
 - [ ] Additional comparison operators (`>=` & `<=`)
 - [ ] String operations: split, comparison with `==` & `!=`

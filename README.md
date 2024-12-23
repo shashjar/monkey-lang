@@ -115,12 +115,17 @@ The basic arithmetic operations (`+`, `-`, `*`, `/`) are supported for integers.
 
 ### Booleans
 
+The logical boolean operators `&&` and `||` are supported.
+
 ```
 true;
 false;
 
 !true;
 !false;
+
+true && true;
+false || true;
 ```
 
 ### Comparison Operators
