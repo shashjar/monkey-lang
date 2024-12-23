@@ -50,6 +50,8 @@ func (l *Lexer) NextToken() token.Token {
 		tok = newToken(token.MUL, l.char)
 	case '/':
 		tok = newToken(token.DIV, l.char)
+	case '%':
+		tok = newToken(token.MODULO, l.char)
 	case '!':
 		if l.peekChar() == '=' {
 			char1 := l.char

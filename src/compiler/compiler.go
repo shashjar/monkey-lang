@@ -163,6 +163,8 @@ func (c *Compiler) Compile(node ast.Node) error {
 			c.emit(bytecode.OpMul)
 		case "/":
 			c.emit(bytecode.OpDiv)
+		case "%":
+			c.emit(bytecode.OpMod)
 
 		case "&&":
 			c.emit(bytecode.OpAnd)

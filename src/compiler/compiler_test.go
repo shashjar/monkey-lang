@@ -77,6 +77,16 @@ func TestIntegerArithmetic(t *testing.T) {
 			},
 			expectedConstants: []interface{}{15, 5},
 		},
+		{
+			input: "14 % 5",
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpMod),
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{14, 5},
+		},
 	}
 
 	runCompilerTests(t, tests)

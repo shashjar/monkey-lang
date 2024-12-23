@@ -107,7 +107,7 @@ func (vm *VM) Run() error {
 			jumpToPos := int(bytecode.ReadUint16(instr[ip+1:]))
 			vm.currentFrame().ip = jumpToPos - 1 // Set to `pos - 1` since this loop increments ip on each iteration
 
-		case bytecode.OpAdd, bytecode.OpSub, bytecode.OpMul, bytecode.OpDiv:
+		case bytecode.OpAdd, bytecode.OpSub, bytecode.OpMul, bytecode.OpDiv, bytecode.OpMod:
 			err := vm.executeBinaryOperation(op)
 			if err != nil {
 				return err
@@ -376,6 +376,8 @@ func (vm *VM) executeBinaryIntegerOperation(op bytecode.Opcode, left object.Obje
 		result = leftValue * rightValue
 	case bytecode.OpDiv:
 		result = leftValue / rightValue
+	case bytecode.OpMod:
+		result = leftValue % rightValue
 	default:
 		return fmt.Errorf("unknown binary integer operator: %d", op)
 	}

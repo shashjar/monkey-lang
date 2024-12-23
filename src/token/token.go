@@ -28,6 +28,8 @@ const (
 	MUL   = "*"
 	DIV   = "/"
 
+	MODULO = "%"
+
 	BANG = "!"
 
 	AND = "&&"
