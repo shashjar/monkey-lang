@@ -86,12 +86,13 @@ The more advanced implementation of Monkey relies on a compiler & virtual machin
     - [Hashmaps](#hashmaps)
     - [Functions](#functions)
     - [Built-In Functions](#built-in-functions)
-      - [len](#len)
       - [puts](#puts)
+      - [len](#len)
       - [first](#first)
       - [last](#last)
       - [rest](#rest)
       - [append](#append)
+      - [join](#join)
 
 ### Summary
 
@@ -262,16 +263,6 @@ fibonacci(15); // 610
 
 There are several built-in functions within this implementation, with more to be added soon.
 
-#### len
-
-Calculates the number of characters in the provided string, the number of elements in the provided array, or the number of key-value pairs in the provided hashmap.
-
-```
-len("Hello world!");
-len([1, 2, 3]);
-len({1: 2, "hi": "there", true: false});
-```
-
 #### puts
 
 Prints the specified value to `STDOUT`. Monkey's equivalent of `print` or `console.log`.
@@ -280,6 +271,16 @@ Prints the specified value to `STDOUT`. Monkey's equivalent of `print` or `conso
 puts("Hello world!");
 puts(1 + 4 + 7);
 puts([4, 7, 9]);
+```
+
+#### len
+
+Calculates the number of characters in the provided string, the number of elements in the provided array, or the number of key-value pairs in the provided hashmap.
+
+```
+len("Hello world!");
+len([1, 2, 3]);
+len({1: 2, "hi": "there", true: false});
 ```
 
 #### first
@@ -329,4 +330,14 @@ Expects the first provided argument to be an array, and the second to be of any 
 let a = [1, 2];
 let b = append(a, 3); // [1, 2, 3]
 let c = append(a, fn(x) { x; }); // [1, 2, fn(x) { x; }]
+```
+
+#### join
+
+Joins the elements of the provided array into a single string with some delimiter if one is provided. All array elements must themselves be strings, and the delimiter must be a string.
+
+```
+join(["hello", " world", "!"]) // "hello world!"
+join(["i", "am", "here"], " ") // "i am here"
+join(["1", "2", "3"], ", ") // "1, 2, 3"
 ```

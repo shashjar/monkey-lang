@@ -7,12 +7,12 @@ var BuiltIns = []struct {
 	BuiltIn *BuiltIn
 }{
 	{
-		"len",
-		length,
-	},
-	{
 		"puts",
 		puts,
+	},
+	{
+		"len",
+		length,
 	},
 	{
 		"first",
@@ -30,6 +30,10 @@ var BuiltIns = []struct {
 		"append",
 		appendBI,
 	},
+	{
+		"join",
+		join,
+	},
 }
 
 func GetBuiltInByName(name string) *BuiltIn {
@@ -43,6 +47,20 @@ func GetBuiltInByName(name string) *BuiltIn {
 
 func newError(format string, a ...interface{}) *Error {
 	return &Error{Message: fmt.Sprintf(format, a...)}
+}
+
+var puts = &BuiltIn{
+	Fn: func(args ...Object) Object {
+		if len(args) == 0 {
+			return newError("need at least one argument provided to `puts`")
+		}
+
+		for _, arg := range args {
+			fmt.Println(arg.Inspect())
+		}
+
+		return nil
+	},
 }
 
 var length = &BuiltIn{
@@ -61,20 +79,6 @@ var length = &BuiltIn{
 		default:
 			return newError("argument to `len` is not supported, got %s", arg.Type())
 		}
-	},
-}
-
-var puts = &BuiltIn{
-	Fn: func(args ...Object) Object {
-		if len(args) == 0 {
-			return newError("need at least one argument provided to puts")
-		}
-
-		for _, arg := range args {
-			fmt.Println(arg.Inspect())
-		}
-
-		return nil
 	},
 }
 
@@ -151,6 +155,44 @@ var appendBI = &BuiltIn{
 			return &Array{Elements: newElements}
 		default:
 			return newError("argument to `append` is not supported, got %s", arg.Type())
+		}
+	},
+}
+
+var join = &BuiltIn{
+	Fn: func(args ...Object) Object {
+		if len(args) != 1 && len(args) != 2 {
+			return newError("wrong number of arguments. expected 1 or 2, got=%d", len(args))
+		}
+
+		var delimiter string
+		if len(args) == 2 {
+			delimStr, ok := args[1].(*String)
+			if !ok {
+				return newError("expected delimiter passed to `join` to be a string, got %s", args[1].Type())
+			}
+			delimiter = delimStr.Value
+		}
+
+		switch arr := args[0].(type) {
+		case *Array:
+			var joined string
+
+			for i, elem := range arr.Elements {
+				elemStr, ok := elem.(*String)
+				if !ok {
+					return newError("elements of array passed to `join` must be strings, got %s", elem.Type())
+				}
+
+				joined += elemStr.Value
+				if i < len(arr.Elements)-1 {
+					joined += delimiter
+				}
+			}
+
+			return &String{Value: joined}
+		default:
+			return newError("first argument to `join` must be an array, got %s", arr.Type())
 		}
 	},
 }

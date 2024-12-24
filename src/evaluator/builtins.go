@@ -11,4 +11,5 @@ var builtins = map[string]*object.BuiltIn{
 	"last":   object.GetBuiltInByName("last"),
 	"rest":   object.GetBuiltInByName("rest"),
 	"append": object.GetBuiltInByName("append"),
+	"join":   object.GetBuiltInByName("join"),
 }

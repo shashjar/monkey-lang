@@ -13,7 +13,7 @@ This is a living document storing some ideas for extensions & improvements that 
 - [x] Strings: comparison with `==` & `!=`
 - [ ] Strings: `split` operation
 - [x] Arrays: `+` operator
-- [ ] Arrays: `join` operation
+- [x] Arrays: `join` operation
 - [ ] Implement loops: `for` and/or `while`
 - [ ] Add support for `switch` statements
 - [ ] The lexer (`lexer/lexer.go`) currently only supports ASCII characters. Maybe extend this to Unicode (see p. 19-20 in WAIIG).
