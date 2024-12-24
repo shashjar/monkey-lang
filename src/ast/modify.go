@@ -33,8 +33,13 @@ func Modify(node Node, modifier ModifierFunc) Node {
 		}
 
 	case *IfExpression:
-		node.Condition, _ = Modify(node.Condition, modifier).(Expression)
-		node.Consequence, _ = Modify(node.Consequence, modifier).(*BlockStatement)
+		modifiedClauses := []ConditionalClause{}
+		for _, clause := range node.Clauses {
+			modifiedClauseCondition, _ := Modify(clause.Condition, modifier).(Expression)
+			modifiedClauseConsequence, _ := Modify(clause.Consequence, modifier).(*BlockStatement)
+			modifiedClauses = append(modifiedClauses, ConditionalClause{Condition: modifiedClauseCondition, Consequence: modifiedClauseConsequence})
+		}
+		node.Clauses = modifiedClauses
 		if node.Alternative != nil {
 			node.Alternative, _ = Modify(node.Alternative, modifier).(*BlockStatement)
 		}

@@ -257,12 +257,18 @@ func (sl *StringLiteral) String() string {
 	return sl.Token.Literal
 }
 
-// Represents an if expression in the form "if (<condition>) <consequence> else <alternative>"
-type IfExpression struct {
-	Token       token.Token // the token.IF token
+// Represents a clause (`if` or `else if`) in a conditional expression.
+type ConditionalClause struct {
 	Condition   Expression
 	Consequence *BlockStatement
-	Alternative *BlockStatement
+}
+
+// Represents an if expression in the form "if (<condition>) <consequence> else if (<condition>) <consequence> ... else <alternative>"
+// `else if` and `else` clauses are optional
+type IfExpression struct {
+	Token       token.Token         // the token.IF token
+	Clauses     []ConditionalClause // will always contain at least one clause (the `if` clause itself), and additional if any `else if`s are used
+	Alternative *BlockStatement     // the `else` clause body, if `else` was used
 }
 
 func (ie *IfExpression) expressionNode() {}
@@ -274,14 +280,24 @@ func (ie *IfExpression) TokenLiteral() string {
 func (ie *IfExpression) String() string {
 	var out bytes.Buffer
 
-	out.WriteString("if")
-	out.WriteString(ie.Condition.String())
-	out.WriteString(" ")
-	out.WriteString(ie.Consequence.String())
+	out.WriteString("if (")
+	out.WriteString(ie.Clauses[0].Condition.String())
+	out.WriteString(") { ")
+	out.WriteString(ie.Clauses[0].Consequence.String())
+	out.WriteString(" } ")
+
+	for i := 1; i < len(ie.Clauses); i++ {
+		out.WriteString("else if (")
+		out.WriteString(ie.Clauses[i].Condition.String())
+		out.WriteString(") { ")
+		out.WriteString(ie.Clauses[i].Consequence.String())
+		out.WriteString(" } ")
+	}
 
 	if ie.Alternative != nil {
-		out.WriteString("else ")
+		out.WriteString("else { ")
 		out.WriteString(ie.Alternative.String())
+		out.WriteString(" }")
 	}
 
 	return out.String()

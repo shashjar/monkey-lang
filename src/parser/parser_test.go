@@ -466,17 +466,17 @@ func TestIfExpression(t *testing.T) {
 		t.Fatalf("statement.Expression is not an ast.IfExpression. got=%T", statement.Expression)
 	}
 
-	if !testInfixExpression(t, exp.Condition, "x", "<", "y") {
+	if !testInfixExpression(t, exp.Clauses[0].Condition, "x", "<", "y") {
 		return
 	}
 
-	if len(exp.Consequence.Statements) != 1 {
-		t.Errorf("consequence contains wrong number of statements. expected=%d, got=%d", 1, len(exp.Consequence.Statements))
+	if len(exp.Clauses[0].Consequence.Statements) != 1 {
+		t.Errorf("consequence contains wrong number of statements. expected=%d, got=%d", 1, len(exp.Clauses[0].Consequence.Statements))
 	}
 
-	consequence, ok := exp.Consequence.Statements[0].(*ast.ExpressionStatement)
+	consequence, ok := exp.Clauses[0].Consequence.Statements[0].(*ast.ExpressionStatement)
 	if !ok {
-		t.Fatalf("exp.Consequence.Statements[0] is not an ast.ExpressionStatement. got=%T", exp.Consequence.Statements[0])
+		t.Fatalf("exp.Consequence.Statements[0] is not an ast.ExpressionStatement. got=%T", exp.Clauses[0].Consequence.Statements[0])
 	}
 
 	if !testIdentifier(t, consequence.Expression, "x") {
@@ -509,23 +509,99 @@ func TestIfElseExpression(t *testing.T) {
 		t.Fatalf("statement.Expression is not an ast.IfExpression. got=%T", statement.Expression)
 	}
 
-	if !testInfixExpression(t, exp.Condition, "x", "<", "y") {
+	if !testInfixExpression(t, exp.Clauses[0].Condition, "x", "<", "y") {
 		return
 	}
 
-	if len(exp.Consequence.Statements) != 1 {
-		t.Errorf("consequence contains wrong number of statements. expected=%d, got=%d", 1, len(exp.Consequence.Statements))
+	if len(exp.Clauses[0].Consequence.Statements) != 1 {
+		t.Errorf("consequence contains wrong number of statements. expected=%d, got=%d", 1, len(exp.Clauses[0].Consequence.Statements))
 	}
 
-	consequence, ok := exp.Consequence.Statements[0].(*ast.ExpressionStatement)
+	consequence, ok := exp.Clauses[0].Consequence.Statements[0].(*ast.ExpressionStatement)
 	if !ok {
-		t.Fatalf("exp.Consequence.Statements[0] is not an ast.ExpressionStatement. got=%T", exp.Consequence.Statements[0])
+		t.Fatalf("exp.Consequence.Statements[0] is not an ast.ExpressionStatement. got=%T", exp.Clauses[0].Consequence.Statements[0])
 	}
 
 	if !testIdentifier(t, consequence.Expression, "x") {
 		return
 	}
 
+	if len(exp.Alternative.Statements) != 1 {
+		t.Errorf("alternative contains wrong number of statements. expected=%d, got=%d", 1, len(exp.Alternative.Statements))
+	}
+
+	alternative, ok := exp.Alternative.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("exp.Alternative.Statements[0] is not an ast.ExpressionStatement. got=%T", exp.Alternative.Statements[0])
+	}
+
+	if !testIdentifier(t, alternative.Expression, "y") {
+		return
+	}
+}
+
+func TestIfElseIfElseExpression(t *testing.T) {
+	input := `if (x < y) { x } else if (x == y) { 0 } else { y }`
+
+	l := lexer.NewLexer(input)
+	p := NewParser(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+	if len(program.Statements) != 1 {
+		t.Fatalf("program contains wrong number of statements. expected=%d, got=%d", 1, len(program.Statements))
+	}
+
+	statement, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not an *ast.ExpressionStatement. got=%T", program.Statements[0])
+	}
+
+	exp, ok := statement.Expression.(*ast.IfExpression)
+	if !ok {
+		t.Fatalf("statement.Expression is not an ast.IfExpression. got=%T", statement.Expression)
+	}
+
+	if len(exp.Clauses) != 2 {
+		t.Fatalf("exp.Clauses is the wrong length. expected=%d, got=%d", 2, len(exp.Clauses))
+	}
+
+	// First clause (`if`)
+	if !testInfixExpression(t, exp.Clauses[0].Condition, "x", "<", "y") {
+		return
+	}
+
+	if len(exp.Clauses[0].Consequence.Statements) != 1 {
+		t.Errorf("consequence contains wrong number of statements. expected=%d, got=%d", 1, len(exp.Clauses[0].Consequence.Statements))
+	}
+
+	consequence, ok := exp.Clauses[0].Consequence.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("exp.Clauses[0].Consequence.Statements[0] is not an ast.ExpressionStatement. got=%T", exp.Clauses[0].Consequence.Statements[0])
+	}
+
+	if !testIdentifier(t, consequence.Expression, "x") {
+		return
+	}
+
+	// Second clause (`else if`)
+	if !testInfixExpression(t, exp.Clauses[1].Condition, "x", "==", "y") {
+		return
+	}
+
+	if len(exp.Clauses[1].Consequence.Statements) != 1 {
+		t.Errorf("consequence contains wrong number of statements. expected=%d, got=%d", 1, len(exp.Clauses[1].Consequence.Statements))
+	}
+
+	consequence, ok = exp.Clauses[1].Consequence.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("exp.Clauses[1].Consequence.Statements[0] is not an ast.ExpressionStatement. got=%T", exp.Clauses[1].Consequence.Statements[0])
+	}
+
+	if !testIntegerLiteral(t, consequence.Expression, 0) {
+		return
+	}
+
+	// Alternative (`else`)
 	if len(exp.Alternative.Statements) != 1 {
 		t.Errorf("alternative contains wrong number of statements. expected=%d, got=%d", 1, len(exp.Alternative.Statements))
 	}

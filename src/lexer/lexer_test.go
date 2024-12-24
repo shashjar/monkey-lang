@@ -51,10 +51,12 @@ func TestNextToken(t *testing.T) {
 	!-/*5;
 	5 < 10 > 5;
 
-	if (5 < 10) {
-		return true;
+	if (5 > 10) {
+		return 1;
+	} else if (5 == 10) {
+	 	return 0;
 	} else {
-		return false;
+		return -1;
 	}
 
 	10 == 10;
@@ -138,19 +140,33 @@ func TestNextToken(t *testing.T) {
 		{token.IF, "if"},
 		{token.LPAREN, "("},
 		{token.INT, "5"},
-		{token.LT, "<"},
+		{token.GT, ">"},
 		{token.INT, "10"},
 		{token.RPAREN, ")"},
 		{token.LBRACE, "{"},
 		{token.RETURN, "return"},
-		{token.TRUE, "true"},
+		{token.INT, "1"},
+		{token.SEMICOLON, ";"},
+		{token.RBRACE, "}"},
+
+		{token.ELSE, "else"},
+		{token.IF, "if"},
+		{token.LPAREN, "("},
+		{token.INT, "5"},
+		{token.EQ, "=="},
+		{token.INT, "10"},
+		{token.RPAREN, ")"},
+		{token.LBRACE, "{"},
+		{token.RETURN, "return"},
+		{token.INT, "0"},
 		{token.SEMICOLON, ";"},
 		{token.RBRACE, "}"},
 
 		{token.ELSE, "else"},
 		{token.LBRACE, "{"},
 		{token.RETURN, "return"},
-		{token.FALSE, "false"},
+		{token.MINUS, "-"},
+		{token.INT, "1"},
 		{token.SEMICOLON, ";"},
 		{token.RBRACE, "}"},
 

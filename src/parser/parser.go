@@ -313,16 +313,11 @@ func (p *Parser) parseGroupedExpression() ast.Expression {
 }
 
 func (p *Parser) parseIfExpression() ast.Expression {
-	ifExpression := &ast.IfExpression{Token: p.currToken}
+	ie := &ast.IfExpression{Token: p.currToken}
+	ieClauses := []ast.ConditionalClause{}
 
-	if !p.expectPeek(token.LPAREN) {
-		return nil
-	}
-
-	p.nextToken()
-	ifExpression.Condition = p.parseExpression(LOWEST)
-
-	if !p.expectPeek(token.RPAREN) {
+	ifCondition, ok := p.parseCondition()
+	if !ok {
 		return nil
 	}
 
@@ -330,19 +325,57 @@ func (p *Parser) parseIfExpression() ast.Expression {
 		return nil
 	}
 
-	ifExpression.Consequence = p.parseBlockStatement()
+	ifConsequence := p.parseBlockStatement()
 
-	if p.peekTokenIs(token.ELSE) {
+	ieClauses = append(ieClauses, ast.ConditionalClause{Condition: ifCondition, Consequence: ifConsequence})
+
+	for p.peekTokenIs(token.ELSE) {
 		p.nextToken()
 
-		if !p.expectPeek(token.LBRACE) {
-			return nil
-		}
+		if p.peekTokenIs(token.IF) { // Parsing `else if` clause
+			p.nextToken()
 
-		ifExpression.Alternative = p.parseBlockStatement()
+			elseIfCondition, ok := p.parseCondition()
+			if !ok {
+				return nil
+			}
+
+			if !p.expectPeek(token.LBRACE) {
+				return nil
+			}
+
+			elseIfConsequence := p.parseBlockStatement()
+
+			ieClauses = append(ieClauses, ast.ConditionalClause{Condition: elseIfCondition, Consequence: elseIfConsequence})
+		} else { // Parsing `else` clause
+			if !p.expectPeek(token.LBRACE) {
+				return nil
+			}
+
+			ie.Alternative = p.parseBlockStatement()
+
+			break
+		}
 	}
 
-	return ifExpression
+	ie.Clauses = ieClauses
+	return ie
+}
+
+func (p *Parser) parseCondition() (ast.Expression, bool) {
+	if !p.expectPeek(token.LPAREN) {
+		return nil, false
+	}
+
+	p.nextToken()
+
+	ifCondition := p.parseExpression(LOWEST)
+
+	if !p.expectPeek(token.RPAREN) {
+		return nil, false
+	}
+
+	return ifCondition, true
 }
 
 func (p *Parser) parseFunctionLiteral() ast.Expression {

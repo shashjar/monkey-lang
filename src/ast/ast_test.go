@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestString(t *testing.T) {
+func TestStringLetStatement(t *testing.T) {
 	program := &Program{
 		Statements: []Statement{
 			&LetStatement{
@@ -24,6 +24,37 @@ func TestString(t *testing.T) {
 	}
 
 	if program.String() != "let myVar = anotherVar;" {
+		t.Errorf("program.String() is wrong. got=%q", program.String())
+	}
+}
+
+func TestStringIfExpression(t *testing.T) {
+	one := func() Expression { return &IntegerLiteral{Token: token.Token{Type: token.INT, Literal: "1"}, Value: 1} }
+	two := func() Expression { return &IntegerLiteral{Token: token.Token{Type: token.INT, Literal: "2"}, Value: 2} }
+	three := func() Expression { return &IntegerLiteral{Token: token.Token{Type: token.INT, Literal: "3"}, Value: 3} }
+
+	ie := &IfExpression{
+		Clauses: []ConditionalClause{
+			{
+				Condition:   &Boolean{Token: token.Token{Type: token.TRUE, Literal: "true"}, Value: true},
+				Consequence: &BlockStatement{Statements: []Statement{&ExpressionStatement{Expression: one()}}},
+			},
+			{
+				Condition:   &Boolean{Token: token.Token{Type: token.FALSE, Literal: "false"}, Value: false},
+				Consequence: &BlockStatement{Statements: []Statement{&ExpressionStatement{Expression: two()}}},
+			},
+		},
+		Alternative: &BlockStatement{Statements: []Statement{&ExpressionStatement{Expression: three()}}},
+	}
+	program := &Program{
+		Statements: []Statement{
+			&ExpressionStatement{
+				Expression: ie,
+			},
+		},
+	}
+
+	if program.String() != "if (true) { 1 } else if (false) { 2 } else { 3 }" {
 		t.Errorf("program.String() is wrong. got=%q", program.String())
 	}
 }
@@ -95,35 +126,31 @@ func TestModify(t *testing.T) {
 			&BlockStatement{Statements: []Statement{&ExpressionStatement{Expression: two()}, &ExpressionStatement{Expression: two()}, &ExpressionStatement{Expression: two()}}},
 		},
 		{
-			&IfExpression{Condition: one(), Consequence: &BlockStatement{Statements: []Statement{&ExpressionStatement{Expression: one()}}}, Alternative: &BlockStatement{Statements: []Statement{&ExpressionStatement{Expression: one()}}}},
-			&IfExpression{Condition: two(), Consequence: &BlockStatement{Statements: []Statement{&ExpressionStatement{Expression: two()}}}, Alternative: &BlockStatement{Statements: []Statement{&ExpressionStatement{Expression: two()}}}},
-		},
-		{
 			&IfExpression{
-				Condition: one(),
-				Consequence: &BlockStatement{
-					Statements: []Statement{
-						&ExpressionStatement{Expression: one()},
+				Clauses: []ConditionalClause{
+					{
+						Condition:   one(),
+						Consequence: &BlockStatement{Statements: []Statement{&ExpressionStatement{Expression: one()}}},
+					},
+					{
+						Condition:   one(),
+						Consequence: &BlockStatement{Statements: []Statement{&ExpressionStatement{Expression: one()}}},
 					},
 				},
-				Alternative: &BlockStatement{
-					Statements: []Statement{
-						&ExpressionStatement{Expression: one()},
-					},
-				},
+				Alternative: &BlockStatement{Statements: []Statement{&ExpressionStatement{Expression: one()}}},
 			},
 			&IfExpression{
-				Condition: two(),
-				Consequence: &BlockStatement{
-					Statements: []Statement{
-						&ExpressionStatement{Expression: two()},
+				Clauses: []ConditionalClause{
+					{
+						Condition:   two(),
+						Consequence: &BlockStatement{Statements: []Statement{&ExpressionStatement{Expression: two()}}},
+					},
+					{
+						Condition:   two(),
+						Consequence: &BlockStatement{Statements: []Statement{&ExpressionStatement{Expression: two()}}},
 					},
 				},
-				Alternative: &BlockStatement{
-					Statements: []Statement{
-						&ExpressionStatement{Expression: two()},
-					},
-				},
+				Alternative: &BlockStatement{Statements: []Statement{&ExpressionStatement{Expression: two()}}},
 			},
 		},
 		{
