@@ -182,33 +182,38 @@ func (c *Compiler) Compile(node ast.Node) error {
 		}
 
 	case *ast.IfExpression:
-		err := c.Compile(node.Condition)
-		if err != nil {
-			return err
+		jumpPositions := []int{}
+
+		for _, clause := range node.Clauses {
+			err := c.Compile(clause.Condition)
+			if err != nil {
+				return err
+			}
+
+			// Emit an `OpJumpNotTruthy` with a bogus offset to be updated below with the position following this clause's consequence
+			jumpNotTruthyPos := c.emit(bytecode.OpJumpNotTruthy, 9999)
+
+			err = c.Compile(clause.Consequence)
+			if err != nil {
+				return err
+			}
+
+			if c.lastInstructionIs(bytecode.OpPop) {
+				c.removeLastPop()
+			}
+
+			// Emit an `OpJump` with a bogus offset to be updated below with the position following the end of the entire if expression
+			jumpPos := c.emit(bytecode.OpJump, 9999)
+			jumpPositions = append(jumpPositions, jumpPos)
+
+			afterClauseConsequencePos := len(c.currentInstructions())
+			c.changeOperand(jumpNotTruthyPos, afterClauseConsequencePos)
 		}
-
-		// Emit an `OpJumpNotTruthy` with a bogus offset to be updated below with the position following the consequence
-		jumpNotTruthyPos := c.emit(bytecode.OpJumpNotTruthy, 9999)
-
-		err = c.Compile(node.Consequence)
-		if err != nil {
-			return err
-		}
-
-		if c.lastInstructionIs(bytecode.OpPop) {
-			c.removeLastPop()
-		}
-
-		// Emit an `OpJump` with a bogus offset to be updated below with the position following the alternative
-		jumpPos := c.emit(bytecode.OpJump, 9999)
-
-		afterConsequencePos := len(c.currentInstructions())
-		c.changeOperand(jumpNotTruthyPos, afterConsequencePos)
 
 		if node.Alternative == nil {
 			c.emit(bytecode.OpNull)
 		} else {
-			err = c.Compile(node.Alternative)
+			err := c.Compile(node.Alternative)
 			if err != nil {
 				return err
 			}
@@ -218,8 +223,10 @@ func (c *Compiler) Compile(node ast.Node) error {
 			}
 		}
 
-		afterAlternativePos := len(c.currentInstructions())
-		c.changeOperand(jumpPos, afterAlternativePos)
+		afterIfExpressionPos := len(c.currentInstructions())
+		for _, jumpPos := range jumpPositions {
+			c.changeOperand(jumpPos, afterIfExpressionPos)
+		}
 
 	case *ast.IntegerLiteral:
 		integer := &object.Integer{Value: node.Value}

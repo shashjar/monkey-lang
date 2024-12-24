@@ -5,7 +5,7 @@ This is a living document storing some ideas for extensions & improvements that 
 ## Language Features
 
 - [ ] Support floating-point numbers (currently only integers are supported)
-- [ ] Add support for `else if` within conditional expressions
+- [x] Add support for `else if` within conditional expressions
 - [ ] Support `const` binding declarations in addition to `let`
 - [x] Logical boolean operators (`&&`, `||`)
 - [x] Modulo operator (`%`)

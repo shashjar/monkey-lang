@@ -99,6 +99,13 @@ func TestConditionals(t *testing.T) {
 		{"if (1 > 2) { 10 }", Null},
 		{"if (false) { 10 }", Null},
 		{"if ((if (false) { 10 })) { 10 } else { 20 }", 20},
+		{"if (true) { 10 } else if (1 < 2) { 20 } else { 30 }", 10},
+		{"if (3 > 4) { 10 } else if (1 < 2) { 20 } else { 30 }", 20},
+		{"if (1 > 2) { 10 } else if (1 == 2) { 20 } else { 30 }", 30},
+		{"if (1 > 2) { 10 } else if (1 == 2) { 20 }", Null},
+		{"if (1 > 2) { 10 } else if (1 < 2) { 20 }", 20},
+		{"if ((if (false) { false } else { true })) { 5 } else { 7 }", 5},
+		{"if (3) { 10 } else if (4) { 20 } else { 30 }", 10},
 	}
 
 	runVMTests(t, tests)
