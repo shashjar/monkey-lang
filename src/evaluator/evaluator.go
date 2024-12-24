@@ -266,14 +266,18 @@ func evalIdentifier(i *ast.Identifier, env *object.Environment) object.Object {
 }
 
 func evalIfExpression(ie *ast.IfExpression, env *object.Environment) object.Object {
-	condition := Eval(ie.Condition, env)
-	if isError(condition) {
-		return condition
+	for _, clause := range ie.Clauses {
+		condition := Eval(clause.Condition, env)
+		if isError(condition) {
+			return condition
+		}
+
+		if isTruthy(condition) {
+			return Eval(clause.Consequence, env)
+		}
 	}
 
-	if isTruthy(condition) {
-		return Eval(ie.Consequence, env)
-	} else if ie.Alternative != nil {
+	if ie.Alternative != nil {
 		return Eval(ie.Alternative, env)
 	} else {
 		return NULL
