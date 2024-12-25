@@ -169,6 +169,16 @@ func TestBooleanExpressions(t *testing.T) {
 			expectedConstants: []interface{}{1, 1},
 		},
 		{
+			input: "6 < 8",
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpLessThan),
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{6, 8},
+		},
+		{
 			input: "1 > 2",
 			expectedInstructions: []bytecode.Instructions{
 				bytecode.Make(bytecode.OpConstant, 0),
@@ -189,14 +199,24 @@ func TestBooleanExpressions(t *testing.T) {
 			expectedConstants: []interface{}{4, 4},
 		},
 		{
-			input: "6 < 8",
+			input: "10 <= 12",
 			expectedInstructions: []bytecode.Instructions{
 				bytecode.Make(bytecode.OpConstant, 0),
 				bytecode.Make(bytecode.OpConstant, 1),
-				bytecode.Make(bytecode.OpGreaterThan),
+				bytecode.Make(bytecode.OpLessThanOrEqualTo),
 				bytecode.Make(bytecode.OpPop),
 			},
-			expectedConstants: []interface{}{8, 6},
+			expectedConstants: []interface{}{10, 12},
+		},
+		{
+			input: "3 >= 4",
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpGreaterThanOrEqualTo),
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{3, 4},
 		},
 		{
 			input: "true == false",
@@ -838,7 +858,7 @@ func TestBuiltIns(t *testing.T) {
 			append([], 1);
 			`,
 			expectedInstructions: []bytecode.Instructions{
-				bytecode.Make(bytecode.OpGetBuiltIn, 0),
+				bytecode.Make(bytecode.OpGetBuiltIn, 1),
 				bytecode.Make(bytecode.OpArray, 0),
 				bytecode.Make(bytecode.OpCall, 1),
 				bytecode.Make(bytecode.OpPop),
@@ -860,7 +880,7 @@ func TestBuiltIns(t *testing.T) {
 			},
 			expectedConstants: []interface{}{
 				[]bytecode.Instructions{
-					bytecode.Make(bytecode.OpGetBuiltIn, 0),
+					bytecode.Make(bytecode.OpGetBuiltIn, 1),
 					bytecode.Make(bytecode.OpArray, 0),
 					bytecode.Make(bytecode.OpCall, 1),
 					bytecode.Make(bytecode.OpReturnValue),

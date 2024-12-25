@@ -9,7 +9,7 @@ This is a living document storing some ideas for extensions & improvements that 
 - [ ] Support `const` binding declarations in addition to `let`
 - [x] Logical boolean operators (`&&`, `||`)
 - [x] Modulo operator (`%`)
-- [ ] Additional comparison operators (`>=` & `<=`)
+- [x] Additional comparison operators (`>=` & `<=`)
 - [x] Strings: comparison with `==` & `!=`
 - [ ] Strings: `split` operation
 - [x] Arrays: `+` operator
@@ -49,4 +49,4 @@ This is a living document storing some ideas for extensions & improvements that 
 
 - [ ] Keep [README](README.md) documenting language features & implementation up-to-date
 - [ ] In the AST modification functionality (`ast/modify.go`), implement thorough error-checking
-- [ ] In the `*ast.InfixExpression` handling in `compiler/compiler.go`, is it worth just adding an `OpLessThan` bytecode instruction so that this case doesn't have to be handled separately from the rest of the logic?
+- [x] In the `*ast.InfixExpression` handling in `compiler/compiler.go`, is it worth just adding an `OpLessThan` bytecode instruction so that this case doesn't have to be handled separately from the rest of the logic?

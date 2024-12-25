@@ -117,7 +117,7 @@ func (vm *VM) Run() error {
 			if err != nil {
 				return err
 			}
-		case bytecode.OpEqual, bytecode.OpNotEqual, bytecode.OpGreaterThan:
+		case bytecode.OpEqual, bytecode.OpNotEqual, bytecode.OpLessThan, bytecode.OpGreaterThan, bytecode.OpLessThanOrEqualTo, bytecode.OpGreaterThanOrEqualTo:
 			err := vm.executeComparison(op)
 			if err != nil {
 				return err
@@ -466,8 +466,14 @@ func (vm *VM) executeIntegerComparison(op bytecode.Opcode, left object.Object, r
 		return vm.push(nativeBoolToBooleanObject(leftValue == rightValue))
 	case bytecode.OpNotEqual:
 		return vm.push(nativeBoolToBooleanObject(leftValue != rightValue))
+	case bytecode.OpLessThan:
+		return vm.push(nativeBoolToBooleanObject(leftValue < rightValue))
 	case bytecode.OpGreaterThan:
 		return vm.push(nativeBoolToBooleanObject(leftValue > rightValue))
+	case bytecode.OpLessThanOrEqualTo:
+		return vm.push(nativeBoolToBooleanObject(leftValue <= rightValue))
+	case bytecode.OpGreaterThanOrEqualTo:
+		return vm.push(nativeBoolToBooleanObject(leftValue >= rightValue))
 	default:
 		return fmt.Errorf("unknown binary integer comparison operator: %d", op)
 	}

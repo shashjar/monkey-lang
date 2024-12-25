@@ -129,21 +129,6 @@ func (c *Compiler) Compile(node ast.Node) error {
 		}
 
 	case *ast.InfixExpression:
-		if node.Operator == "<" {
-			err := c.Compile(node.Right)
-			if err != nil {
-				return err
-			}
-
-			err = c.Compile(node.Left)
-			if err != nil {
-				return err
-			}
-
-			c.emit(bytecode.OpGreaterThan)
-			return nil
-		}
-
 		err := c.Compile(node.Left)
 		if err != nil {
 			return err
@@ -175,8 +160,14 @@ func (c *Compiler) Compile(node ast.Node) error {
 			c.emit(bytecode.OpEqual)
 		case "!=":
 			c.emit(bytecode.OpNotEqual)
+		case "<":
+			c.emit(bytecode.OpLessThan)
 		case ">":
 			c.emit(bytecode.OpGreaterThan)
+		case "<=":
+			c.emit(bytecode.OpLessThanOrEqualTo)
+		case ">=":
+			c.emit(bytecode.OpGreaterThanOrEqualTo)
 		default:
 			return fmt.Errorf("unknown operator: %s", node.Operator)
 		}
