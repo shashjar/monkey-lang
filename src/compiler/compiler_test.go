@@ -929,6 +929,36 @@ func TestBuiltIns(t *testing.T) {
 				},
 			},
 		},
+		{
+			input: `
+			split("hello");
+			`,
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpGetBuiltIn, 7),
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpCall, 1),
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{
+				"hello",
+			},
+		},
+		{
+			input: `
+			split("hello world", " ");
+			`,
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpGetBuiltIn, 7),
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpCall, 2),
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{
+				"hello world",
+				" ",
+			},
+		},
 	}
 
 	runCompilerTests(t, tests)

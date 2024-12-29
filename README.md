@@ -61,6 +61,7 @@ Note that the features listed in this document are all supported in the compiler
       - [rest](#rest)
       - [append](#append)
       - [join](#join)
+      - [split](#split)
 
 ## Benchmarks
 
@@ -345,7 +346,16 @@ let c = append(a, fn(x) { x; }); // [1, 2, fn(x) { x; }]
 Joins the elements of the provided array into a single string with some delimiter if one is provided. All array elements must themselves be strings, and the delimiter must be a string.
 
 ```
-join(["hello", " world", "!"]) // "hello world!"
-join(["i", "am", "here"], " ") // "i am here"
-join(["1", "2", "3"], ", ") // "1, 2, 3"
+join(["hello", " world", "!"]); // "hello world!"
+join(["i", "am", "here"], " "); // "i am here"
+join(["1", "2", "3"], ", "); // "1, 2, 3"
+```
+
+#### split
+
+Splits the characters of the provided string into substrings separated by the provided separator string, if one is provided. If a separator is not provided, the string is split into individual characters. An array of the resulting substrings is returned.
+
+```
+split("hello"); // ["h", "e", "l", "l", "o"]
+split("hello world", " "); // ["hello", "world"]
 ```

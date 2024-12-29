@@ -675,6 +675,24 @@ func testExpectedObject(t *testing.T, expected interface{}, actual object.Object
 				t.Errorf("testIntegerObject failed: %s", err)
 			}
 		}
+	case []string:
+		array, ok := actual.(*object.Array)
+		if !ok {
+			t.Errorf("object is not an Array: %T (%+v)", actual, actual)
+			return
+		}
+
+		if len(array.Elements) != len(expected) {
+			t.Errorf("array has wrong number of elements. expected=%d, got=%d", len(expected), len(array.Elements))
+			return
+		}
+
+		for i, expectedElem := range expected {
+			err := testStringObject(expectedElem, array.Elements[i])
+			if err != nil {
+				t.Errorf("testStringObject failed: %s", err)
+			}
+		}
 	case map[object.HashKey]int64:
 		hashmap, ok := actual.(*object.HashMap)
 		if !ok {

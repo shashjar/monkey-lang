@@ -1,6 +1,9 @@
 package object
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 var BuiltIns = []struct {
 	Name    string
@@ -33,6 +36,10 @@ var BuiltIns = []struct {
 	{
 		"join",
 		join,
+	},
+	{
+		"split",
+		split,
 	},
 }
 
@@ -193,6 +200,37 @@ var join = &BuiltIn{
 			return &String{Value: joined}
 		default:
 			return newError("first argument to `join` must be an array, got %s", arr.Type())
+		}
+	},
+}
+
+var split = &BuiltIn{
+	Fn: func(args ...Object) Object {
+		if len(args) != 1 && len(args) != 2 {
+			return newError("wrong number of arguments. expected 1 or 2, got=%d", len(args))
+		}
+
+		var separator string
+		if len(args) == 2 {
+			sepStr, ok := args[1].(*String)
+			if !ok {
+				return newError("expected separator passed to `split` to be a string, got %s", args[1].Type())
+			}
+			separator = sepStr.Value
+		}
+
+		switch s := args[0].(type) {
+		case *String:
+			resultStrings := strings.Split(s.Value, separator)
+
+			resultObjects := []Object{}
+			for _, resultStr := range resultStrings {
+				resultObjects = append(resultObjects, &String{Value: resultStr})
+			}
+
+			return &Array{Elements: resultObjects}
+		default:
+			return newError("first argument to `split` must be a string, got %s", s.Type())
 		}
 	},
 }

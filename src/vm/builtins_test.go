@@ -229,3 +229,46 @@ func TestJoin(t *testing.T) {
 
 	runVMTests(t, tests)
 }
+
+func TestSplit(t *testing.T) {
+	tests := []vmTestCase{
+		{
+			input:    `split("")`,
+			expected: []string{},
+		},
+		{
+			input:    `split("a")`,
+			expected: []string{"a"},
+		},
+		{
+			input:    `split("abc")`,
+			expected: []string{"a", "b", "c"},
+		},
+		{
+			input:    `split("hello")`,
+			expected: []string{"h", "e", "l", "l", "o"},
+		},
+		{
+			input:    `split("hello world", " ")`,
+			expected: []string{"hello", "world"},
+		},
+		{
+			input:    `split("first,second,third,fourth", ",")`,
+			expected: []string{"first", "second", "third", "fourth"},
+		},
+		{
+			input:    `split("hello world", " ", "testing")`,
+			expected: &object.Error{Message: "wrong number of arguments. expected 1 or 2, got=3"},
+		},
+		{
+			input:    `split(13, " ")`,
+			expected: &object.Error{Message: "first argument to `split` must be a string, got INTEGER"},
+		},
+		{
+			input:    `split("hello world", true)`,
+			expected: &object.Error{Message: "expected separator passed to `split` to be a string, got BOOLEAN"},
+		},
+	}
+
+	runVMTests(t, tests)
+}
