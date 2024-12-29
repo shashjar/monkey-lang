@@ -82,6 +82,8 @@ func TestNextToken(t *testing.T) {
 	9 >= 8;
 
 	4.57 + 9;
+
+	22 // 7;
 	`
 
 	tests := []struct {
@@ -262,6 +264,11 @@ func TestNextToken(t *testing.T) {
 		{token.FLOAT, "4.57"},
 		{token.PLUS, "+"},
 		{token.INT, "9"},
+		{token.SEMICOLON, ";"},
+
+		{token.INT, "22"},
+		{token.INTEGER_DIV, "//"},
+		{token.INT, "7"},
 		{token.SEMICOLON, ";"},
 
 		{token.EOF, ""},

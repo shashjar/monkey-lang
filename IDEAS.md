@@ -9,7 +9,7 @@ This is a living document storing some ideas for extensions & improvements that 
 - [ ] Support `const` binding declarations in addition to `let`
 - [x] Logical boolean operators (`&&`, `||`)
 - [x] Modulo operator (`%`)
-- [ ] Add `//` (integer division) as a separate operator from `/`
+- [x] Add `//` (integer division) as a separate operator from `/`
 - [x] Additional comparison operators (`>=` & `<=`)
 - [x] Strings: comparison with `==` & `!=`
 - [ ] Strings: `split` operation

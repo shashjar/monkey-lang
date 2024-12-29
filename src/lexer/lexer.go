@@ -49,7 +49,11 @@ func (l *Lexer) NextToken() token.Token {
 	case '*':
 		tok = newToken(token.MUL, l.char)
 	case '/':
-		tok = newToken(token.DIV, l.char)
+		if l.peekChar() == '/' {
+			tok = l.readTwoCharacterToken(token.INTEGER_DIV)
+		} else {
+			tok = newToken(token.DIV, l.char)
+		}
 	case '%':
 		tok = newToken(token.MODULO, l.char)
 	case '!':

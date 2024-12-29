@@ -24,10 +24,11 @@ const (
 	// Operators
 	ASSIGN = "="
 
-	PLUS  = "+"
-	MINUS = "-"
-	MUL   = "*"
-	DIV   = "/"
+	PLUS        = "+"
+	MINUS       = "-"
+	MUL         = "*"
+	DIV         = "/"
+	INTEGER_DIV = "//"
 
 	MODULO = "%"
 

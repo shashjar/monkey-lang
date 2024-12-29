@@ -23,6 +23,7 @@ const (
 	OpSub
 	OpMul
 	OpDiv
+	OpIntegerDiv
 	OpMod
 
 	OpAnd
@@ -114,11 +115,12 @@ var definitions = map[Opcode]*Definition{
 	OpJumpNotTruthy: {"OpJumpNotTruthy", []int{2}},
 	OpJump:          {"OpJump", []int{2}},
 
-	OpAdd: {"OpAdd", []int{}},
-	OpSub: {"OpSub", []int{}},
-	OpMul: {"OpMul", []int{}},
-	OpDiv: {"OpDiv", []int{}},
-	OpMod: {"OpMod", []int{}},
+	OpAdd:        {"OpAdd", []int{}},
+	OpSub:        {"OpSub", []int{}},
+	OpMul:        {"OpMul", []int{}},
+	OpDiv:        {"OpDiv", []int{}},
+	OpIntegerDiv: {"OpIntegerDiv", []int{}},
+	OpMod:        {"OpMod", []int{}},
 
 	OpAnd: {"OpAnd", []int{}},
 	OpOr:  {"OpOr", []int{}},

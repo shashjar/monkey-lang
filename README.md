@@ -6,36 +6,6 @@ Monkey Programming Language, Interpreter, Compiler, & Virtual Machine written in
 
 I'm actively extending this language implementation with new features, for which I have many [ideas](IDEAS.md).
 
-## Table of Contents
-
-- [monkey-lang](#monkey-lang)
-  - [Table of Contents](#table-of-contents)
-  - [The Monkey Programming Language](#the-monkey-programming-language)
-  - [Usage](#usage)
-  - [Benchmarks](#benchmarks)
-  - [Implementation Details](#implementation-details)
-  - [Interpreter \& Evaluator](#interpreter--evaluator)
-  - [Compiler \& Virtual Machine](#compiler--virtual-machine)
-  - [Language Documentation](#language-documentation)
-    - [Summary](#summary)
-    - [Integers, Floats, and Arithmetic Operations](#integers-floats-and-arithmetic-operations)
-    - [Booleans](#booleans)
-    - [Comparison Operators](#comparison-operators)
-    - [Conditionals](#conditionals)
-    - [Bindings](#bindings)
-    - [Strings](#strings)
-    - [Arrays](#arrays)
-    - [Hashmaps](#hashmaps)
-    - [Functions](#functions)
-    - [Built-In Functions](#built-in-functions)
-      - [puts](#puts)
-      - [len](#len)
-      - [first](#first)
-      - [last](#last)
-      - [rest](#rest)
-      - [append](#append)
-      - [join](#join)
-
 ## The Monkey Programming Language
 
 Monkey is a programming language designed to help teach programming language theory & design, interpreters, and compilers.
@@ -61,6 +31,36 @@ go build -o monkey && ./monkey -engine=eval
 ```
 
 Note that the features listed in this document are all supported in the compiler/VM engine, but the interpreter/evaluator implementation may not be fully up-to-date.
+
+## Table of Contents
+
+- [monkey-lang](#monkey-lang)
+  - [The Monkey Programming Language](#the-monkey-programming-language)
+  - [Usage](#usage)
+  - [Table of Contents](#table-of-contents)
+  - [Benchmarks](#benchmarks)
+  - [Implementation Details](#implementation-details)
+  - [Interpreter \& Evaluator](#interpreter--evaluator)
+  - [Compiler \& Virtual Machine](#compiler--virtual-machine)
+  - [Language Documentation](#language-documentation)
+    - [Summary](#summary)
+    - [Integers, Floats, and Arithmetic Operations](#integers-floats-and-arithmetic-operations)
+    - [Booleans](#booleans)
+    - [Comparison Operators](#comparison-operators)
+    - [Conditionals](#conditionals)
+    - [Bindings](#bindings)
+    - [Strings](#strings)
+    - [Arrays](#arrays)
+    - [Hashmaps](#hashmaps)
+    - [Functions](#functions)
+    - [Built-In Functions](#built-in-functions)
+      - [puts](#puts)
+      - [len](#len)
+      - [first](#first)
+      - [last](#last)
+      - [rest](#rest)
+      - [append](#append)
+      - [join](#join)
 
 ## Benchmarks
 
@@ -108,10 +108,11 @@ The more advanced implementation of Monkey relies on a compiler & virtual machin
 
 ### Integers, Floats, and Arithmetic Operations
 
-The basic arithmetic operations (`+`, `-`, `*`, `/`) are supported for integers and floats (both 64 bits). The modulo operator `%` is also supported. Operations involving an integer and a float will produce a float, and division between two integers may produce either an integer or a float.
+The basic arithmetic operations (`+`, `-`, `*`, `/`, `//`) are supported for integers and floats (both 64 bits). The modulo operator `%` is also supported. Operations involving an integer and a float will produce a float, and division between two integers may produce either an integer or a float. Note that both regular division and integer division are supported.
 
 ```
 3 + (10 * 2) - (8 / -4);
+22 // 7;
 5 % 3;
 3.87 + 4 * 6.1;
 ```

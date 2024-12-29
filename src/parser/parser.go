@@ -35,28 +35,29 @@ const (
 	AND_OR       // && or ||
 	LESS_GREATER // > or <
 	SUM          // + or -
-	PRODUCT      // * or / or %
+	PRODUCT      // * or / or // or %
 	PREFIX       // -X or !X
 	CALL         // myFunction(X)
 	INDEX        // array[index]
 )
 
 var precedences = map[token.TokenType]int{
-	token.EQ:       EQUALS,
-	token.NOT_EQ:   EQUALS,
-	token.AND:      AND_OR,
-	token.OR:       AND_OR,
-	token.LT:       LESS_GREATER,
-	token.GT:       LESS_GREATER,
-	token.LTE:      LESS_GREATER,
-	token.GTE:      LESS_GREATER,
-	token.PLUS:     SUM,
-	token.MINUS:    SUM,
-	token.MUL:      PRODUCT,
-	token.DIV:      PRODUCT,
-	token.MODULO:   PRODUCT,
-	token.LPAREN:   CALL,
-	token.LBRACKET: INDEX,
+	token.EQ:          EQUALS,
+	token.NOT_EQ:      EQUALS,
+	token.AND:         AND_OR,
+	token.OR:          AND_OR,
+	token.LT:          LESS_GREATER,
+	token.GT:          LESS_GREATER,
+	token.LTE:         LESS_GREATER,
+	token.GTE:         LESS_GREATER,
+	token.PLUS:        SUM,
+	token.MINUS:       SUM,
+	token.MUL:         PRODUCT,
+	token.DIV:         PRODUCT,
+	token.INTEGER_DIV: PRODUCT,
+	token.MODULO:      PRODUCT,
+	token.LPAREN:      CALL,
+	token.LBRACKET:    INDEX,
 }
 
 func NewParser(l *lexer.Lexer) *Parser {
@@ -83,6 +84,7 @@ func NewParser(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.MINUS, p.parseInfixExpression)
 	p.registerInfix(token.MUL, p.parseInfixExpression)
 	p.registerInfix(token.DIV, p.parseInfixExpression)
+	p.registerInfix(token.INTEGER_DIV, p.parseInfixExpression)
 	p.registerInfix(token.MODULO, p.parseInfixExpression)
 	p.registerInfix(token.AND, p.parseInfixExpression)
 	p.registerInfix(token.OR, p.parseInfixExpression)

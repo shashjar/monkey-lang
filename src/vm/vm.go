@@ -107,7 +107,7 @@ func (vm *VM) Run() error {
 			jumpToPos := int(bytecode.ReadUint16(instr[ip+1:]))
 			vm.currentFrame().ip = jumpToPos - 1 // Set to `pos - 1` since this loop increments ip on each iteration
 
-		case bytecode.OpAdd, bytecode.OpSub, bytecode.OpMul, bytecode.OpDiv, bytecode.OpMod:
+		case bytecode.OpAdd, bytecode.OpSub, bytecode.OpMul, bytecode.OpDiv, bytecode.OpIntegerDiv, bytecode.OpMod:
 			err := vm.executeBinaryOperation(op)
 			if err != nil {
 				return err
@@ -386,6 +386,11 @@ func (vm *VM) executeBinaryNumericalOperation(op bytecode.Opcode, left object.Ob
 		if !isFloatOperation && int64(leftValue)%int64(rightValue) != 0 {
 			isFloatOperation = true
 		}
+	case bytecode.OpIntegerDiv:
+		if rightValue == 0 {
+			return fmt.Errorf("division by zero")
+		}
+		return vm.push(&object.Integer{Value: int64(leftValue / rightValue)})
 	case bytecode.OpMod:
 		if isFloatOperation {
 			return fmt.Errorf("modulo operation not supported for float values")
