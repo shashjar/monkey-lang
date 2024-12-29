@@ -6,6 +6,36 @@ Monkey Programming Language, Interpreter, Compiler, & Virtual Machine written in
 
 I'm actively extending this language implementation with new features, for which I have many [ideas](IDEAS.md).
 
+## Table of Contents
+
+- [monkey-lang](#monkey-lang)
+  - [Table of Contents](#table-of-contents)
+  - [The Monkey Programming Language](#the-monkey-programming-language)
+  - [Usage](#usage)
+  - [Benchmarks](#benchmarks)
+  - [Implementation Details](#implementation-details)
+  - [Interpreter \& Evaluator](#interpreter--evaluator)
+  - [Compiler \& Virtual Machine](#compiler--virtual-machine)
+  - [Language Documentation](#language-documentation)
+    - [Summary](#summary)
+    - [Integers, Floats, and Arithmetic Operations](#integers-floats-and-arithmetic-operations)
+    - [Booleans](#booleans)
+    - [Comparison Operators](#comparison-operators)
+    - [Conditionals](#conditionals)
+    - [Bindings](#bindings)
+    - [Strings](#strings)
+    - [Arrays](#arrays)
+    - [Hashmaps](#hashmaps)
+    - [Functions](#functions)
+    - [Built-In Functions](#built-in-functions)
+      - [puts](#puts)
+      - [len](#len)
+      - [first](#first)
+      - [last](#last)
+      - [rest](#rest)
+      - [append](#append)
+      - [join](#join)
+
 ## The Monkey Programming Language
 
 Monkey is a programming language designed to help teach programming language theory & design, interpreters, and compilers.
@@ -64,36 +94,6 @@ The more advanced implementation of Monkey relies on a compiler & virtual machin
 
 ## Language Documentation
 
-### Table of Contents
-
-- [monkey-lang](#monkey-lang)
-  - [The Monkey Programming Language](#the-monkey-programming-language)
-  - [Usage](#usage)
-  - [Benchmarks](#benchmarks)
-  - [Implementation Details](#implementation-details)
-  - [Interpreter \& Evaluator](#interpreter--evaluator)
-  - [Compiler \& Virtual Machine](#compiler--virtual-machine)
-  - [Language Documentation](#language-documentation)
-    - [Table of Contents](#table-of-contents)
-    - [Summary](#summary)
-    - [Integers \& Arithmetic Operations](#integers--arithmetic-operations)
-    - [Booleans](#booleans)
-    - [Comparison Operators](#comparison-operators)
-    - [Conditionals](#conditionals)
-    - [Bindings](#bindings)
-    - [Strings](#strings)
-    - [Arrays](#arrays)
-    - [Hashmaps](#hashmaps)
-    - [Functions](#functions)
-    - [Built-In Functions](#built-in-functions)
-      - [puts](#puts)
-      - [len](#len)
-      - [first](#first)
-      - [last](#last)
-      - [rest](#rest)
-      - [append](#append)
-      - [join](#join)
-
 ### Summary
 
 - Syntax inspired by JavaScript, Python, and C
@@ -106,17 +106,19 @@ The more advanced implementation of Monkey relies on a compiler & virtual machin
 - Closures
 - Recursion
 
-### Integers & Arithmetic Operations
+### Integers, Floats, and Arithmetic Operations
 
-The basic arithmetic operations (`+`, `-`, `*`, `/`) are supported for integers. Floating-point numbers are not yet implemented.
+The basic arithmetic operations (`+`, `-`, `*`, `/`) are supported for integers and floats (both 64 bits). The modulo operator `%` is also supported. Operations involving an integer and a float will produce a float, and division between two integers may produce either an integer or a float.
 
 ```
 3 + (10 * 2) - (8 / -4);
+5 % 3;
+3.87 + 4 * 6.1;
 ```
 
 ### Booleans
 
-The logical boolean operators `&&` and `||` are supported.
+The bang operator `!` and the logical boolean operators `&&` and `||` are supported.
 
 ```
 true;
@@ -131,13 +133,15 @@ false || true;
 
 ### Comparison Operators
 
-The comparison operators `==`, `!=`, `<`, and `>` are supported. `<=` and `>=` are not yet implemented.
+The comparison operators `==`, `!=`, `<`, `>`, `<=`, and `>=` are supported.
 
 ```
 2 + 2 == 2 * 2;
 3 != 1;
 4 < 5;
 -4 > -6;
+16 <= 42;
+89 >= 89;
 
 "hello" == "hello";
 "hello" != "world";
@@ -145,11 +149,13 @@ The comparison operators `==`, `!=`, `<`, and `>` are supported. `<=` and `>=` a
 
 ### Conditionals
 
-`if` statements with optional `else` clauses are supported. `else if` blocks are not yet implemented.
+`if` statements with optional `else if` and `else` clauses are supported. As many `else if` clauses as desired can be used.
 
 ```
-if (3 == 2 + 1) {
+if (x > 3) {
     27;
+} else if (x == 3) {
+    -14;
 } else {
     9;
 }
@@ -176,17 +182,18 @@ Strings can be added with `+`. More complex operations for strings, such as comp
 
 ### Arrays
 
-As Monkey has a purely dynamic type system, arrays can contain elements of different types. The index operator is used to access elements from within an array.
+As Monkey has a purely dynamic type system, arrays can contain elements of different types. The index operator is used to access elements from within an array. Arrays can also be added using the `+` operator.
 
 ```
 let a = [1, true, "hi there", 16 - 32, [9, false]];
 a[2];
 a[4][1];
+let b = a + [1, 4] + [true, "bye"];
 ```
 
 ### Hashmaps
 
-The hashable data types in Monkey are integers, booleans, and strings, so these are the data types that can be used as keys in hashmaps. Values of any type can be used as values in hashmaps. The index operator is used to access key-value pairings based on the key. When a key is not found in a hashmap, the index operation returns `null`.
+The hashable data types in Monkey are integers, booleans, and strings, so these are the data types that can be used as keys in hashmaps. Note that floats are not hashable in this implementation and therefore cannot be used as hashmap keys. Values of any type can be used as values in hashmaps. The index operator is used to access key-value pairings based on the key. When a key is not found in a hashmap, the index operation returns `null`.
 
 ```
 let h = {

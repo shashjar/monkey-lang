@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+	"math"
 	"monkey/ast"
 	"monkey/lexer"
 	"testing"
@@ -136,6 +137,39 @@ func TestIntegerLiteralExpression(t *testing.T) {
 	}
 	if literal.TokenLiteral() != "5" {
 		t.Errorf("literal.TokenLiteral is not %s. got=%s", "5", literal.TokenLiteral())
+	}
+}
+
+func TestFloatExpression(t *testing.T) {
+	input := "8.946;"
+
+	l := lexer.NewLexer(input)
+	p := NewParser(l)
+
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+	if program == nil {
+		t.Fatalf("ParseProgram() returned nil")
+	}
+	if len(program.Statements) != 1 {
+		t.Fatalf("program contains wrong number of statements. expected=%d, got=%d", 1, len(program.Statements))
+	}
+
+	statement, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not an *ast.ExpressionStatement. got=%T", program.Statements[0])
+	}
+
+	float, ok := statement.Expression.(*ast.Float)
+	if !ok {
+		t.Fatalf("expression is not an *ast.Float. got=%T", statement.Expression)
+	}
+
+	if math.Abs(float.Value-8.946) > ast.FLOAT_64_EQUALITY_THRESHOLD {
+		t.Errorf("float.Value is not %f. got=%f", 8.946, float.Value)
+	}
+	if float.TokenLiteral() != "8.946" {
+		t.Errorf("float.TokenLiteral is not %s. got=%s", "8.946", float.TokenLiteral())
 	}
 }
 
@@ -799,7 +833,7 @@ func TestCallExpressionParameterParsing(t *testing.T) {
 }
 
 func TestParsingArrayLiterals(t *testing.T) {
-	input := `[1, 2 * 2, "hello"]`
+	input := `[1, 2 * 2, "hello", 6.97]`
 
 	l := lexer.NewLexer(input)
 	p := NewParser(l)
@@ -819,13 +853,14 @@ func TestParsingArrayLiterals(t *testing.T) {
 		t.Fatalf("statement.Expression is not an ast.ArrayLiteral. got=%T", statement.Expression)
 	}
 
-	if len(array.Elements) != 3 {
-		t.Fatalf("len(array.Elements) is wrong. expected=3, got=%d", len(array.Elements))
+	if len(array.Elements) != 4 {
+		t.Fatalf("len(array.Elements) is wrong. expected=4, got=%d", len(array.Elements))
 	}
 
 	testIntegerLiteral(t, array.Elements[0], 1)
 	testInfixExpression(t, array.Elements[1], 2, "*", 2)
 	testStringLiteral(t, array.Elements[2], "hello")
+	testFloat(t, array.Elements[3], 6.97)
 }
 
 func TestParsingIndexExpressions(t *testing.T) {
@@ -1154,6 +1189,8 @@ func testLiteralExpression(t *testing.T, exp ast.Expression, expected interface{
 		return testIntegerLiteral(t, exp, int64(v))
 	case int64:
 		return testIntegerLiteral(t, exp, v)
+	case float64:
+		return testFloat(t, exp, v)
 	case string:
 		return testIdentifier(t, exp, v)
 	case bool:
@@ -1177,6 +1214,21 @@ func testIntegerLiteral(t *testing.T, il ast.Expression, value int64) bool {
 
 	if integer.TokenLiteral() != fmt.Sprintf("%d", value) {
 		t.Errorf("integer.TokenLiteral is not %d. got=%s", value, integer.TokenLiteral())
+		return false
+	}
+
+	return true
+}
+
+func testFloat(t *testing.T, f ast.Expression, value float64) bool {
+	float, ok := f.(*ast.Float)
+	if !ok {
+		t.Errorf("f is not an *ast.Float. got=%T", f)
+		return false
+	}
+
+	if math.Abs(float.Value-value) > ast.FLOAT_64_EQUALITY_THRESHOLD {
+		t.Errorf("float.Value is not %f. got=%f", value, float.Value)
 		return false
 	}
 

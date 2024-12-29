@@ -223,6 +223,10 @@ func (c *Compiler) Compile(node ast.Node) error {
 		integer := &object.Integer{Value: node.Value}
 		c.emit(bytecode.OpConstant, c.addConstant(integer))
 
+	case *ast.Float:
+		float := &object.Float{Value: node.Value}
+		c.emit(bytecode.OpConstant, c.addConstant(float))
+
 	case *ast.Boolean:
 		if node.Value {
 			c.emit(bytecode.OpTrue)

@@ -352,8 +352,8 @@ func (vm *VM) executeBinaryOperation(op bytecode.Opcode) error {
 	rightType := right.Type()
 
 	switch {
-	case leftType == object.INTEGER_OBJ && rightType == object.INTEGER_OBJ:
-		return vm.executeBinaryIntegerOperation(op, left, right)
+	case isNumerical(leftType) && isNumerical(rightType):
+		return vm.executeBinaryNumericalOperation(op, left, right)
 	case leftType == object.STRING_OBJ && rightType == object.STRING_OBJ:
 		return vm.executeBinaryStringOperation(op, left, right)
 	case leftType == object.ARRAY_OBJ && rightType == object.ARRAY_OBJ:
@@ -363,11 +363,13 @@ func (vm *VM) executeBinaryOperation(op bytecode.Opcode) error {
 	}
 }
 
-func (vm *VM) executeBinaryIntegerOperation(op bytecode.Opcode, left object.Object, right object.Object) error {
-	leftValue := left.(*object.Integer).Value
-	rightValue := right.(*object.Integer).Value
+func (vm *VM) executeBinaryNumericalOperation(op bytecode.Opcode, left object.Object, right object.Object) error {
+	var result interface{}
 
-	var result int64
+	leftValue, leftIsFloat := getNumericalValue(left)
+	rightValue, rightIsFloat := getNumericalValue(right)
+
+	isFloatOperation := leftIsFloat || rightIsFloat
 
 	switch op {
 	case bytecode.OpAdd:
@@ -377,14 +379,27 @@ func (vm *VM) executeBinaryIntegerOperation(op bytecode.Opcode, left object.Obje
 	case bytecode.OpMul:
 		result = leftValue * rightValue
 	case bytecode.OpDiv:
+		if rightValue == 0 {
+			return fmt.Errorf("division by zero")
+		}
 		result = leftValue / rightValue
+		if !isFloatOperation && int64(leftValue)%int64(rightValue) != 0 {
+			isFloatOperation = true
+		}
 	case bytecode.OpMod:
-		result = leftValue % rightValue
+		if isFloatOperation {
+			return fmt.Errorf("modulo operation not supported for float values")
+		}
+		return vm.push(&object.Integer{Value: int64(leftValue) % int64(rightValue)})
 	default:
-		return fmt.Errorf("unknown binary integer operator: %d", op)
+		return fmt.Errorf("unknown binary numerical operator: %d", op)
 	}
 
-	return vm.push(&object.Integer{Value: result})
+	if isFloatOperation {
+		return vm.push(&object.Float{Value: result.(float64)})
+	} else {
+		return vm.push(&object.Integer{Value: int64(result.(float64))})
+	}
 }
 
 func (vm *VM) executeBinaryStringOperation(op bytecode.Opcode, left object.Object, right object.Object) error {
@@ -446,8 +461,8 @@ func (vm *VM) executeComparison(op bytecode.Opcode) error {
 	leftType := left.Type()
 	rightType := right.Type()
 
-	if leftType == object.INTEGER_OBJ && rightType == object.INTEGER_OBJ {
-		return vm.executeIntegerComparison(op, left, right)
+	if isNumerical(leftType) && isNumerical(rightType) {
+		return vm.executeNumericalComparison(op, left, right)
 	} else if leftType == object.BOOLEAN_OBJ && rightType == object.BOOLEAN_OBJ {
 		return vm.executeBooleanComparison(op, left, right)
 	} else if leftType == object.STRING_OBJ && rightType == object.STRING_OBJ {
@@ -457,25 +472,25 @@ func (vm *VM) executeComparison(op bytecode.Opcode) error {
 	return fmt.Errorf("unsupported types for binary comparison: %s %s", leftType, rightType)
 }
 
-func (vm *VM) executeIntegerComparison(op bytecode.Opcode, left object.Object, right object.Object) error {
-	leftValue := left.(*object.Integer).Value
-	rightValue := right.(*object.Integer).Value
+func (vm *VM) executeNumericalComparison(op bytecode.Opcode, left object.Object, right object.Object) error {
+	leftValue, _ := getNumericalValue(left)
+	rightValue, _ := getNumericalValue(right)
 
 	switch op {
 	case bytecode.OpEqual:
-		return vm.push(nativeBoolToBooleanObject(leftValue == rightValue))
+		return vm.push(nativeBoolToBooleanObject(floatEquality(leftValue, rightValue)))
 	case bytecode.OpNotEqual:
-		return vm.push(nativeBoolToBooleanObject(leftValue != rightValue))
+		return vm.push(nativeBoolToBooleanObject(!floatEquality(leftValue, rightValue)))
 	case bytecode.OpLessThan:
 		return vm.push(nativeBoolToBooleanObject(leftValue < rightValue))
 	case bytecode.OpGreaterThan:
 		return vm.push(nativeBoolToBooleanObject(leftValue > rightValue))
 	case bytecode.OpLessThanOrEqualTo:
-		return vm.push(nativeBoolToBooleanObject(leftValue <= rightValue))
+		return vm.push(nativeBoolToBooleanObject(leftValue < rightValue || floatEquality(leftValue, rightValue)))
 	case bytecode.OpGreaterThanOrEqualTo:
-		return vm.push(nativeBoolToBooleanObject(leftValue >= rightValue))
+		return vm.push(nativeBoolToBooleanObject(leftValue > rightValue || floatEquality(leftValue, rightValue)))
 	default:
-		return fmt.Errorf("unknown binary integer comparison operator: %d", op)
+		return fmt.Errorf("unknown binary numerical comparison operator: %d", op)
 	}
 }
 
@@ -508,12 +523,13 @@ func (vm *VM) executeStringComparison(op bytecode.Opcode, left object.Object, ri
 func (vm *VM) executeMinusOperator() error {
 	operand := vm.pop()
 
-	if operand.Type() != object.INTEGER_OBJ {
-		return fmt.Errorf("unsupported type for negation: %s", operand.Type())
+	if operand.Type() == object.INTEGER_OBJ {
+		return vm.push(&object.Integer{Value: -operand.(*object.Integer).Value})
+	} else if operand.Type() == object.FLOAT_OBJ {
+		return vm.push(&object.Float{Value: -operand.(*object.Float).Value})
 	}
 
-	value := operand.(*object.Integer).Value
-	return vm.push(&object.Integer{Value: -value})
+	return fmt.Errorf("unsupported type for negation: %s", operand.Type())
 }
 
 func (vm *VM) executeBangOperator() error {

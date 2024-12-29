@@ -2,6 +2,7 @@ package vm
 
 import (
 	"fmt"
+	"math"
 	"monkey/ast"
 	"monkey/compiler"
 	"monkey/lexer"
@@ -15,10 +16,12 @@ type vmTestCase struct {
 	expected interface{}
 }
 
-func TestIntegerArithmetic(t *testing.T) {
+func TestArithmetic(t *testing.T) {
 	tests := []vmTestCase{
 		{"1", 1},
 		{"2", 2},
+		{"1.49", 1.49},
+		{"-7801.23189123", -7801.23189123},
 		{"-4", -4},
 		{"1 + 2", 3},
 		{"4 - 9", -5},
@@ -27,6 +30,7 @@ func TestIntegerArithmetic(t *testing.T) {
 		{"-2 * 4", -8},
 		{"5 * 12", 60},
 		{"21 / 7", 3},
+		{"22 / 7", 3.1428571429},
 		{"0 % 10", 0},
 		{"36 % 6", 0},
 		{"7 % 4", 3},
@@ -39,6 +43,9 @@ func TestIntegerArithmetic(t *testing.T) {
 		{"5 * (2 + 10)", 60},
 		{"3 * -(2 + 10) + 4", -32},
 		{"3 * -(2 + 10) + 4 % 3", -35},
+		{"7 * 8.4178923", 58.9252461},
+		{"6.84 - 10 * 9.8 + 42.17987", -48.98013},
+		{"5 * (6.87 - 10.892137) / 4.21 + (10 - 7) * 11.6", 30.0231152019},
 	}
 
 	runVMTests(t, tests)
@@ -113,6 +120,7 @@ func TestConditionals(t *testing.T) {
 		{"if (1 > 2) { 10 } else if (1 < 2) { 20 }", 20},
 		{"if ((if (false) { false } else { true })) { 5 } else { 7 }", 5},
 		{"if (3) { 10 } else if (4) { 20 } else { 30 }", 10},
+		{"if (81.917) { 10 } else if (4) { 20 } else { 30 }", 10},
 	}
 
 	runVMTests(t, tests)
@@ -631,6 +639,11 @@ func testExpectedObject(t *testing.T, expected interface{}, actual object.Object
 		if err != nil {
 			t.Errorf("testIntegerObject failed: %s", err)
 		}
+	case float64:
+		err := testFloatObject(float64(expected), actual)
+		if err != nil {
+			t.Errorf("testFloatObject failed: %s", err)
+		}
 	case bool:
 		err := testBooleanObject(bool(expected), actual)
 		if err != nil {
@@ -696,6 +709,8 @@ func testExpectedObject(t *testing.T, expected interface{}, actual object.Object
 		if actual != Null {
 			t.Errorf("object is not Null: %T (%+v)", actual, actual)
 		}
+	default:
+		t.Errorf("unknown expected object type: %T", expected)
 	}
 }
 
@@ -707,6 +722,19 @@ func testIntegerObject(expected int64, actual object.Object) error {
 
 	if result.Value != expected {
 		return fmt.Errorf("object has wrong integer value. expected=%d, got=%d", expected, result.Value)
+	}
+
+	return nil
+}
+
+func testFloatObject(expected float64, actual object.Object) error {
+	result, ok := actual.(*object.Float)
+	if !ok {
+		return fmt.Errorf("object is not a Float. got=%T (%+v)", actual, actual)
+	}
+
+	if math.Abs(result.Value-expected) > ast.FLOAT_64_EQUALITY_THRESHOLD {
+		return fmt.Errorf("object has wrong float value. expected=%f, got=%f", expected, result.Value)
 	}
 
 	return nil

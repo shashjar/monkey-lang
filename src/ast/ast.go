@@ -225,6 +225,24 @@ func (il *IntegerLiteral) String() string {
 	return il.Token.Literal
 }
 
+// Represents a 64-bit float number, consisting of the FLOAT token and the value of the float.
+type Float struct {
+	Token token.Token // the token.FLOAT token
+	Value float64
+}
+
+const FLOAT_64_EQUALITY_THRESHOLD = 1e-9
+
+func (f *Float) expressionNode() {}
+
+func (f *Float) TokenLiteral() string {
+	return f.Token.Literal
+}
+
+func (f *Float) String() string {
+	return f.Token.Literal
+}
+
 // Represents a boolean, consisting of the TRUE or FALSE token and the value of the boolean.
 type Boolean struct {
 	Token token.Token

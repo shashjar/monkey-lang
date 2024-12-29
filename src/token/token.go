@@ -16,6 +16,7 @@ const (
 	// Identifiers & Literals
 	IDENT  = "IDENT"
 	INT    = "INT"
+	FLOAT  = "FLOAT"
 	TRUE   = "TRUE"
 	FALSE  = "FALSE"
 	STRING = "STRING"

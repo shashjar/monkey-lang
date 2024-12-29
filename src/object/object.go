@@ -15,6 +15,7 @@ type ObjectType string
 const (
 	NULL_OBJ              = "NULL"
 	INTEGER_OBJ           = "INTEGER"
+	FLOAT_OBJ             = "FLOAT"
 	BOOLEAN_OBJ           = "BOOLEAN"
 	STRING_OBJ            = "STRING"
 	ARRAY_OBJ             = "ARRAY"
@@ -57,6 +58,19 @@ func (i *Integer) Type() ObjectType {
 
 func (i *Integer) Inspect() string {
 	return fmt.Sprintf("%d", i.Value)
+}
+
+// Represents a 64-bit float.
+type Float struct {
+	Value float64
+}
+
+func (f *Float) Type() ObjectType {
+	return FLOAT_OBJ
+}
+
+func (f *Float) Inspect() string {
+	return fmt.Sprintf("%f", f.Value)
 }
 
 // Represents a boolean.

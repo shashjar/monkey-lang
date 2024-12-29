@@ -2,6 +2,7 @@ package compiler
 
 import (
 	"fmt"
+	"math"
 	"monkey/ast"
 	"monkey/bytecode"
 	"monkey/lexer"
@@ -16,7 +17,7 @@ type compilerTestCase struct {
 	expectedConstants    []interface{}
 }
 
-func TestIntegerArithmetic(t *testing.T) {
+func TestArithmetic(t *testing.T) {
 	tests := []compilerTestCase{
 		{
 			input: "-2",
@@ -26,6 +27,15 @@ func TestIntegerArithmetic(t *testing.T) {
 				bytecode.Make(bytecode.OpPop),
 			},
 			expectedConstants: []interface{}{2},
+		},
+		{
+			input: "-8.64",
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpMinus),
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{8.64},
 		},
 		{
 			input: "1; 2;",
@@ -68,14 +78,14 @@ func TestIntegerArithmetic(t *testing.T) {
 			expectedConstants: []interface{}{2, 8},
 		},
 		{
-			input: "15 / 5",
+			input: "15 / 5.45",
 			expectedInstructions: []bytecode.Instructions{
 				bytecode.Make(bytecode.OpConstant, 0),
 				bytecode.Make(bytecode.OpConstant, 1),
 				bytecode.Make(bytecode.OpDiv),
 				bytecode.Make(bytecode.OpPop),
 			},
-			expectedConstants: []interface{}{15, 5},
+			expectedConstants: []interface{}{15, 5.45},
 		},
 		{
 			input: "14 % 5",
@@ -86,6 +96,18 @@ func TestIntegerArithmetic(t *testing.T) {
 				bytecode.Make(bytecode.OpPop),
 			},
 			expectedConstants: []interface{}{14, 5},
+		},
+		{
+			input: "3.1415 * 2.718 - 1",
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpMul),
+				bytecode.Make(bytecode.OpConstant, 2),
+				bytecode.Make(bytecode.OpSub),
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{3.1415, 2.718, 1},
 		},
 	}
 
@@ -1148,6 +1170,11 @@ func testConstants(expected []interface{}, actual []object.Object) error {
 			if err != nil {
 				return fmt.Errorf("constant %d - testIntegerObject failed: %s", i, err)
 			}
+		case float64:
+			err := testFloatObject(float64(expConst), actual[i])
+			if err != nil {
+				return fmt.Errorf("constant %d - testFloatObject failed: %s", i, err)
+			}
 		case string:
 			err := testStringObject(expConst, actual[i])
 			if err != nil {
@@ -1163,6 +1190,8 @@ func testConstants(expected []interface{}, actual []object.Object) error {
 			if err != nil {
 				return fmt.Errorf("constant %d - testInstructions failed: %s", i, err)
 			}
+		default:
+			return fmt.Errorf("unknown expected constant type: %T", expConst)
 		}
 	}
 
@@ -1185,6 +1214,19 @@ func testIntegerObject(expected int64, actual object.Object) error {
 
 	if result.Value != expected {
 		return fmt.Errorf("object has wrong integer value. expected=%d, got=%d", expected, result.Value)
+	}
+
+	return nil
+}
+
+func testFloatObject(expected float64, actual object.Object) error {
+	result, ok := actual.(*object.Float)
+	if !ok {
+		return fmt.Errorf("object is not a Float. got=%T (%+v)", actual, actual)
+	}
+
+	if math.Abs(result.Value-expected) > ast.FLOAT_64_EQUALITY_THRESHOLD {
+		return fmt.Errorf("object has wrong float value. expected=%f, got=%f", expected, result.Value)
 	}
 
 	return nil
