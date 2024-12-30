@@ -77,8 +77,10 @@ func Start(in io.Reader, out io.Writer) {
 
 		// Printing Output
 		lastPopped := vm.LastPoppedStackElem()
-		io.WriteString(out, lastPopped.Inspect())
-		io.WriteString(out, "\n")
+		if lastPopped != nil {
+			io.WriteString(out, lastPopped.Inspect())
+			io.WriteString(out, "\n")
+		}
 	}
 }
 
