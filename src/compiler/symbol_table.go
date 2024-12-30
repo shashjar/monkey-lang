@@ -16,6 +16,7 @@ type Symbol struct {
 	Name  string
 	Scope SymbolScope
 	Index int
+	Const bool
 }
 
 // Represents a symbol table associating Monkey identifiers with information.
@@ -45,6 +46,19 @@ func NewEnclosedSymbolTable(outer *SymbolTable) *SymbolTable {
 
 func (st *SymbolTable) Define(name string) Symbol {
 	sym := Symbol{Name: name, Index: st.numDefinitions}
+	if st.outer == nil {
+		sym.Scope = GlobalScope
+	} else {
+		sym.Scope = LocalScope
+	}
+
+	st.store[name] = sym
+	st.numDefinitions += 1
+	return sym
+}
+
+func (st *SymbolTable) DefineConst(name string) Symbol {
+	sym := Symbol{Name: name, Index: st.numDefinitions, Const: true}
 	if st.outer == nil {
 		sym.Scope = GlobalScope
 	} else {

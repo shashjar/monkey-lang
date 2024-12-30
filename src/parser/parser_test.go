@@ -40,6 +40,38 @@ func TestLetStatements(t *testing.T) {
 	}
 }
 
+func TestConstStatements(t *testing.T) {
+	tests := []struct {
+		input              string
+		expectedIdentifier string
+		expectedValue      interface{}
+	}{
+		{"const X = 5;", "X", 5},
+		{"const Y = true;", "Y", true},
+		{"const FOOBAR = Y;", "FOOBAR", "Y"},
+	}
+
+	for _, test := range tests {
+		l := lexer.NewLexer(test.input)
+		p := NewParser(l)
+		program := p.ParseProgram()
+		checkParserErrors(t, p)
+		if len(program.Statements) != 1 {
+			t.Fatalf("program contains wrong number of statements. expected=%d, got=%d", 1, len(program.Statements))
+		}
+
+		statement := program.Statements[0]
+		if !testConstStatement(t, statement, test.expectedIdentifier) {
+			return
+		}
+
+		val := statement.(*ast.ConstStatement).Value
+		if !testLiteralExpression(t, val, test.expectedValue) {
+			return
+		}
+	}
+}
+
 func TestAssignStatements(t *testing.T) {
 	tests := []struct {
 		input              string
@@ -1187,6 +1219,30 @@ func testLetStatement(t *testing.T, statement ast.Statement, name string) bool {
 
 	if letStatement.Name.TokenLiteral() != name {
 		t.Errorf("letStatement.Name.TokenLiteral() is not '%s'. got=%s", name, letStatement.Name.TokenLiteral())
+		return false
+	}
+
+	return true
+}
+
+func testConstStatement(t *testing.T, statement ast.Statement, name string) bool {
+	if statement.TokenLiteral() != "const" {
+		t.Errorf("statement.TokenLiteral not 'const'. got=%q", statement.TokenLiteral())
+	}
+
+	constStatement, ok := statement.(*ast.ConstStatement)
+	if !ok {
+		t.Errorf("statement is not an *ast.constStatement. got=%T", statement)
+		return false
+	}
+
+	if constStatement.Name.Value != name {
+		t.Errorf("constStatement.Name.Value is not '%s'. got=%s", name, constStatement.Name.Value)
+		return false
+	}
+
+	if constStatement.Name.TokenLiteral() != name {
+		t.Errorf("constStatement.Name.TokenLiteral() is not '%s'. got=%s", name, constStatement.Name.TokenLiteral())
 		return false
 	}
 

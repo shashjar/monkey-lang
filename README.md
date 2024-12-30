@@ -167,7 +167,7 @@ if (x > 3) {
 
 Bindings in Monkey can be defined using the `let` keyword. Once a variable with a given name has been declared using `let`, its value can be reassigned using a naked assign statement, as shown below. Note that a variable binding's value can only be reassigned in the same scope in which it was originally declared.
 
-`const` declarations, as in JavaScript, are not yet supported.
+`const` declarations, as in JavaScript, are also supported. If a binding is declared using the `const` keyword, its value may not be reassigned later.
 
 ```
 let a = 3;
@@ -177,6 +177,9 @@ let b = a;
 let c = a + b;
 
 d = b + c; // Illegal assignment (`d` has not been declared - compile-time error)
+
+const e = 50;
+e = 40; // Illegal reassignment (`e` is a const)
 ```
 
 ### Strings

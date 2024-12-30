@@ -139,6 +139,52 @@ func TestGlobalLetStatements(t *testing.T) {
 	runVMTests(t, tests)
 }
 
+func TestConstStatements(t *testing.T) {
+	tests := []vmTestCase{
+		{"const one = 1; one", 1},
+		{"const one = 1; const two = 2; one + two", 3},
+		{"const one = 1; const three = one + one + 1; one + three;", 4},
+		{
+			input: `
+			const num = 10;
+			let f = fn() {
+				return num;
+			};
+			f();
+			`,
+			expected: 10,
+		},
+		{
+			input: `
+			const num = 10;
+			let f = fn() {
+				const num = 20;
+				let g = fn() {
+					const num = 30;
+					return num;
+				};
+				return g();
+			};
+			f();
+			`,
+			expected: 30,
+		},
+		{
+			input: `
+			const num = 10;
+			let f = fn() {
+				let f = 20;
+				return f;
+			};
+			f();
+			`,
+			expected: 20,
+		},
+	}
+
+	runVMTests(t, tests)
+}
+
 func TestAssignStatements(t *testing.T) {
 	tests := []vmTestCase{
 		{"let one = 1; one = one + 1; one;", 2},

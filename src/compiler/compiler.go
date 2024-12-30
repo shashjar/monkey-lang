@@ -92,7 +92,31 @@ func (c *Compiler) Compile(node ast.Node) error {
 		c.emit(bytecode.OpPop)
 
 	case *ast.LetStatement:
-		symbol := c.symbolTable.Define(node.Name.Value)
+		symbol, ok := c.symbolTable.store[node.Name.Value] // Only able to declare this variable if it hasn't already been declared
+		if ok && (symbol.Scope == GlobalScope || symbol.Scope == LocalScope) {
+			return fmt.Errorf("identifier '%s' has already been declared", node.Name.Value)
+		}
+
+		symbol = c.symbolTable.Define(node.Name.Value)
+
+		err := c.Compile(node.Value)
+		if err != nil {
+			return err
+		}
+
+		if symbol.Scope == GlobalScope {
+			c.emit(bytecode.OpSetGlobal, symbol.Index)
+		} else {
+			c.emit(bytecode.OpSetLocal, symbol.Index)
+		}
+
+	case *ast.ConstStatement:
+		symbol, ok := c.symbolTable.store[node.Name.Value] // Only able to declare this variable if it hasn't already been declared
+		if ok && (symbol.Scope == GlobalScope || symbol.Scope == LocalScope) {
+			return fmt.Errorf("identifier '%s' has already been declared", node.Name.Value)
+		}
+
+		symbol = c.symbolTable.DefineConst(node.Name.Value)
 
 		err := c.Compile(node.Value)
 		if err != nil {
@@ -109,6 +133,9 @@ func (c *Compiler) Compile(node ast.Node) error {
 		symbol, ok := c.symbolTable.store[node.Name.Value] // Only able to reassign value if the variable was declared in the same scope we're currently in
 		if !ok {
 			return fmt.Errorf("attempting to assign value to identifier '%s' prior to declaration", node.Name.Value)
+		}
+		if symbol.Const {
+			return fmt.Errorf("attempting to assign value to constant variable '%s'", node.Name.Value)
 		}
 
 		err := c.Compile(node.Value)

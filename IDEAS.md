@@ -7,7 +7,7 @@ This is a living document storing some ideas for extensions & improvements that 
 - [x] Support floating-point numbers (currently only integers are supported)
 - [x] Add support for `else if` within conditional expressions
 - [x] Allow for reassignment of values to variables declared with let
-- [ ] Support `const` binding declarations in addition to `let`
+- [x] Support `const` binding declarations in addition to `let`
 - [x] Logical boolean operators (`&&`, `||`)
 - [x] Modulo operator (`%`)
 - [x] Add `//` (integer division) as a separate operator from `/`

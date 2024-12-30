@@ -454,6 +454,120 @@ func TestGlobalLetStatements(t *testing.T) {
 	runCompilerTests(t, tests)
 }
 
+func TestGlobalConstStatements(t *testing.T) {
+	tests := []compilerTestCase{
+		{
+			input: `
+			const one = 1;
+			const two = 2;
+			`,
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpSetGlobal, 0),
+				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpSetGlobal, 1),
+			},
+			expectedConstants: []interface{}{1, 2},
+		},
+		{
+			input: `
+			const one = 1;
+			one;
+			`,
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpSetGlobal, 0),
+				bytecode.Make(bytecode.OpGetGlobal, 0),
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{1},
+		},
+		{
+			input: `
+			const one = 1;
+			const two = one;
+			two;
+			`,
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpSetGlobal, 0),
+				bytecode.Make(bytecode.OpGetGlobal, 0),
+				bytecode.Make(bytecode.OpSetGlobal, 1),
+				bytecode.Make(bytecode.OpGetGlobal, 1),
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{1},
+		},
+	}
+
+	runCompilerTests(t, tests)
+}
+
+func TestConstStatementsErrors(t *testing.T) {
+	tests := []compilerErrorTestCase{
+		{
+			input: `
+			const num = 10;
+			num = 20;
+			`,
+			expectedError: `attempting to assign value to constant variable 'num'`,
+		},
+		{
+			input: `
+			const num = 10;
+			fn() {
+				num = 20;
+				num;
+			}
+			num;
+			`,
+			expectedError: `attempting to assign value to identifier 'num' prior to declaration`,
+		},
+		{
+			input: `
+			const num = 10;
+			fn() {
+				const num = 20;
+				num = 30;
+				return num;
+			}
+			num;
+			`,
+			expectedError: `attempting to assign value to constant variable 'num'`,
+		},
+		{
+			input: `
+			const num = 10;
+			let num = 20;
+			`,
+			expectedError: `identifier 'num' has already been declared`,
+		},
+		{
+			input: `
+			let num = 10;
+			const num = 20;
+			`,
+			expectedError: `identifier 'num' has already been declared`,
+		},
+		{
+			input: `
+			let num = 10;
+			let num = 20;
+			`,
+			expectedError: `identifier 'num' has already been declared`,
+		},
+		{
+			input: `
+			const num = 10;
+			const num = 20;
+			`,
+			expectedError: `identifier 'num' has already been declared`,
+		},
+	}
+
+	runCompilerErrorTests(t, tests)
+}
+
 func TestGlobalAssignStatements(t *testing.T) {
 	tests := []compilerTestCase{
 		{
@@ -948,6 +1062,80 @@ func TestLetStatementScopes(t *testing.T) {
 			fn() {
 				let a = 55;
 				let b = 77;
+				a + b
+			}
+			`,
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpClosure, 2, 0),
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{
+				55,
+				77,
+				[]bytecode.Instructions{
+					bytecode.Make(bytecode.OpConstant, 0),
+					bytecode.Make(bytecode.OpSetLocal, 0),
+					bytecode.Make(bytecode.OpConstant, 1),
+					bytecode.Make(bytecode.OpSetLocal, 1),
+					bytecode.Make(bytecode.OpGetLocal, 0),
+					bytecode.Make(bytecode.OpGetLocal, 1),
+					bytecode.Make(bytecode.OpAdd),
+					bytecode.Make(bytecode.OpReturnValue),
+				},
+			},
+		},
+	}
+
+	runCompilerTests(t, tests)
+}
+
+func TestConstStatementScopes(t *testing.T) {
+	tests := []compilerTestCase{
+		{
+			input: `
+			const num = 55;
+			fn() { num; }
+			`,
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpSetGlobal, 0),
+				bytecode.Make(bytecode.OpClosure, 1, 0),
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{
+				55,
+				[]bytecode.Instructions{
+					bytecode.Make(bytecode.OpGetGlobal, 0),
+					bytecode.Make(bytecode.OpReturnValue),
+				},
+			},
+		},
+		{
+			input: `
+			fn() {
+				const num = 55;
+				num;
+			}
+			`,
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpClosure, 1, 0),
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{
+				55,
+				[]bytecode.Instructions{
+					bytecode.Make(bytecode.OpConstant, 0),
+					bytecode.Make(bytecode.OpSetLocal, 0),
+					bytecode.Make(bytecode.OpGetLocal, 0),
+					bytecode.Make(bytecode.OpReturnValue),
+				},
+			},
+		},
+		{
+			input: `
+			fn() {
+				const a = 55;
+				const b = 77;
 				a + b
 			}
 			`,

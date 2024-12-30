@@ -155,7 +155,9 @@ func (p *Parser) registerInfix(tokenType token.TokenType, fn infixParseFn) {
 func (p *Parser) parseStatement() ast.Statement {
 	switch {
 	case p.currToken.Type == token.LET:
-		return p.parseLetStatement()
+		return p.parseBindingDeclarationStatement(false)
+	case p.currToken.Type == token.CONST:
+		return p.parseBindingDeclarationStatement(true)
 	case p.currToken.Type == token.IDENT && p.peekTokenIs(token.ASSIGN):
 		return p.parseAssignStatement()
 	case p.currToken.Type == token.RETURN:
@@ -165,14 +167,19 @@ func (p *Parser) parseStatement() ast.Statement {
 	}
 }
 
-func (p *Parser) parseLetStatement() ast.Statement {
-	letStatement := &ast.LetStatement{Token: p.currToken}
+func (p *Parser) parseBindingDeclarationStatement(isConst bool) ast.Statement {
+	var statement ast.Statement
+	if isConst {
+		statement = &ast.ConstStatement{Token: p.currToken}
+	} else {
+		statement = &ast.LetStatement{Token: p.currToken}
+	}
 
 	if !p.expectPeek(token.IDENT) {
 		return nil
 	}
 
-	letStatement.Name = &ast.Identifier{Token: p.currToken, Value: p.currToken.Literal}
+	name := &ast.Identifier{Token: p.currToken, Value: p.currToken.Literal}
 
 	if !p.expectPeek(token.ASSIGN) {
 		return nil
@@ -180,17 +187,26 @@ func (p *Parser) parseLetStatement() ast.Statement {
 
 	p.nextToken()
 
-	letStatement.Value = p.parseExpression(LOWEST)
+	value := p.parseExpression(LOWEST)
 
-	if fl, ok := letStatement.Value.(*ast.FunctionLiteral); ok {
-		fl.Name = letStatement.Name.Value
+	if fl, ok := value.(*ast.FunctionLiteral); ok {
+		fl.Name = name.Value
 	}
 
 	if p.peekTokenIs(token.SEMICOLON) {
 		p.nextToken()
 	}
 
-	return letStatement
+	switch statement := statement.(type) {
+	case *ast.LetStatement:
+		statement.Name = name
+		statement.Value = value
+	case *ast.ConstStatement:
+		statement.Name = name
+		statement.Value = value
+	}
+
+	return statement
 }
 
 func (p *Parser) parseAssignStatement() ast.Statement {

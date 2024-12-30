@@ -87,6 +87,8 @@ func TestNextToken(t *testing.T) {
 
 	let a = 5;
 	a = 6;
+
+	const FIFTY = 50;
 	`
 
 	tests := []struct {
@@ -282,6 +284,12 @@ func TestNextToken(t *testing.T) {
 		{token.IDENT, "a"},
 		{token.ASSIGN, "="},
 		{token.INT, "6"},
+		{token.SEMICOLON, ";"},
+
+		{token.CONST, "const"},
+		{token.IDENT, "FIFTY"},
+		{token.ASSIGN, "="},
+		{token.INT, "50"},
 		{token.SEMICOLON, ";"},
 
 		{token.EOF, ""},

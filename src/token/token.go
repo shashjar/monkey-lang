@@ -60,6 +60,7 @@ const (
 	// Keywords
 	FUNCTION = "FUNCTION"
 	LET      = "LET"
+	CONST    = "CONST"
 	IF       = "IF"
 	ELSE     = "ELSE"
 	RETURN   = "RETURN"
@@ -69,6 +70,7 @@ const (
 var keywords = map[string]TokenType{
 	"fn":     FUNCTION,
 	"let":    LET,
+	"const":  CONST,
 	"true":   TRUE,
 	"false":  FALSE,
 	"if":     IF,

@@ -99,6 +99,34 @@ func TestResolveLocal(t *testing.T) {
 	}
 }
 
+func TestResolveConst(t *testing.T) {
+	global := NewSymbolTable()
+	global.DefineConst("a")
+	global.DefineConst("b")
+
+	local := NewEnclosedSymbolTable(global)
+	local.DefineConst("c")
+	local.DefineConst("d")
+
+	expected := []Symbol{
+		{Name: "a", Scope: GlobalScope, Index: 0, Const: true},
+		{Name: "b", Scope: GlobalScope, Index: 1, Const: true},
+		{Name: "c", Scope: LocalScope, Index: 0, Const: true},
+		{Name: "d", Scope: LocalScope, Index: 1, Const: true},
+	}
+
+	for _, sym := range expected {
+		result, ok := local.Resolve(sym.Name)
+		if !ok {
+			t.Errorf("name %s is not resolvable", sym.Name)
+			continue
+		}
+		if result != sym {
+			t.Errorf("expected %s to resolve to %+v, got=%+v", sym.Name, sym, result)
+		}
+	}
+}
+
 func TestResolveNestedLocal(t *testing.T) {
 	global := NewSymbolTable()
 	global.Define("a")

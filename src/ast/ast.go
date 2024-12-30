@@ -146,6 +146,35 @@ func (ls *LetStatement) String() string {
 	return out.String()
 }
 
+// Represents a const declaration statement in the Monkey programming language, consisting of (1) the CONST token,
+// (2) the name of the identifier in the binding, and (3) the expression that produces the value for the binding.
+// Variables declared as consts cannot be reassigned other values later.
+type ConstStatement struct {
+	Token token.Token // the token.CONST token
+	Name  *Identifier
+	Value Expression
+}
+
+func (cs *ConstStatement) statementNode() {}
+
+func (cs *ConstStatement) TokenLiteral() string {
+	return cs.Token.Literal
+}
+
+func (cs *ConstStatement) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(cs.TokenLiteral() + " ")
+	out.WriteString(cs.Name.String())
+	out.WriteString(" = ")
+	if cs.Value != nil {
+		out.WriteString(cs.Value.String())
+	}
+	out.WriteString(";")
+
+	return out.String()
+}
+
 // Represents an assign statement in the Monkey programming language, consisting of (1) the name of
 // the identifier in the binding and (2) the expression that produces the value for the binding. Note
 // that a variable binding must first be declared with 'let' before it can be assigned a new value
