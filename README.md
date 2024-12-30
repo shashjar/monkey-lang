@@ -40,8 +40,8 @@ Note that the features listed in this document are all supported in the compiler
   - [Table of Contents](#table-of-contents)
   - [Benchmarks](#benchmarks)
   - [Implementation Details](#implementation-details)
-  - [Interpreter \& Evaluator](#interpreter--evaluator)
-  - [Compiler \& Virtual Machine](#compiler--virtual-machine)
+    - [Interpreter \& Evaluator](#interpreter--evaluator)
+    - [Compiler \& Virtual Machine](#compiler--virtual-machine)
   - [Language Documentation](#language-documentation)
     - [Summary](#summary)
     - [Integers, Floats, and Arithmetic Operations](#integers-floats-and-arithmetic-operations)
@@ -85,11 +85,11 @@ The tree-walking interpreter/evaluator engine took 9.004286 seconds for completi
 
 ## Implementation Details
 
-## Interpreter & Evaluator
+### Interpreter & Evaluator
 
 The first implementation of Monkey relies on a tree-walking interpreter. In order, the stages are reading input, lexing (tokenization), parsing into an abstract syntax tree (AST), evaluation by traversing the nodes of the AST, and printing output.
 
-## Compiler & Virtual Machine
+### Compiler & Virtual Machine
 
 The more advanced implementation of Monkey relies on a compiler & virtual machine. In order, the stages are reading input, lexing (tokenization), parsing into an AST, traversing the AST to compile it into a flat series of bytecode instructions, running the VM on the bytecode, and printing output. 
 
@@ -165,12 +165,18 @@ if (x > 3) {
 
 ### Bindings
 
-Bindings in Monkey can be defined using the `let` keyword. `const` declarations, as in JavaScript, are not yet supported.
+Bindings in Monkey can be defined using the `let` keyword. Once a variable with a given name has been declared using `let`, its value can be reassigned using a naked assign statement, as shown below. Note that a variable binding's value can only be reassigned in the same scope in which it was originally declared.
+
+`const` declarations, as in JavaScript, are not yet supported.
 
 ```
 let a = 3;
+a = a + 1; // Legal reassignment
+
 let b = a;
 let c = a + b;
+
+d = b + c; // Illegal assignment (`d` has not been declared - compile-time error)
 ```
 
 ### Strings

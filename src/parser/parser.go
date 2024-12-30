@@ -153,10 +153,12 @@ func (p *Parser) registerInfix(tokenType token.TokenType, fn infixParseFn) {
 }
 
 func (p *Parser) parseStatement() ast.Statement {
-	switch p.currToken.Type {
-	case token.LET:
+	switch {
+	case p.currToken.Type == token.LET:
 		return p.parseLetStatement()
-	case token.RETURN:
+	case p.currToken.Type == token.IDENT && p.peekTokenIs(token.ASSIGN):
+		return p.parseAssignStatement()
+	case p.currToken.Type == token.RETURN:
 		return p.parseReturnStatement()
 	default:
 		return p.parseExpressionStatement()
@@ -189,6 +191,33 @@ func (p *Parser) parseLetStatement() ast.Statement {
 	}
 
 	return letStatement
+}
+
+func (p *Parser) parseAssignStatement() ast.Statement {
+	if !p.currTokenIs(token.IDENT) {
+		return nil
+	}
+
+	assignStatement := &ast.AssignStatement{Token: p.currToken}
+	assignStatement.Name = &ast.Identifier{Token: p.currToken, Value: p.currToken.Literal}
+
+	if !p.expectPeek(token.ASSIGN) {
+		return nil
+	}
+
+	p.nextToken()
+
+	assignStatement.Value = p.parseExpression(LOWEST)
+
+	if fl, ok := assignStatement.Value.(*ast.FunctionLiteral); ok {
+		fl.Name = assignStatement.Name.Value
+	}
+
+	if p.peekTokenIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return assignStatement
 }
 
 func (p *Parser) parseReturnStatement() ast.Statement {

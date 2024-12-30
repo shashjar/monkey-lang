@@ -146,6 +146,35 @@ func (ls *LetStatement) String() string {
 	return out.String()
 }
 
+// Represents an assign statement in the Monkey programming language, consisting of (1) the name of
+// the identifier in the binding and (2) the expression that produces the value for the binding. Note
+// that a variable binding must first be declared with 'let' before it can be assigned a new value
+// with an assign statement.
+type AssignStatement struct {
+	Token token.Token // the token.IDENT token
+	Name  *Identifier
+	Value Expression
+}
+
+func (as *AssignStatement) statementNode() {}
+
+func (as *AssignStatement) TokenLiteral() string {
+	return as.Token.Literal
+}
+
+func (as *AssignStatement) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(as.Name.String())
+	out.WriteString(" = ")
+	if as.Value != nil {
+		out.WriteString(as.Value.String())
+	}
+	out.WriteString(";")
+
+	return out.String()
+}
+
 // Represents a return statement in the Monkey programming language, consisting of the RETURN token
 // and the expression providing the value that is being returned.
 type ReturnStatement struct {

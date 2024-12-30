@@ -40,6 +40,38 @@ func TestLetStatements(t *testing.T) {
 	}
 }
 
+func TestAssignStatements(t *testing.T) {
+	tests := []struct {
+		input              string
+		expectedIdentifier string
+		expectedValue      interface{}
+	}{
+		{"x = 5;", "x", 5},
+		{"y = true;", "y", true},
+		{"foobar = y;", "foobar", "y"},
+	}
+
+	for _, test := range tests {
+		l := lexer.NewLexer(test.input)
+		p := NewParser(l)
+		program := p.ParseProgram()
+		checkParserErrors(t, p)
+		if len(program.Statements) != 1 {
+			t.Fatalf("program contains wrong number of statements. expected=%d, got=%d", 1, len(program.Statements))
+		}
+
+		statement := program.Statements[0]
+		if !testAssignStatement(t, statement, test.expectedIdentifier) {
+			return
+		}
+
+		val := statement.(*ast.AssignStatement).Value
+		if !testLiteralExpression(t, val, test.expectedValue) {
+			return
+		}
+	}
+}
+
 func TestReturnStatements(t *testing.T) {
 	tests := []struct {
 		input         string
@@ -1155,6 +1187,30 @@ func testLetStatement(t *testing.T, statement ast.Statement, name string) bool {
 
 	if letStatement.Name.TokenLiteral() != name {
 		t.Errorf("letStatement.Name.TokenLiteral() is not '%s'. got=%s", name, letStatement.Name.TokenLiteral())
+		return false
+	}
+
+	return true
+}
+
+func testAssignStatement(t *testing.T, statement ast.Statement, name string) bool {
+	if statement.TokenLiteral() != name {
+		t.Errorf("statement.TokenLiteral not %q. got=%q", name, statement.TokenLiteral())
+	}
+
+	assignStatement, ok := statement.(*ast.AssignStatement)
+	if !ok {
+		t.Errorf("statement is not an *ast.AssignStatement. got=%T", statement)
+		return false
+	}
+
+	if assignStatement.Name.Value != name {
+		t.Errorf("assignStatement.Name.Value is not '%s'. got=%s", name, assignStatement.Name.Value)
+		return false
+	}
+
+	if assignStatement.Name.TokenLiteral() != name {
+		t.Errorf("assignStatement.Name.TokenLiteral() is not '%s'. got=%s", name, assignStatement.Name.TokenLiteral())
 		return false
 	}
 

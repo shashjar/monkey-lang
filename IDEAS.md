@@ -6,15 +6,14 @@ This is a living document storing some ideas for extensions & improvements that 
 
 - [x] Support floating-point numbers (currently only integers are supported)
 - [x] Add support for `else if` within conditional expressions
+- [x] Allow for reassignment of values to variables declared with let
 - [ ] Support `const` binding declarations in addition to `let`
 - [x] Logical boolean operators (`&&`, `||`)
 - [x] Modulo operator (`%`)
 - [x] Add `//` (integer division) as a separate operator from `/`
 - [x] Additional comparison operators (`>=` & `<=`)
 - [x] Strings: comparison with `==` & `!=`
-- [x] Strings: `split` operation
 - [x] Arrays: `+` operator
-- [x] Arrays: `join` operation
 - [ ] Implement loops: `for` and/or `while`
 - [ ] Add support for `switch` statements
 - [ ] The lexer (`lexer/lexer.go`) currently only supports ASCII characters. Maybe extend this to Unicode (see p. 19-20 in WAIIG).
@@ -23,12 +22,14 @@ This is a living document storing some ideas for extensions & improvements that 
 # Builtin Functions
 
 - [x] Add support for hashmaps in the `len` builtin function
+- [x] Strings: `split` operation
+- [x] Arrays: `join` operation
 - [ ] Add support for more language built-ins (`evaluator/builtins.go`), e.g. list comprehensions from Python - map, sum, filter, etc.
 
 ## REPL Features
 
 - [x] When opening a REPL, ability to select interpreter/evaluator or compiler/VM engine
-- [ ] Implement better printing of functions to the console (currently looks like: `Closure[0x140000ce160]`)
+- [x] Implement better printing of functions to the console (currently looks like: `Closure[0x140000ce160]`)
 - [ ] Ability to navigate back and forth in REPL input with arrow keys & do multi-line input (look into [readline package](https://github.com/chzyer/readline))
 
 ## Additional Features

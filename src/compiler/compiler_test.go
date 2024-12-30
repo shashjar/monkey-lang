@@ -17,6 +17,11 @@ type compilerTestCase struct {
 	expectedConstants    []interface{}
 }
 
+type compilerErrorTestCase struct {
+	input         string
+	expectedError string
+}
+
 func TestArithmetic(t *testing.T) {
 	tests := []compilerTestCase{
 		{
@@ -447,6 +452,84 @@ func TestGlobalLetStatements(t *testing.T) {
 	}
 
 	runCompilerTests(t, tests)
+}
+
+func TestGlobalAssignStatements(t *testing.T) {
+	tests := []compilerTestCase{
+		{
+			input: `
+			let one = 1;
+			one = "one";
+			`,
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpSetGlobal, 0),
+				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpSetGlobal, 0),
+			},
+			expectedConstants: []interface{}{1, "one"},
+		},
+		{
+			input: `
+			let one = 1;
+			let two = one;
+			two = 2;
+			two;
+			`,
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpSetGlobal, 0),
+				bytecode.Make(bytecode.OpGetGlobal, 0),
+				bytecode.Make(bytecode.OpSetGlobal, 1),
+				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpSetGlobal, 1),
+				bytecode.Make(bytecode.OpGetGlobal, 1),
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{1, 2},
+		},
+	}
+
+	runCompilerTests(t, tests)
+}
+
+func TestAssignStatementsErrors(t *testing.T) {
+	tests := []compilerErrorTestCase{
+		{
+			input: `
+			one = 1;
+			`,
+			expectedError: `attempting to assign value to identifier 'one' prior to declaration`,
+		},
+		{
+			input: `
+			let num = 10;
+			fn() {
+				num = 20;
+				num;
+			}
+			num;
+			`,
+			expectedError: `attempting to assign value to identifier 'num' prior to declaration`,
+		},
+		{
+			input: `
+			let num = 10;
+			let f = fn() {
+				let num = 20;
+				let g = fn() {
+					num = 30;
+					return num
+				};
+				return g()
+			};
+			num + f();
+			`,
+			expectedError: `attempting to assign value to identifier 'num' prior to declaration`,
+		},
+	}
+
+	runCompilerErrorTests(t, tests)
 }
 
 func TestStringExpressions(t *testing.T) {
@@ -892,6 +975,68 @@ func TestLetStatementScopes(t *testing.T) {
 	runCompilerTests(t, tests)
 }
 
+func TestAssignStatementScopes(t *testing.T) {
+	tests := []compilerTestCase{
+		{
+			input: `
+			fn() {
+				let num = 55;
+				num = num + 5;
+				num;
+			}
+			`,
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpClosure, 2, 0),
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{
+				55,
+				5,
+				[]bytecode.Instructions{
+					bytecode.Make(bytecode.OpConstant, 0),
+					bytecode.Make(bytecode.OpSetLocal, 0),
+					bytecode.Make(bytecode.OpGetLocal, 0),
+					bytecode.Make(bytecode.OpConstant, 1),
+					bytecode.Make(bytecode.OpAdd),
+					bytecode.Make(bytecode.OpSetLocal, 0),
+					bytecode.Make(bytecode.OpGetLocal, 0),
+					bytecode.Make(bytecode.OpReturnValue),
+				},
+			},
+		},
+		{
+			input: `
+			let num = 10;
+			fn() {
+				let num = 20;
+				return num;
+			}
+			num;
+			`,
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpSetGlobal, 0),
+				bytecode.Make(bytecode.OpClosure, 2, 0),
+				bytecode.Make(bytecode.OpPop),
+				bytecode.Make(bytecode.OpGetGlobal, 0),
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{
+				10,
+				20,
+				[]bytecode.Instructions{
+					bytecode.Make(bytecode.OpConstant, 1),
+					bytecode.Make(bytecode.OpSetLocal, 0),
+					bytecode.Make(bytecode.OpGetLocal, 0),
+					bytecode.Make(bytecode.OpReturnValue),
+				},
+			},
+		},
+	}
+
+	runCompilerTests(t, tests)
+}
+
 func TestBuiltIns(t *testing.T) {
 	tests := []compilerTestCase{
 		{
@@ -1188,6 +1333,24 @@ func runCompilerTests(t *testing.T, tests []compilerTestCase) {
 		err = testConstants(test.expectedConstants, bytecode.Constants)
 		if err != nil {
 			t.Fatalf("testConstants failed: %s", err)
+		}
+	}
+}
+
+func runCompilerErrorTests(t *testing.T, tests []compilerErrorTestCase) {
+	t.Helper()
+
+	for _, test := range tests {
+		program := parse(test.input)
+
+		compiler := NewCompiler()
+		err := compiler.Compile(program)
+		if err == nil {
+			t.Errorf("no error was detected in compiler in compiler error test case")
+		}
+
+		if err.Error() != test.expectedError {
+			t.Errorf("compiler error test case: error message was not correct. expected=%q, got=%q", test.expectedError, err.Error())
 		}
 	}
 }

@@ -105,6 +105,23 @@ func (c *Compiler) Compile(node ast.Node) error {
 			c.emit(bytecode.OpSetLocal, symbol.Index)
 		}
 
+	case *ast.AssignStatement:
+		symbol, ok := c.symbolTable.store[node.Name.Value] // Only able to reassign value if the variable was declared in the same scope we're currently in
+		if !ok {
+			return fmt.Errorf("attempting to assign value to identifier '%s' prior to declaration", node.Name.Value)
+		}
+
+		err := c.Compile(node.Value)
+		if err != nil {
+			return err
+		}
+
+		if symbol.Scope == GlobalScope {
+			c.emit(bytecode.OpSetGlobal, symbol.Index)
+		} else {
+			c.emit(bytecode.OpSetLocal, symbol.Index)
+		}
+
 	case *ast.Identifier:
 		symbol, ok := c.symbolTable.Resolve(node.Value)
 		if !ok {
