@@ -717,6 +717,45 @@ func TestIfElseIfElseExpression(t *testing.T) {
 	}
 }
 
+func TestWhileLoop(t *testing.T) {
+	input := `while (x < y) { x = x + 1; }`
+
+	l := lexer.NewLexer(input)
+	p := NewParser(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+	if len(program.Statements) != 1 {
+		t.Fatalf("program contains wrong number of statements. expected=%d, got=%d", 1, len(program.Statements))
+	}
+
+	statement, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not an *ast.ExpressionStatement. got=%T", program.Statements[0])
+	}
+
+	exp, ok := statement.Expression.(*ast.WhileLoop)
+	if !ok {
+		t.Fatalf("statement.Expression is not an ast.WhileLoop. got=%T", statement.Expression)
+	}
+
+	if !testInfixExpression(t, exp.Condition, "x", "<", "y") {
+		return
+	}
+
+	if len(exp.Body.Statements) != 1 {
+		t.Errorf("body contains wrong number of statements. expected=%d, got=%d", 1, len(exp.Body.Statements))
+	}
+
+	body, ok := exp.Body.Statements[0].(*ast.AssignStatement)
+	if !ok {
+		t.Fatalf("exp.Body.Statements[0] is not an ast.AssignStatement. got=%T", exp.Body.Statements[0])
+	}
+
+	if !testAssignStatement(t, body, "x") {
+		return
+	}
+}
+
 func TestFunctionLiteralParsing(t *testing.T) {
 	input := `fn(x, y) { x + y; }`
 

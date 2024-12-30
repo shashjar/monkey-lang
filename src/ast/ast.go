@@ -379,6 +379,32 @@ func (ie *IfExpression) String() string {
 	return out.String()
 }
 
+// Represents a while loop in the Monkey programming language, which executes some body as long as some
+// provided condition is truthy.
+type WhileLoop struct {
+	Token     token.Token // the token.WHILE token
+	Condition Expression
+	Body      *BlockStatement
+}
+
+func (wl *WhileLoop) expressionNode() {}
+
+func (wl *WhileLoop) TokenLiteral() string {
+	return wl.Token.Literal
+}
+
+func (wl *WhileLoop) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("while (")
+	out.WriteString(wl.Condition.String())
+	out.WriteString(") { ")
+	out.WriteString(wl.Body.String())
+	out.WriteString(" } ")
+
+	return out.String()
+}
+
 // Represents a function literal in the form "fn <parameters> <block statement>".
 type FunctionLiteral struct {
 	Token      token.Token // the 'fn' token

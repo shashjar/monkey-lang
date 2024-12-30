@@ -89,6 +89,11 @@ func TestNextToken(t *testing.T) {
 	a = 6;
 
 	const FIFTY = 50;
+
+	let i = 0;
+	while true {
+		i = i + 1;
+	};
 	`
 
 	tests := []struct {
@@ -290,6 +295,23 @@ func TestNextToken(t *testing.T) {
 		{token.IDENT, "FIFTY"},
 		{token.ASSIGN, "="},
 		{token.INT, "50"},
+		{token.SEMICOLON, ";"},
+
+		{token.LET, "let"},
+		{token.IDENT, "i"},
+		{token.ASSIGN, "="},
+		{token.INT, "0"},
+		{token.SEMICOLON, ";"},
+		{token.WHILE, "while"},
+		{token.TRUE, "true"},
+		{token.LBRACE, "{"},
+		{token.IDENT, "i"},
+		{token.ASSIGN, "="},
+		{token.IDENT, "i"},
+		{token.PLUS, "+"},
+		{token.INT, "1"},
+		{token.SEMICOLON, ";"},
+		{token.RBRACE, "}"},
 		{token.SEMICOLON, ";"},
 
 		{token.EOF, ""},

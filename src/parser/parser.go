@@ -74,6 +74,7 @@ func NewParser(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.FALSE, p.parseBoolean)
 	p.registerPrefix(token.LPAREN, p.parseGroupedExpression)
 	p.registerPrefix(token.IF, p.parseIfExpression)
+	p.registerPrefix(token.WHILE, p.parseWhileLoop)
 	p.registerPrefix(token.FUNCTION, p.parseFunctionLiteral)
 	p.registerPrefix(token.LBRACKET, p.parseArrayLiteral)
 	p.registerPrefix(token.LBRACE, p.parseHashMapLiteral)
@@ -426,6 +427,25 @@ func (p *Parser) parseIfExpression() ast.Expression {
 
 	ie.Clauses = ieClauses
 	return ie
+}
+
+func (p *Parser) parseWhileLoop() ast.Expression {
+	wl := &ast.WhileLoop{Token: p.currToken}
+
+	whileCondition, ok := p.parseCondition()
+	if !ok {
+		return nil
+	}
+	wl.Condition = whileCondition
+
+	if !p.expectPeek(token.LBRACE) {
+		return nil
+	}
+
+	whileBody := p.parseBlockStatement()
+	wl.Body = whileBody
+
+	return wl
 }
 
 func (p *Parser) parseCondition() (ast.Expression, bool) {

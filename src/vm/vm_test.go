@@ -129,6 +129,19 @@ func TestConditionals(t *testing.T) {
 	runVMTests(t, tests)
 }
 
+func TestWhileLoops(t *testing.T) {
+	tests := []vmTestCase{
+		{"let x = 0; while (false) { x = x + 1; }; x;", 0},
+		{"let x = 0; while (x < 10) { x = x + 1; }; x;", 10},
+		{"let x = 0; while (x < 10) { x = x + 1; };", Null},
+		{"let arr = [1, 2, 3]; let i = 0; while (i < len(arr)) { puts(arr[i]); i = i + 1; };", Null},
+		{"let arr = [1, 2, 3]; let i = 0; while (i < len(arr)) { puts(arr[i]); i = i + 1; }; i;", 3},
+		{"let arr = [1, 2, 3, 4, 5]; let l = 0; let r = len(arr) - 1; while (l < r) { puts(arr[l], arr[r]); l = l + 1; r = r - 1; }; l + r;", 4},
+	}
+
+	runVMTests(t, tests)
+}
+
 func TestGlobalLetStatements(t *testing.T) {
 	tests := []vmTestCase{
 		{"let one = 1; one", 1},

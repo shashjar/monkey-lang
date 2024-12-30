@@ -405,6 +405,75 @@ func TestConditionals(t *testing.T) {
 	runCompilerTests(t, tests)
 }
 
+func TestWhileLoops(t *testing.T) {
+	tests := []compilerTestCase{
+		{
+			input: `
+			while (true) { 10; }; 3333;
+			`,
+			expectedInstructions: []bytecode.Instructions{
+				// 0000
+				bytecode.Make(bytecode.OpTrue),
+				// 0001
+				bytecode.Make(bytecode.OpJumpNotTruthy, 10),
+				// 0004
+				bytecode.Make(bytecode.OpConstant, 0),
+				// 0007
+				bytecode.Make(bytecode.OpJump, 0),
+				// 0010
+				bytecode.Make(bytecode.OpNull),
+				// 0011
+				bytecode.Make(bytecode.OpPop),
+				// 0012
+				bytecode.Make(bytecode.OpConstant, 1),
+				// 0015
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{10, 3333},
+		},
+		{
+			input: `
+			let x = 0; while (x < 10) { x = x + 1; }; 3333;
+			`,
+			expectedInstructions: []bytecode.Instructions{
+				// 0000
+				bytecode.Make(bytecode.OpConstant, 0),
+				// 0003
+				bytecode.Make(bytecode.OpSetGlobal, 0),
+				// 0006
+				bytecode.Make(bytecode.OpGetGlobal, 0),
+				// 0009
+				bytecode.Make(bytecode.OpConstant, 1),
+				// 0012
+				bytecode.Make(bytecode.OpLessThan),
+				// 0013
+				bytecode.Make(bytecode.OpJumpNotTruthy, 29),
+				// 0016
+				bytecode.Make(bytecode.OpGetGlobal, 0),
+				// 0019
+				bytecode.Make(bytecode.OpConstant, 2),
+				// 0022
+				bytecode.Make(bytecode.OpAdd),
+				// 0023
+				bytecode.Make(bytecode.OpSetGlobal, 0),
+				// 0026
+				bytecode.Make(bytecode.OpJump, 6),
+				// 0029
+				bytecode.Make(bytecode.OpNull),
+				// 0030
+				bytecode.Make(bytecode.OpPop),
+				// 0031
+				bytecode.Make(bytecode.OpConstant, 3),
+				// 0034
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{0, 10, 1, 3333},
+		},
+	}
+
+	runCompilerTests(t, tests)
+}
+
 func TestGlobalLetStatements(t *testing.T) {
 	tests := []compilerTestCase{
 		{

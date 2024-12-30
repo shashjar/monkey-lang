@@ -48,6 +48,7 @@ Note that the features listed in this document are all supported in the compiler
     - [Booleans](#booleans)
     - [Comparison Operators](#comparison-operators)
     - [Conditionals](#conditionals)
+    - [Loops](#loops)
     - [Bindings](#bindings)
     - [Strings](#strings)
     - [Arrays](#arrays)
@@ -98,10 +99,12 @@ The more advanced implementation of Monkey relies on a compiler & virtual machin
 ### Summary
 
 - Syntax inspired by JavaScript, Python, and C
-- Primitives: integers, booleans, strings
+- Primitives: integers, floats, booleans, strings
+- Global & local bindings
+- Conditionals
+- Loops
 - Arrays, hashmaps
 - Prefix-, infix-, and index operators
-- Global & local bindings
 - First-class & higher-order functions
 - Built-in functions
 - Closures
@@ -160,6 +163,19 @@ if (x > 3) {
     -14;
 } else {
     9;
+}
+```
+
+### Loops
+
+`while` loops with a conditional clause and a body block statement are supported. `for` loops are not yet supported.
+
+```
+let arr = [1, 2, 3];
+let i = 0;
+while (i < len(arr)) {
+    puts(arr[i]);
+    i = i + 1;
 }
 ```
 
