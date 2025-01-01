@@ -474,6 +474,126 @@ func TestWhileLoops(t *testing.T) {
 	runCompilerTests(t, tests)
 }
 
+func TestForLoops(t *testing.T) {
+	tests := []compilerTestCase{
+		{
+			input: `
+			for (let i = 0; true; i = i + 1) { puts(i); }; 3333;
+			`,
+			expectedInstructions: []bytecode.Instructions{
+				// 0000
+				bytecode.Make(bytecode.OpConstant, 0),
+				// 0003
+				bytecode.Make(bytecode.OpSetGlobal, 0),
+
+				// 0006
+				bytecode.Make(bytecode.OpTrue),
+				// 0007
+				bytecode.Make(bytecode.OpJumpNotTruthy, 30),
+
+				// 0010
+				bytecode.Make(bytecode.OpGetBuiltIn, 0),
+				// 0012
+				bytecode.Make(bytecode.OpGetGlobal, 0),
+				// 0015
+				bytecode.Make(bytecode.OpCall, 1),
+
+				// 0017
+				bytecode.Make(bytecode.OpGetGlobal, 0),
+				// 0020
+				bytecode.Make(bytecode.OpConstant, 1),
+				// 0023
+				bytecode.Make(bytecode.OpAdd),
+				// 0024
+				bytecode.Make(bytecode.OpSetGlobal, 0),
+				// 0027
+				bytecode.Make(bytecode.OpJump, 6),
+
+				// 0030
+				bytecode.Make(bytecode.OpNull),
+				// 0031
+				bytecode.Make(bytecode.OpPop),
+
+				// 0032
+				bytecode.Make(bytecode.OpConstant, 2),
+				// 0035
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{0, 1, 3333},
+		},
+		{
+			input: `
+			let arr = [1, 2, 3]; for (let i = 0; i < len(arr); i = i + 1) { puts(arr[i]); }; 3333;
+			`,
+			expectedInstructions: []bytecode.Instructions{
+				// 0000
+				bytecode.Make(bytecode.OpConstant, 0),
+				// 0003
+				bytecode.Make(bytecode.OpConstant, 1),
+				// 0006
+				bytecode.Make(bytecode.OpConstant, 2),
+				// 0009
+				bytecode.Make(bytecode.OpArray, 3),
+				// 0012
+				bytecode.Make(bytecode.OpSetGlobal, 0),
+
+				// 0015
+				bytecode.Make(bytecode.OpConstant, 3),
+				// 0018
+				bytecode.Make(bytecode.OpSetGlobal, 1),
+
+				// 0021
+				bytecode.Make(bytecode.OpGetGlobal, 1),
+				// 0024
+				bytecode.Make(bytecode.OpGetBuiltIn, 1),
+				// 0026
+				bytecode.Make(bytecode.OpGetGlobal, 0),
+				// 0029
+				bytecode.Make(bytecode.OpCall, 1),
+				// 0031
+				bytecode.Make(bytecode.OpLessThan),
+				// 0032
+				bytecode.Make(bytecode.OpJumpNotTruthy, 59),
+
+				// 0035
+				bytecode.Make(bytecode.OpGetBuiltIn, 0),
+				// 0037
+				bytecode.Make(bytecode.OpGetGlobal, 0),
+				// 0040
+				bytecode.Make(bytecode.OpGetGlobal, 1),
+				// 0043
+				bytecode.Make(bytecode.OpIndex),
+				// 0044
+				bytecode.Make(bytecode.OpCall, 1),
+
+				// 0046
+				bytecode.Make(bytecode.OpGetGlobal, 1),
+				// 0049
+				bytecode.Make(bytecode.OpConstant, 4),
+				// 0052
+				bytecode.Make(bytecode.OpAdd),
+				// 0053
+				bytecode.Make(bytecode.OpSetGlobal, 1),
+				// 0056
+				bytecode.Make(bytecode.OpJump, 21),
+
+				// 0059
+				bytecode.Make(bytecode.OpNull),
+				// 0060
+				bytecode.Make(bytecode.OpPop),
+
+				// 0061
+				bytecode.Make(bytecode.OpConstant, 5),
+				// 0064
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{1, 2, 3, 0, 1, 3333},
+		},
+	}
+
+	runCompilerTests(t, tests)
+}
+
 func TestGlobalLetStatements(t *testing.T) {
 	tests := []compilerTestCase{
 		{

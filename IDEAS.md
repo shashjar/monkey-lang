@@ -15,8 +15,11 @@ This is a living document storing some ideas for extensions & improvements that 
 - [x] Strings: comparison with `==` & `!=`
 - [x] Arrays: `+` operator
 - [x] Implement `while` loops
-- [ ] Implement `for` loops
+- [x] Add basic support for `for` loops
+- [ ] Add support for `break` and `continue` in `while` and `for` loops
+- [ ] For `for` loops, the `Init`, `Condition`, and `Afterthought` expressions are all currently required - maybe allow for these to be optional
 - [ ] Implement `switch` statements
+- [ ] Maybe support postfix operators `++` and `--`
 - [ ] The lexer (`lexer/lexer.go`) currently only supports ASCII characters. Maybe extend this to Unicode (see p. 19-20 in WAIIG).
 - [ ] Add support for macros into the compiler/VM engine (supported in interpreter but not yet compiler/VM)
 

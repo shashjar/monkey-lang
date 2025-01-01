@@ -168,7 +168,7 @@ if (x > 3) {
 
 ### Loops
 
-`while` loops with a conditional clause and a body block statement are supported. `for` loops are not yet supported.
+`while` loops with a conditional clause and a body block statement are supported.
 
 ```
 let arr = [1, 2, 3];
@@ -176,6 +176,15 @@ let i = 0;
 while (i < len(arr)) {
     puts(arr[i]);
     i = i + 1;
+}
+```
+
+`for` loops with an initialization statement, a condition, an afterthought statement, and a body block statement are supported.
+
+```
+let arr = [1, 2, 3];
+for (let i = 0; i < len(arr); i = i + 1) {
+    puts(arr[i]);
 }
 ```
 

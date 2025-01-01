@@ -142,6 +142,17 @@ func TestWhileLoops(t *testing.T) {
 	runVMTests(t, tests)
 }
 
+func TestForLoops(t *testing.T) {
+	tests := []vmTestCase{
+		{"for (let i = 0; i < 10; i = i + 1) { i = i; }; i;", 10},
+		{"let arr = [1, 2, 3]; let sum = 0; for (let i = 0; i < len(arr); i = i + 1) { sum = sum + arr[i]; }; sum;", 6},
+		{"let i = 0; let arr = []; for (let j = 0; j < len(arr); j = j + 1) { i = i + 1; }; i;", 0},
+		{"let i = 0; let arr = [10, 15, 20, 25, 30]; for (let j = 0; j < len(arr); j = j + 1) { i = i + 1; }; i;", 5},
+	}
+
+	runVMTests(t, tests)
+}
+
 func TestGlobalLetStatements(t *testing.T) {
 	tests := []vmTestCase{
 		{"let one = 1; one", 1},

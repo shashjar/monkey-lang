@@ -294,6 +294,49 @@ func (c *Compiler) Compile(node ast.Node) error {
 		// Emit an OpNull so that the OpPop emitted after this while loop is compiled doesn't change anything
 		c.emit(bytecode.OpNull)
 
+	case *ast.ForLoop:
+		err := c.Compile(node.Init)
+		if err != nil {
+			return err
+		}
+
+		forLoopConditionStartPos := len(c.currentInstructions())
+
+		err = c.Compile(node.Condition)
+		if err != nil {
+			return err
+		}
+
+		// Emit an `OpJumpNotTruthy` with a bogus offset to be updated below with the position following the loop body
+		jumpNotTruthyPos := c.emit(bytecode.OpJumpNotTruthy, 9999)
+
+		err = c.Compile(node.Body)
+		if err != nil {
+			return err
+		}
+
+		if c.lastInstructionIs(bytecode.OpPop) {
+			c.removeLastPop()
+		}
+
+		err = c.Compile(node.Afterthought)
+		if err != nil {
+			return err
+		}
+
+		if c.lastInstructionIs(bytecode.OpPop) {
+			c.removeLastPop()
+		}
+
+		// Emit an `OpJump` to go back to the start of the loop
+		c.emit(bytecode.OpJump, forLoopConditionStartPos)
+
+		afterForLoopPos := len(c.currentInstructions())
+		c.changeOperand(jumpNotTruthyPos, afterForLoopPos)
+
+		// Emit an OpNull so that the OpPop emitted after this for loop is compiled doesn't change anything
+		c.emit(bytecode.OpNull)
+
 	case *ast.IntegerLiteral:
 		integer := &object.Integer{Value: node.Value}
 		c.emit(bytecode.OpConstant, c.addConstant(integer))
