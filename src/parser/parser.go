@@ -75,6 +75,7 @@ func NewParser(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.LPAREN, p.parseGroupedExpression)
 	p.registerPrefix(token.IF, p.parseIfExpression)
 	p.registerPrefix(token.WHILE, p.parseWhileLoop)
+	p.registerPrefix(token.FOR, p.parseForLoop)
 	p.registerPrefix(token.FUNCTION, p.parseFunctionLiteral)
 	p.registerPrefix(token.LBRACKET, p.parseArrayLiteral)
 	p.registerPrefix(token.LBRACE, p.parseHashMapLiteral)
@@ -448,6 +449,46 @@ func (p *Parser) parseWhileLoop() ast.Expression {
 	return wl
 }
 
+func (p *Parser) parseForLoop() ast.Expression {
+	fl := &ast.ForLoop{Token: p.currToken}
+
+	if !p.expectPeek(token.LPAREN) {
+		return nil
+	}
+
+	p.nextToken()
+
+	init := p.parseStatement()
+	if !p.currTokenIs(token.SEMICOLON) {
+		return nil
+	}
+	p.nextToken()
+
+	condition := p.parseExpression(LOWEST)
+	if !p.expectPeek(token.SEMICOLON) {
+		return nil
+	}
+	p.nextToken()
+
+	afterthought := p.parseStatement()
+
+	if !p.expectPeek(token.RPAREN) {
+		return nil
+	}
+
+	if !p.expectPeek(token.LBRACE) {
+		return nil
+	}
+
+	forBody := p.parseBlockStatement()
+
+	fl.Init = init
+	fl.Condition = condition
+	fl.Afterthought = afterthought
+	fl.Body = forBody
+	return fl
+}
+
 func (p *Parser) parseCondition() (ast.Expression, bool) {
 	if !p.expectPeek(token.LPAREN) {
 		return nil, false
@@ -455,13 +496,13 @@ func (p *Parser) parseCondition() (ast.Expression, bool) {
 
 	p.nextToken()
 
-	ifCondition := p.parseExpression(LOWEST)
+	condition := p.parseExpression(LOWEST)
 
 	if !p.expectPeek(token.RPAREN) {
 		return nil, false
 	}
 
-	return ifCondition, true
+	return condition, true
 }
 
 func (p *Parser) parseFunctionLiteral() ast.Expression {

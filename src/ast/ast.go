@@ -405,6 +405,38 @@ func (wl *WhileLoop) String() string {
 	return out.String()
 }
 
+// Represents a for loop in the Monkey programming language, consisting of an initialization expression, a condition,
+// and an expression which is evaluated at the end of each loop iteration.
+type ForLoop struct {
+	Token        token.Token // the token.FOR token
+	Init         Statement
+	Condition    Expression
+	Afterthought Statement
+	Body         *BlockStatement
+}
+
+func (fl *ForLoop) expressionNode() {}
+
+func (fl *ForLoop) TokenLiteral() string {
+	return fl.Token.Literal
+}
+
+func (fl *ForLoop) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("for (")
+	out.WriteString(fl.Init.String())
+	out.WriteString(" ")
+	out.WriteString(fl.Condition.String())
+	out.WriteString("; ")
+	out.WriteString(fl.Afterthought.String())
+	out.WriteString(") { ")
+	out.WriteString(fl.Body.String())
+	out.WriteString(" } ")
+
+	return out.String()
+}
+
 // Represents a function literal in the form "fn <parameters> <block statement>".
 type FunctionLiteral struct {
 	Token      token.Token // the 'fn' token
