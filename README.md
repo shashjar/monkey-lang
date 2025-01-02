@@ -50,6 +50,7 @@ Note that the features listed in this document are all supported in the compiler
     - [Conditionals](#conditionals)
     - [Loops](#loops)
     - [Bindings](#bindings)
+    - [Postfix Operators](#postfix-operators)
     - [Strings](#strings)
     - [Arrays](#arrays)
     - [Hashmaps](#hashmaps)
@@ -104,7 +105,7 @@ The more advanced implementation of Monkey relies on a compiler & virtual machin
 - Conditionals
 - Loops
 - Arrays, hashmaps
-- Prefix-, infix-, and index operators
+- Prefix-, infix-, postfix-, and index operators
 - First-class & higher-order functions
 - Built-in functions
 - Closures
@@ -205,6 +206,16 @@ d = b + c; // Illegal assignment (`d` has not been declared - compile-time error
 
 const e = 50;
 e = 40; // Illegal reassignment (`e` is a const)
+```
+
+### Postfix Operators
+
+The postfix operators `++` and `--` are supported for incrementing and decrementing, respectively, values bound to identifiers.
+
+```
+let i = 0;
+i++;
+i--;
 ```
 
 ### Strings

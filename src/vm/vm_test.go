@@ -132,10 +132,18 @@ func TestConditionals(t *testing.T) {
 func TestWhileLoops(t *testing.T) {
 	tests := []vmTestCase{
 		{"let x = 0; while (false) { x = x + 1; }; x;", 0},
+		{"let x = 0; while (false) { x++; }; x;", 0},
+		{"let x = 0; while (false) { x++ }; x;", 0},
 		{"let x = 0; while (x < 10) { x = x + 1; }; x;", 10},
+		{"let x = 0; while (x < 10) { x++; }; x;", 10},
+		{"let x = 0; while (x < 10) { x++ }; x;", 10},
 		{"let x = 0; while (x < 10) { x = x + 1; };", Null},
+		{"let x = 0; while (x < 10) { x++; };", Null},
 		{"let arr = [1, 2, 3]; let i = 0; while (i < len(arr)) { puts(arr[i]); i = i + 1; };", Null},
 		{"let arr = [1, 2, 3]; let i = 0; while (i < len(arr)) { puts(arr[i]); i = i + 1; }; i;", 3},
+		{"let arr = [1, 2, 3]; let i = 0; while (i < len(arr)) { puts(arr[i]); i++; }; i;", 3},
+		{"let arr = [1, 2, 3]; let i = 0; while (i < len(arr)) { puts(arr[i]); i++ }; i;", 3},
+		{"let arr = [1, 2, 3]; let i = len(arr) - 1; while (i >= 0) { puts(arr[i]); i--; }; i;", -1},
 		{"let arr = [1, 2, 3, 4, 5]; let l = 0; let r = len(arr) - 1; while (l < r) { puts(arr[l], arr[r]); l = l + 1; r = r - 1; }; l + r;", 4},
 	}
 
@@ -145,6 +153,8 @@ func TestWhileLoops(t *testing.T) {
 func TestForLoops(t *testing.T) {
 	tests := []vmTestCase{
 		{"for (let i = 0; i < 10; i = i + 1) { i = i; }; i;", 10},
+		{"for (let i = 0; i < 10; i++) { i = i; }; i;", 10},
+		{"for (let i = 0; i < 10; i++;) { i = i; }; i;", 10},
 		{"let arr = [1, 2, 3]; let sum = 0; for (let i = 0; i < len(arr); i = i + 1) { sum = sum + arr[i]; }; sum;", 6},
 		{"let i = 0; let arr = []; for (let j = 0; j < len(arr); j = j + 1) { i = i + 1; }; i;", 0},
 		{"let i = 0; let arr = [10, 15, 20, 25, 30]; for (let j = 0; j < len(arr); j = j + 1) { i = i + 1; }; i;", 5},
@@ -250,6 +260,31 @@ func TestAssignStatements(t *testing.T) {
 			num + f();
 			`,
 			expected: 40,
+		},
+		{
+			input: `
+			let num = 0;
+			num++;
+			num;
+			`,
+			expected: 1,
+		},
+		{
+			input: `
+			let num = 0;
+			num--;
+			num;
+			`,
+			expected: -1,
+		},
+		{
+			input: `
+			let x = 10;
+			let y = 17 + 4 * x;
+			y++;
+			y;
+			`,
+			expected: 58,
 		},
 	}
 

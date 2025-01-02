@@ -43,9 +43,17 @@ func (l *Lexer) NextToken() token.Token {
 			tok = newToken(token.ILLEGAL, l.char)
 		}
 	case '+':
-		tok = newToken(token.PLUS, l.char)
+		if l.peekChar() == '+' {
+			tok = l.readTwoCharacterToken(token.INCREMENT)
+		} else {
+			tok = newToken(token.PLUS, l.char)
+		}
 	case '-':
-		tok = newToken(token.MINUS, l.char)
+		if l.peekChar() == '-' {
+			tok = l.readTwoCharacterToken(token.DECREMENT)
+		} else {
+			tok = newToken(token.MINUS, l.char)
+		}
 	case '*':
 		tok = newToken(token.MUL, l.char)
 	case '/':

@@ -44,6 +44,9 @@ const (
 	LTE    = "<="
 	GTE    = ">="
 
+	INCREMENT = "++"
+	DECREMENT = "--"
+
 	// Delimiters
 	COMMA     = ","
 	SEMICOLON = ";"

@@ -139,6 +139,58 @@ func TestArithmetic(t *testing.T) {
 	runCompilerTests(t, tests)
 }
 
+func TestPostfixOperators(t *testing.T) {
+	tests := []compilerTestCase{
+		{
+			input: "let x = 0; x++;",
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpSetGlobal, 0),
+
+				bytecode.Make(bytecode.OpGetGlobal, 0),
+				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpAdd),
+				bytecode.Make(bytecode.OpSetGlobal, 0),
+			},
+			expectedConstants: []interface{}{0, 1},
+		},
+		{
+			input: "let x = 0; x--;",
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpSetGlobal, 0),
+
+				bytecode.Make(bytecode.OpGetGlobal, 0),
+				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpSub),
+				bytecode.Make(bytecode.OpSetGlobal, 0),
+			},
+			expectedConstants: []interface{}{0, 1},
+		},
+	}
+
+	runCompilerTests(t, tests)
+}
+
+func TestPostfixOperatorErrors(t *testing.T) {
+	tests := []compilerErrorTestCase{
+		{
+			input:         "x++",
+			expectedError: "attempting to assign value to identifier 'x' prior to declaration",
+		},
+		{
+			input:         "x--",
+			expectedError: "attempting to assign value to identifier 'x' prior to declaration",
+		},
+		{
+			input:         "const x = 5; x++;",
+			expectedError: "attempting to assign value to constant variable 'x'",
+		},
+	}
+
+	runCompilerErrorTests(t, tests)
+}
+
 func TestBooleanExpressions(t *testing.T) {
 	tests := []compilerTestCase{
 		{
@@ -469,6 +521,82 @@ func TestWhileLoops(t *testing.T) {
 			},
 			expectedConstants: []interface{}{0, 10, 1, 3333},
 		},
+		{
+			input: `
+			let x = 0; while (x < 10) { x++ }; 3333;
+			`,
+			expectedInstructions: []bytecode.Instructions{
+				// 0000
+				bytecode.Make(bytecode.OpConstant, 0),
+				// 0003
+				bytecode.Make(bytecode.OpSetGlobal, 0),
+				// 0006
+				bytecode.Make(bytecode.OpGetGlobal, 0),
+				// 0009
+				bytecode.Make(bytecode.OpConstant, 1),
+				// 0012
+				bytecode.Make(bytecode.OpLessThan),
+				// 0013
+				bytecode.Make(bytecode.OpJumpNotTruthy, 29),
+				// 0016
+				bytecode.Make(bytecode.OpGetGlobal, 0),
+				// 0019
+				bytecode.Make(bytecode.OpConstant, 2),
+				// 0022
+				bytecode.Make(bytecode.OpAdd),
+				// 0023
+				bytecode.Make(bytecode.OpSetGlobal, 0),
+				// 0026
+				bytecode.Make(bytecode.OpJump, 6),
+				// 0029
+				bytecode.Make(bytecode.OpNull),
+				// 0030
+				bytecode.Make(bytecode.OpPop),
+				// 0031
+				bytecode.Make(bytecode.OpConstant, 3),
+				// 0034
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{0, 10, 1, 3333},
+		},
+		{
+			input: `
+			let x = 0; while (x < 10) { x++; }; 3333;
+			`,
+			expectedInstructions: []bytecode.Instructions{
+				// 0000
+				bytecode.Make(bytecode.OpConstant, 0),
+				// 0003
+				bytecode.Make(bytecode.OpSetGlobal, 0),
+				// 0006
+				bytecode.Make(bytecode.OpGetGlobal, 0),
+				// 0009
+				bytecode.Make(bytecode.OpConstant, 1),
+				// 0012
+				bytecode.Make(bytecode.OpLessThan),
+				// 0013
+				bytecode.Make(bytecode.OpJumpNotTruthy, 29),
+				// 0016
+				bytecode.Make(bytecode.OpGetGlobal, 0),
+				// 0019
+				bytecode.Make(bytecode.OpConstant, 2),
+				// 0022
+				bytecode.Make(bytecode.OpAdd),
+				// 0023
+				bytecode.Make(bytecode.OpSetGlobal, 0),
+				// 0026
+				bytecode.Make(bytecode.OpJump, 6),
+				// 0029
+				bytecode.Make(bytecode.OpNull),
+				// 0030
+				bytecode.Make(bytecode.OpPop),
+				// 0031
+				bytecode.Make(bytecode.OpConstant, 3),
+				// 0034
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{0, 10, 1, 3333},
+		},
 	}
 
 	runCompilerTests(t, tests)
@@ -479,6 +607,51 @@ func TestForLoops(t *testing.T) {
 		{
 			input: `
 			for (let i = 0; true; i = i + 1) { puts(i); }; 3333;
+			`,
+			expectedInstructions: []bytecode.Instructions{
+				// 0000
+				bytecode.Make(bytecode.OpConstant, 0),
+				// 0003
+				bytecode.Make(bytecode.OpSetGlobal, 0),
+
+				// 0006
+				bytecode.Make(bytecode.OpTrue),
+				// 0007
+				bytecode.Make(bytecode.OpJumpNotTruthy, 30),
+
+				// 0010
+				bytecode.Make(bytecode.OpGetBuiltIn, 0),
+				// 0012
+				bytecode.Make(bytecode.OpGetGlobal, 0),
+				// 0015
+				bytecode.Make(bytecode.OpCall, 1),
+
+				// 0017
+				bytecode.Make(bytecode.OpGetGlobal, 0),
+				// 0020
+				bytecode.Make(bytecode.OpConstant, 1),
+				// 0023
+				bytecode.Make(bytecode.OpAdd),
+				// 0024
+				bytecode.Make(bytecode.OpSetGlobal, 0),
+				// 0027
+				bytecode.Make(bytecode.OpJump, 6),
+
+				// 0030
+				bytecode.Make(bytecode.OpNull),
+				// 0031
+				bytecode.Make(bytecode.OpPop),
+
+				// 0032
+				bytecode.Make(bytecode.OpConstant, 2),
+				// 0035
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{0, 1, 3333},
+		},
+		{
+			input: `
+			for (let i = 0; true; i++) { puts(i); }; 3333;
 			`,
 			expectedInstructions: []bytecode.Instructions{
 				// 0000

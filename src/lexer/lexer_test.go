@@ -99,6 +99,10 @@ func TestNextToken(t *testing.T) {
 	for (let i = 0; i < len(arr); i = i + 1) {
 		puts(arr[i]);
 	}
+
+	let i = 0;
+	i++;
+	i--;
 	`
 
 	tests := []struct {
@@ -360,6 +364,18 @@ func TestNextToken(t *testing.T) {
 		{token.RPAREN, ")"},
 		{token.SEMICOLON, ";"},
 		{token.RBRACE, "}"},
+
+		{token.LET, "let"},
+		{token.IDENT, "i"},
+		{token.ASSIGN, "="},
+		{token.INT, "0"},
+		{token.SEMICOLON, ";"},
+		{token.IDENT, "i"},
+		{token.INCREMENT, "++"},
+		{token.SEMICOLON, ";"},
+		{token.IDENT, "i"},
+		{token.DECREMENT, "--"},
+		{token.SEMICOLON, ";"},
 
 		{token.EOF, ""},
 	}

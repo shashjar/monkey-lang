@@ -9,7 +9,8 @@ import (
 )
 
 // Represents a parser for the Monkey programming language, consisting of (1) a lexer for tokenization,
-// (2) any errors encountered during parsing, (3) the current token under examination, and (4) the next token.
+// (2) any errors encountered during parsing, (3) the current token under examination, (4) the next token,
+// and (5) the parsing functions for operators in different (prefix, infix) positions.
 type Parser struct {
 	l *lexer.Lexer
 
@@ -33,7 +34,7 @@ const (
 	LOWEST
 	EQUALS       // == or !=
 	AND_OR       // && or ||
-	LESS_GREATER // > or <
+	LESS_GREATER // > or < or <= or >=
 	SUM          // + or -
 	PRODUCT      // * or / or // or %
 	PREFIX       // -X or !X
@@ -162,6 +163,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseBindingDeclarationStatement(true)
 	case p.currToken.Type == token.IDENT && p.peekTokenIs(token.ASSIGN):
 		return p.parseAssignStatement()
+	case p.peekTokenIs(token.INCREMENT) || p.peekTokenIs(token.DECREMENT):
+		return p.parsePostfixStatement()
 	case p.currToken.Type == token.RETURN:
 		return p.parseReturnStatement()
 	default:
@@ -236,6 +239,44 @@ func (p *Parser) parseAssignStatement() ast.Statement {
 	}
 
 	return assignStatement
+}
+
+func (p *Parser) parsePostfixStatement() ast.Statement {
+	if !p.currTokenIs(token.IDENT) {
+		msg := fmt.Sprintf("expected postfix operator '%s' to be applied to an identifier. got %s instead", p.peekToken.Literal, p.currToken.Literal)
+		p.errors = append(p.errors, msg)
+		return nil
+	}
+
+	postfixStatement := &ast.AssignStatement{Token: p.currToken}
+	postfixStatement.Name = &ast.Identifier{Token: p.currToken, Value: p.currToken.Literal}
+
+	p.nextToken()
+
+	switch p.currToken.Type {
+	case token.INCREMENT:
+		postfixStatement.Value = &ast.InfixExpression{
+			Token:    token.Token{Type: token.PLUS, Literal: "+"},
+			Left:     postfixStatement.Name,
+			Operator: "+",
+			Right:    &ast.IntegerLiteral{Token: token.Token{Type: token.INT, Literal: "1"}, Value: 1},
+		}
+	case token.DECREMENT:
+		postfixStatement.Value = &ast.InfixExpression{
+			Token:    token.Token{Type: token.MINUS, Literal: "-"},
+			Left:     postfixStatement.Name,
+			Operator: "-",
+			Right:    &ast.IntegerLiteral{Token: token.Token{Type: token.INT, Literal: "1"}, Value: 1},
+		}
+	default:
+		return nil
+	}
+
+	if p.peekTokenIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return postfixStatement
 }
 
 func (p *Parser) parseReturnStatement() ast.Statement {

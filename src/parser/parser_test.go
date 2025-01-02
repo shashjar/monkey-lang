@@ -380,6 +380,66 @@ func TestParsingInfixExpressions(t *testing.T) {
 	}
 }
 
+func TestParsingPostfixExpressions(t *testing.T) {
+	tests := []struct {
+		input              string
+		expectedIdentifier string
+	}{
+		{"x++", "x"},
+		{"y--", "y"},
+		{"x++;", "x"},
+		{"y--;", "y"},
+	}
+
+	for _, test := range tests {
+		l := lexer.NewLexer(test.input)
+		p := NewParser(l)
+		program := p.ParseProgram()
+		checkParserErrors(t, p)
+		if len(program.Statements) != 1 {
+			t.Fatalf("program contains wrong number of statements. expected=%d, got=%d", 1, len(program.Statements))
+		}
+
+		statement := program.Statements[0]
+		if !testAssignStatement(t, statement, test.expectedIdentifier) {
+			return
+		}
+	}
+}
+
+func TestPostfixOperatorErrors(t *testing.T) {
+	tests := []struct {
+		input         string
+		expectedError string
+	}{
+		{
+			input:         "3++",
+			expectedError: "expected postfix operator '++' to be applied to an identifier. got 3 instead",
+		},
+		{
+			input:         "true--",
+			expectedError: "expected postfix operator '--' to be applied to an identifier. got true instead",
+		},
+	}
+
+	for _, test := range tests {
+		l := lexer.NewLexer(test.input)
+		p := NewParser(l)
+		p.ParseProgram()
+
+		errorCreated := false
+		for _, err := range p.errors {
+			if err == test.expectedError {
+				errorCreated = true
+			}
+		}
+
+		if !errorCreated {
+			t.Fatalf("parser did not create expected error. expected=%q, got=%q", test.expectedError, p.errors)
+		}
+	}
+}
+
 func TestOperatorPrecedenceParsing(t *testing.T) {
 	tests := []struct {
 		input    string
