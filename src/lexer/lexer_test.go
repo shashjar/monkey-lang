@@ -103,6 +103,15 @@ func TestNextToken(t *testing.T) {
 	let i = 0;
 	i++;
 	i--;
+
+	switch x {
+	case "hello":
+		puts("hello");
+	case "world":
+		puts("world");
+	default:
+		puts("hello world");
+	}
 	`
 
 	tests := []struct {
@@ -376,6 +385,34 @@ func TestNextToken(t *testing.T) {
 		{token.IDENT, "i"},
 		{token.DECREMENT, "--"},
 		{token.SEMICOLON, ";"},
+
+		{token.SWITCH, "switch"},
+		{token.IDENT, "x"},
+		{token.LBRACE, "{"},
+		{token.CASE, "case"},
+		{token.STRING, "hello"},
+		{token.COLON, ":"},
+		{token.IDENT, "puts"},
+		{token.LPAREN, "("},
+		{token.STRING, "hello"},
+		{token.RPAREN, ")"},
+		{token.SEMICOLON, ";"},
+		{token.CASE, "case"},
+		{token.STRING, "world"},
+		{token.COLON, ":"},
+		{token.IDENT, "puts"},
+		{token.LPAREN, "("},
+		{token.STRING, "world"},
+		{token.RPAREN, ")"},
+		{token.SEMICOLON, ";"},
+		{token.DEFAULT, "default"},
+		{token.COLON, ":"},
+		{token.IDENT, "puts"},
+		{token.LPAREN, "("},
+		{token.STRING, "hello world"},
+		{token.RPAREN, ")"},
+		{token.SEMICOLON, ";"},
+		{token.RBRACE, "}"},
 
 		{token.EOF, ""},
 	}
