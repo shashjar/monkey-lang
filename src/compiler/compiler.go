@@ -265,6 +265,60 @@ func (c *Compiler) Compile(node ast.Node) error {
 			c.changeOperand(jumpPos, afterIfExpressionPos)
 		}
 
+	case *ast.SwitchStatement:
+		jumpPositions := []int{}
+
+		for _, switchCase := range node.Cases {
+			err := c.Compile(node.SwitchExpression)
+			if err != nil {
+				return err
+			}
+
+			err = c.Compile(switchCase.Expression)
+			if err != nil {
+				return err
+			}
+
+			c.emit(bytecode.OpEqual)
+
+			// Emit an `OpJumpNotTruthy` with a bogus offset to be updated below with the position following this case's consequence
+			jumpNotTruthyPos := c.emit(bytecode.OpJumpNotTruthy, 9999)
+
+			err = c.Compile(switchCase.Consequence)
+			if err != nil {
+				return err
+			}
+
+			if c.lastInstructionIs(bytecode.OpPop) {
+				c.removeLastPop()
+			}
+
+			// Emit an `OpJump` with a bogus offset to be updated below with the position following the end of the entire switch statement
+			jumpPos := c.emit(bytecode.OpJump, 9999)
+			jumpPositions = append(jumpPositions, jumpPos)
+
+			afterCaseConsequencePos := len(c.currentInstructions())
+			c.changeOperand(jumpNotTruthyPos, afterCaseConsequencePos)
+		}
+
+		if node.Default == nil {
+			c.emit(bytecode.OpNull)
+		} else {
+			err := c.Compile(node.Default)
+			if err != nil {
+				return err
+			}
+
+			if c.lastInstructionIs(bytecode.OpPop) {
+				c.removeLastPop()
+			}
+		}
+
+		afterSwitchStatementPos := len(c.currentInstructions())
+		for _, jumpPos := range jumpPositions {
+			c.changeOperand(jumpPos, afterSwitchStatementPos)
+		}
+
 	case *ast.WhileLoop:
 		whileLoopStartPos := len(c.currentInstructions())
 

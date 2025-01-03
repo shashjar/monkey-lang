@@ -390,6 +390,38 @@ func TestConditionals(t *testing.T) {
 		},
 		{
 			input: `
+			if (true) { 10 } else if (false) { 20 }; 3333;
+			`,
+			expectedInstructions: []bytecode.Instructions{
+				// 0000
+				bytecode.Make(bytecode.OpTrue),
+				// 0001
+				bytecode.Make(bytecode.OpJumpNotTruthy, 10),
+				// 0004
+				bytecode.Make(bytecode.OpConstant, 0),
+				// 0007
+				bytecode.Make(bytecode.OpJump, 21),
+				// 0010
+				bytecode.Make(bytecode.OpFalse),
+				// 0011
+				bytecode.Make(bytecode.OpJumpNotTruthy, 20),
+				// 0014
+				bytecode.Make(bytecode.OpConstant, 1),
+				// 0017
+				bytecode.Make(bytecode.OpJump, 21),
+				// 0020
+				bytecode.Make(bytecode.OpNull),
+				// 0021
+				bytecode.Make(bytecode.OpPop),
+				// 0022
+				bytecode.Make(bytecode.OpConstant, 2),
+				// 0025
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{10, 20, 3333},
+		},
+		{
+			input: `
 			if (true) { 10 } else { 20 }; 3333;
 			`,
 			expectedConstants: []interface{}{10, 20, 3333},
@@ -451,6 +483,139 @@ func TestConditionals(t *testing.T) {
 				// 0037
 				bytecode.Make(bytecode.OpPop),
 			},
+		},
+	}
+
+	runCompilerTests(t, tests)
+}
+
+func TestSwitchStatements(t *testing.T) {
+	tests := []compilerTestCase{
+		{
+			input: `
+			switch "hello" {
+			case "hello":
+				10;
+			}
+			3333;
+			`,
+			expectedInstructions: []bytecode.Instructions{
+				// 0000
+				bytecode.Make(bytecode.OpConstant, 0),
+				// 0003
+				bytecode.Make(bytecode.OpConstant, 1),
+				// 0006
+				bytecode.Make(bytecode.OpEqual),
+				// 0007
+				bytecode.Make(bytecode.OpJumpNotTruthy, 16),
+				// 0010
+				bytecode.Make(bytecode.OpConstant, 2),
+				// 0013
+				bytecode.Make(bytecode.OpJump, 17),
+				// 0016
+				bytecode.Make(bytecode.OpNull),
+				// 0017
+				bytecode.Make(bytecode.OpPop),
+				// 0018
+				bytecode.Make(bytecode.OpConstant, 3),
+				// 0021
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{"hello", "hello", 10, 3333},
+		},
+		{
+			input: `
+			switch "hello" {
+			case "hello":
+				10;
+			case "world":
+				20;
+			}
+			3333;
+			`,
+			expectedInstructions: []bytecode.Instructions{
+				// 0000
+				bytecode.Make(bytecode.OpConstant, 0),
+				// 0003
+				bytecode.Make(bytecode.OpConstant, 1),
+				// 0006
+				bytecode.Make(bytecode.OpEqual),
+				// 0007
+				bytecode.Make(bytecode.OpJumpNotTruthy, 16),
+				// 0010
+				bytecode.Make(bytecode.OpConstant, 2),
+				// 0013
+				bytecode.Make(bytecode.OpJump, 33),
+				// 0016
+				bytecode.Make(bytecode.OpConstant, 3),
+				// 0019
+				bytecode.Make(bytecode.OpConstant, 4),
+				// 0022
+				bytecode.Make(bytecode.OpEqual),
+				// 0023
+				bytecode.Make(bytecode.OpJumpNotTruthy, 32),
+				// 0026
+				bytecode.Make(bytecode.OpConstant, 5),
+				// 0029
+				bytecode.Make(bytecode.OpJump, 33),
+				// 0032
+				bytecode.Make(bytecode.OpNull),
+				// 0033
+				bytecode.Make(bytecode.OpPop),
+				// 0034
+				bytecode.Make(bytecode.OpConstant, 6),
+				// 0037
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{"hello", "hello", 10, "hello", "world", 20, 3333},
+		},
+		{
+			input: `
+			switch "hello" {
+			case "hello":
+				10;
+			case "world":
+				20;
+			default:
+				30;
+			}
+			3333;
+			`,
+			expectedInstructions: []bytecode.Instructions{
+				// 0000
+				bytecode.Make(bytecode.OpConstant, 0),
+				// 0003
+				bytecode.Make(bytecode.OpConstant, 1),
+				// 0006
+				bytecode.Make(bytecode.OpEqual),
+				// 0007
+				bytecode.Make(bytecode.OpJumpNotTruthy, 16),
+				// 0010
+				bytecode.Make(bytecode.OpConstant, 2),
+				// 0013
+				bytecode.Make(bytecode.OpJump, 35),
+				// 0016
+				bytecode.Make(bytecode.OpConstant, 3),
+				// 0019
+				bytecode.Make(bytecode.OpConstant, 4),
+				// 0022
+				bytecode.Make(bytecode.OpEqual),
+				// 0023
+				bytecode.Make(bytecode.OpJumpNotTruthy, 32),
+				// 0026
+				bytecode.Make(bytecode.OpConstant, 5),
+				// 0029
+				bytecode.Make(bytecode.OpJump, 35),
+				// 0032
+				bytecode.Make(bytecode.OpConstant, 6),
+				// 0035
+				bytecode.Make(bytecode.OpPop),
+				// 0036
+				bytecode.Make(bytecode.OpConstant, 7),
+				// 0039
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{"hello", "hello", 10, "hello", "world", 20, 30, 3333},
 		},
 	}
 

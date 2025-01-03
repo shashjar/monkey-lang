@@ -777,6 +777,150 @@ func TestIfElseIfElseExpression(t *testing.T) {
 	}
 }
 
+func TestBasicSwitchStatement(t *testing.T) {
+	input := `
+	switch x {
+	case "hello":
+		x;
+	}
+	`
+
+	l := lexer.NewLexer(input)
+	p := NewParser(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+	if len(program.Statements) != 1 {
+		t.Fatalf("program contains wrong number of statements. expected=%d, got=%d", 1, len(program.Statements))
+	}
+
+	statement, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not an *ast.ExpressionStatement. got=%T", program.Statements[0])
+	}
+
+	exp, ok := statement.Expression.(*ast.SwitchStatement)
+	if !ok {
+		t.Fatalf("statement.Expression is not an ast.SwitchStatement. got=%T", statement.Expression)
+	}
+
+	// Switch expression
+	if !testLiteralExpression(t, exp.SwitchExpression, "x") {
+		return
+	}
+
+	if len(exp.Cases) != 1 {
+		t.Fatalf("exp.Cases is the wrong length. expected=%d, got=%d", 1, len(exp.Cases))
+	}
+
+	// First case ("hello")
+	if !testStringLiteral(t, exp.Cases[0].Expression, "hello") {
+		return
+	}
+
+	if len(exp.Cases[0].Consequence.Statements) != 1 {
+		t.Errorf("consequence contains wrong number of statements. expected=%d, got=%d", 1, len(exp.Cases[0].Consequence.Statements))
+	}
+
+	consequence, ok := exp.Cases[0].Consequence.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("exp.Cases[0].Consequence.Statements[0] is not an ast.ExpressionStatement. got=%T", exp.Cases[0].Consequence.Statements[0])
+	}
+
+	if !testIdentifier(t, consequence.Expression, "x") {
+		return
+	}
+}
+
+func TestSwitchStatementWithDefault(t *testing.T) {
+	input := `
+	switch x {
+	case "hello":
+		x;
+	case "world":
+		3;
+	default:
+		y;
+	}
+	`
+
+	l := lexer.NewLexer(input)
+	p := NewParser(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+	if len(program.Statements) != 1 {
+		t.Fatalf("program contains wrong number of statements. expected=%d, got=%d", 1, len(program.Statements))
+	}
+
+	statement, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not an *ast.ExpressionStatement. got=%T", program.Statements[0])
+	}
+
+	exp, ok := statement.Expression.(*ast.SwitchStatement)
+	if !ok {
+		t.Fatalf("statement.Expression is not an ast.SwitchStatement. got=%T", statement.Expression)
+	}
+
+	// Switch expression
+	if !testLiteralExpression(t, exp.SwitchExpression, "x") {
+		return
+	}
+
+	if len(exp.Cases) != 2 {
+		t.Fatalf("exp.Cases is the wrong length. expected=%d, got=%d", 2, len(exp.Cases))
+	}
+
+	// First case ("hello")
+	if !testStringLiteral(t, exp.Cases[0].Expression, "hello") {
+		return
+	}
+
+	if len(exp.Cases[0].Consequence.Statements) != 1 {
+		t.Errorf("consequence contains wrong number of statements. expected=%d, got=%d", 1, len(exp.Cases[0].Consequence.Statements))
+	}
+
+	consequence, ok := exp.Cases[0].Consequence.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("exp.Cases[0].Consequence.Statements[0] is not an ast.ExpressionStatement. got=%T", exp.Cases[0].Consequence.Statements[0])
+	}
+
+	if !testIdentifier(t, consequence.Expression, "x") {
+		return
+	}
+
+	// Second case ("world")
+	if !testStringLiteral(t, exp.Cases[1].Expression, "world") {
+		return
+	}
+
+	if len(exp.Cases[1].Consequence.Statements) != 1 {
+		t.Errorf("consequence contains wrong number of statements. expected=%d, got=%d", 1, len(exp.Cases[1].Consequence.Statements))
+	}
+
+	consequence, ok = exp.Cases[1].Consequence.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("exp.Cases[1].Consequence.Statements[0] is not an ast.ExpressionStatement. got=%T", exp.Cases[1].Consequence.Statements[0])
+	}
+
+	if !testIntegerLiteral(t, consequence.Expression, 3) {
+		return
+	}
+
+	// Default case
+	if len(exp.Default.Statements) != 1 {
+		t.Errorf("default contains wrong number of statements. expected=%d, got=%d", 1, len(exp.Default.Statements))
+	}
+
+	defaultCase, ok := exp.Default.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("exp.Default.Statements[0] is not an ast.ExpressionStatement. got=%T", exp.Default.Statements[0])
+	}
+
+	if !testIdentifier(t, defaultCase.Expression, "y") {
+		return
+	}
+}
+
 func TestWhileLoop(t *testing.T) {
 	input := `while (x < y) { x = x + 1; }`
 

@@ -129,6 +129,141 @@ func TestConditionals(t *testing.T) {
 	runVMTests(t, tests)
 }
 
+func TestSwitchStatements(t *testing.T) {
+	tests := []vmTestCase{
+		{
+			`
+			switch "hello" {
+			case "hello":
+				10;
+			}
+			`,
+			10,
+		},
+		{
+			`
+			switch "world" {
+			case "hello":
+				10;
+			case "world":
+				20;
+			default:
+				30;
+			}
+			`,
+			20,
+		},
+		{
+			`
+			switch "hi" {
+			case "hello":
+				10;
+			case "world":
+				20;
+			default:
+				30;
+			}
+			`,
+			30,
+		},
+		{
+			`
+			let x = 20;
+			switch x {
+			case 0:
+				40;
+			case 10:
+				50;
+			case 20:
+				60;
+			case 30:
+				70;
+			default:
+				80;
+			}
+			`,
+			60,
+		},
+		{
+			`
+			switch 3 < 4 {
+			case false:
+				40;
+			case true:
+				50;
+			}
+			`,
+			50,
+		},
+		{
+			`
+			switch ("hi" + " there") {
+			case "hi":
+				40;
+			case "there":
+				50;
+			case "hi there":
+				60;
+			case "not here":
+				70;
+			default:
+				80;
+			}
+			`,
+			60,
+		},
+		{
+			`
+			switch "doesn't match" {
+			case "hi":
+				40;
+			case "there":
+				50;
+			case "hi there":
+				60;
+			case "not here":
+				70;
+			}
+			`,
+			Null,
+		},
+		{
+			`
+			switch 12 {
+			case 10:
+				40;
+			case 11:
+				50;
+			case 13:
+				60;
+			case 14:
+				70;
+			}
+			`,
+			Null,
+		},
+		{
+			`
+			switch 12 {
+			case 10:
+				40;
+			case 11:
+				50;
+			case 12:
+				60;
+			case 13:
+				70;
+			case 14:
+				80;
+			}
+			`,
+			60,
+		},
+	}
+
+	runVMTests(t, tests)
+}
+
 func TestWhileLoops(t *testing.T) {
 	tests := []vmTestCase{
 		{"let x = 0; while (false) { x = x + 1; }; x;", 0},

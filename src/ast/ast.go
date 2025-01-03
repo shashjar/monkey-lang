@@ -379,6 +379,50 @@ func (ie *IfExpression) String() string {
 	return out.String()
 }
 
+// Represents a case in a switch statement.
+type SwitchCase struct {
+	Expression  Expression
+	Consequence *BlockStatement
+}
+
+// Represents a switch statement in the form "switch <expression> { case <expression>: <consequence> ... default: <default-consequence> }"
+// At least one `case` must be provided, and `default` is optional
+type SwitchStatement struct {
+	Token            token.Token     // the token.SWITCH token
+	SwitchExpression Expression      // the expression we are switching on
+	Cases            []SwitchCase    // at least one `case` is required
+	Default          *BlockStatement // the `default` case, if one was provided
+}
+
+func (ss *SwitchStatement) expressionNode() {}
+
+func (ss *SwitchStatement) TokenLiteral() string {
+	return ss.Token.Literal
+}
+
+func (ss *SwitchStatement) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("switch ")
+	out.WriteString(ss.SwitchExpression.String())
+	out.WriteString(" { ")
+	out.WriteString("case " + ss.Cases[0].Expression.String() + ": ")
+	out.WriteString(ss.Cases[0].Consequence.String())
+
+	for i := 1; i < len(ss.Cases); i++ {
+		out.WriteString(" case " + ss.Cases[i].Expression.String() + ": ")
+		out.WriteString(ss.Cases[i].Consequence.String())
+	}
+
+	if ss.Default != nil {
+		out.WriteString(" default: " + ss.Default.String())
+	}
+
+	out.WriteString(" }")
+
+	return out.String()
+}
+
 // Represents a while loop in the Monkey programming language, which executes some body as long as some
 // provided condition is truthy.
 type WhileLoop struct {

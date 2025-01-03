@@ -75,6 +75,7 @@ func NewParser(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.FALSE, p.parseBoolean)
 	p.registerPrefix(token.LPAREN, p.parseGroupedExpression)
 	p.registerPrefix(token.IF, p.parseIfExpression)
+	p.registerPrefix(token.SWITCH, p.parseSwitchStatement)
 	p.registerPrefix(token.WHILE, p.parseWhileLoop)
 	p.registerPrefix(token.FOR, p.parseForLoop)
 	p.registerPrefix(token.FUNCTION, p.parseFunctionLiteral)
@@ -294,12 +295,16 @@ func (p *Parser) parseReturnStatement() ast.Statement {
 }
 
 func (p *Parser) parseBlockStatement() *ast.BlockStatement {
+	return p.parseBlock([]token.TokenType{token.RBRACE})
+}
+
+func (p *Parser) parseBlock(endingTokenTypes []token.TokenType) *ast.BlockStatement {
 	blockStatement := &ast.BlockStatement{Token: p.currToken}
 	blockStatement.Statements = []ast.Statement{}
 
 	p.nextToken()
 
-	for !p.currTokenIs(token.RBRACE) && !p.currTokenIs(token.EOF) {
+	for !p.currTokenIn(endingTokenTypes) && !p.currTokenIs(token.EOF) {
 		statement := p.parseStatement()
 		if statement != nil {
 			blockStatement.Statements = append(blockStatement.Statements, statement)
@@ -469,6 +474,64 @@ func (p *Parser) parseIfExpression() ast.Expression {
 
 	ie.Clauses = ieClauses
 	return ie
+}
+
+func (p *Parser) parseSwitchStatement() ast.Expression {
+	ss := &ast.SwitchStatement{Token: p.currToken}
+	switchCases := []ast.SwitchCase{}
+
+	p.nextToken()
+
+	switchExpression := p.parseExpression(LOWEST)
+	ss.SwitchExpression = switchExpression
+
+	if !p.expectPeek(token.LBRACE) {
+		return nil
+	}
+
+	if !p.expectPeek(token.CASE) {
+		return nil
+	}
+
+	p.nextToken()
+
+	firstCaseExpression := p.parseExpression(LOWEST)
+
+	if !p.expectPeek(token.COLON) {
+		return nil
+	}
+
+	firstCaseConsequence := p.parseBlock([]token.TokenType{token.CASE, token.DEFAULT, token.RBRACE})
+
+	firstCase := ast.SwitchCase{Expression: firstCaseExpression, Consequence: firstCaseConsequence}
+	switchCases = append(switchCases, firstCase)
+
+	for p.currTokenIs(token.CASE) {
+		p.nextToken()
+
+		caseExpression := p.parseExpression(LOWEST)
+
+		if !p.expectPeek(token.COLON) {
+			return nil
+		}
+
+		caseConsequence := p.parseBlock([]token.TokenType{token.CASE, token.DEFAULT, token.RBRACE})
+
+		thisCase := ast.SwitchCase{Expression: caseExpression, Consequence: caseConsequence}
+		switchCases = append(switchCases, thisCase)
+	}
+
+	if p.currTokenIs(token.DEFAULT) {
+		if !p.expectPeek(token.COLON) {
+			return nil
+		}
+
+		defaultConsequence := p.parseBlock([]token.TokenType{token.RBRACE})
+		ss.Default = defaultConsequence
+	}
+
+	ss.Cases = switchCases
+	return ss
 }
 
 func (p *Parser) parseWhileLoop() ast.Expression {
@@ -699,6 +762,15 @@ func (p *Parser) expectPeek(t token.TokenType) bool {
 
 func (p *Parser) currTokenIs(t token.TokenType) bool {
 	return p.currToken.Type == t
+}
+
+func (p *Parser) currTokenIn(ts []token.TokenType) bool {
+	for _, t := range ts {
+		if p.currTokenIs(t) {
+			return true
+		}
+	}
+	return false
 }
 
 func (p *Parser) peekTokenIs(t token.TokenType) bool {

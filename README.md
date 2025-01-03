@@ -167,6 +167,19 @@ if (x > 3) {
 }
 ```
 
+Additionally, `switch` statements with an arbitrary number (at least one) of `case`s and an optional `default` case are supported. Truth checking for `case`s is done via the `==` equality operator between the `switch` expression and the `case` expression. Note that only the first applicable case, if any, is executed, and then the `switch` statement terminates.
+
+```
+switch x {
+case "hello":
+    puts("hello");
+case "world":
+    puts("world");
+default:
+    puts("hello world");
+}
+```
+
 ### Loops
 
 `while` loops with a conditional clause and a body block statement are supported.

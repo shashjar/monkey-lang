@@ -18,7 +18,8 @@ This is a living document storing some ideas for extensions & improvements that 
 - [x] Add basic support for `for` loops
 - [ ] Add support for `break` and `continue` in `while` and `for` loops
 - [ ] For `for` loops, the `Init`, `Condition`, and `Afterthought` expressions are all currently required - maybe allow for these to be optional
-- [ ] Implement `switch` statements
+- [x] Add basic support for `switch` statements
+- [ ] `switch` statements currently just use equality (`==`) for comparison - maybe allow for switching based on the type of some variable, like in Go
 - [x] Maybe support postfix operators `++` and `--`
 - [ ] The lexer (`lexer/lexer.go`) currently only supports ASCII characters. Maybe extend this to Unicode (see p. 19-20 in WAIIG).
 - [ ] Add support for macros into the compiler/VM engine (supported in interpreter but not yet compiler/VM)
@@ -54,5 +55,6 @@ This is a living document storing some ideas for extensions & improvements that 
 ## Housekeeping / Tech Debt
 
 - [ ] Keep [README](README.md) documenting language features & implementation up-to-date
-- [ ] In the AST modification functionality (`ast/modify.go`), implement thorough error-checking
+- [ ] Maybe refactor some code files/split into more files (some files are getting pretty long)
 - [x] In the `*ast.InfixExpression` handling in `compiler/compiler.go`, is it worth just adding an `OpLessThan` bytecode instruction so that this case doesn't have to be handled separately from the rest of the logic?
+- [ ] In the AST modification functionality (`ast/modify.go`), implement thorough error-checking
