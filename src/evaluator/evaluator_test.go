@@ -317,7 +317,7 @@ func TestBuiltInFunctions(t *testing.T) {
 		input    string
 		expected interface{}
 	}{
-		{`puts()`, "need at least one argument provided to puts"},
+		{`puts()`, "need at least one argument provided to `puts`"},
 		{`puts("hello world!")`, nil},
 
 		{`len("")`, 0},
