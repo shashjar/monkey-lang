@@ -352,7 +352,7 @@ func (vm *VM) executeBinaryOperation(op bytecode.Opcode) error {
 	rightType := right.Type()
 
 	switch {
-	case isNumerical(leftType) && isNumerical(rightType):
+	case object.IsNumerical(leftType) && object.IsNumerical(rightType):
 		return vm.executeBinaryNumericalOperation(op, left, right)
 	case leftType == object.STRING_OBJ && rightType == object.STRING_OBJ:
 		return vm.executeBinaryStringOperation(op, left, right)
@@ -366,8 +366,8 @@ func (vm *VM) executeBinaryOperation(op bytecode.Opcode) error {
 func (vm *VM) executeBinaryNumericalOperation(op bytecode.Opcode, left object.Object, right object.Object) error {
 	var result interface{}
 
-	leftValue, leftIsFloat := getNumericalValue(left)
-	rightValue, rightIsFloat := getNumericalValue(right)
+	leftValue, leftIsFloat, _ := object.GetNumericalValue(left)
+	rightValue, rightIsFloat, _ := object.GetNumericalValue(right)
 
 	isFloatOperation := leftIsFloat || rightIsFloat
 
@@ -466,7 +466,7 @@ func (vm *VM) executeComparison(op bytecode.Opcode) error {
 	leftType := left.Type()
 	rightType := right.Type()
 
-	if isNumerical(leftType) && isNumerical(rightType) {
+	if object.IsNumerical(leftType) && object.IsNumerical(rightType) {
 		return vm.executeNumericalComparison(op, left, right)
 	} else if leftType == object.BOOLEAN_OBJ && rightType == object.BOOLEAN_OBJ {
 		return vm.executeBooleanComparison(op, left, right)
@@ -478,8 +478,8 @@ func (vm *VM) executeComparison(op bytecode.Opcode) error {
 }
 
 func (vm *VM) executeNumericalComparison(op bytecode.Opcode, left object.Object, right object.Object) error {
-	leftValue, _ := getNumericalValue(left)
-	rightValue, _ := getNumericalValue(right)
+	leftValue, _, _ := object.GetNumericalValue(left)
+	rightValue, _, _ := object.GetNumericalValue(right)
 
 	switch op {
 	case bytecode.OpEqual:
