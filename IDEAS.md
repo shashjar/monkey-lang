@@ -29,7 +29,9 @@ This is a living document storing some ideas for extensions & improvements that 
 - [x] Add support for hashmaps in the `len` builtin function
 - [x] Strings: `split` operation
 - [x] Arrays: `join` operation
-- [ ] Add support for more language built-ins (`evaluator/builtins.go`), e.g. list comprehensions from Python - map, sum, filter, etc.
+- [x] Arrays: `sum`
+- [ ] Arrays: `map`
+- [ ] Arrays: `filter`
 
 ## REPL Features
 

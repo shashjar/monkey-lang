@@ -13,4 +13,5 @@ var builtins = map[string]*object.BuiltIn{
 	"append": object.GetBuiltInByName("append"),
 	"join":   object.GetBuiltInByName("join"),
 	"split":  object.GetBuiltInByName("split"),
+	"sum":    object.GetBuiltInByName("sum"),
 }

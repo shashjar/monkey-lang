@@ -41,6 +41,10 @@ var BuiltIns = []struct {
 		"split",
 		split,
 	},
+	{
+		"sum",
+		sum,
+	},
 }
 
 func GetBuiltInByName(name string) *BuiltIn {
@@ -231,6 +235,42 @@ var split = &BuiltIn{
 			return &Array{Elements: resultObjects}
 		default:
 			return newError("first argument to `split` must be a string, got %s", s.Type())
+		}
+	},
+}
+
+var sum = &BuiltIn{
+	Fn: func(args ...Object) Object {
+		if len(args) != 1 {
+			return newError("wrong number of arguments. expected=1, got=%d", len(args))
+		}
+
+		switch arg := args[0].(type) {
+		case *Array:
+			var arraySum float64
+			isFloat := false
+
+			for _, elem := range arg.Elements {
+				elemValue, elemIsFloat, err := GetNumericalValue(elem)
+				if err != nil {
+					return &Error{Message: err.Error()}
+				}
+
+				arraySum += elemValue
+
+				if elemIsFloat {
+					isFloat = true
+				}
+			}
+
+			if isFloat {
+				return &Float{Value: arraySum}
+			} else {
+				return &Integer{Value: int64(arraySum)}
+			}
+
+		default:
+			return newError("argument to `sum` is not supported, got %s", arg.Type())
 		}
 	},
 }

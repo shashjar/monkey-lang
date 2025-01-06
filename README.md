@@ -64,6 +64,7 @@ Note that the features listed in this document are all supported in the compiler
       - [append](#append)
       - [join](#join)
       - [split](#split)
+      - [sum](#sum)
 
 ## Benchmarks
 
@@ -416,4 +417,13 @@ Splits the characters of the provided string into substrings separated by the pr
 ```
 split("hello"); // ["h", "e", "l", "l", "o"]
 split("hello world", " "); // ["hello", "world"]
+```
+
+#### sum
+
+Returns the numerical sum of the elements in the provided array.
+
+```
+let a = [1, 2, 3];
+let aSum = sum(a); // 6
 ```

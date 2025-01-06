@@ -272,3 +272,42 @@ func TestSplit(t *testing.T) {
 
 	runVMTests(t, tests)
 }
+
+func TestSum(t *testing.T) {
+	tests := []vmTestCase{
+		{
+			input:    `sum([])`,
+			expected: 0,
+		},
+		{
+			input:    `sum([1])`,
+			expected: 1,
+		},
+		{
+			input:    `sum([1, 2, 3])`,
+			expected: 6,
+		},
+		{
+			input:    `sum([-5, 7, -14.3, 2])`,
+			expected: -10.3,
+		},
+		{
+			input:    `sum()`,
+			expected: &object.Error{Message: "wrong number of arguments. expected=1, got=0"},
+		},
+		{
+			input:    `sum([1, 2], [3, 4])`,
+			expected: &object.Error{Message: "wrong number of arguments. expected=1, got=2"},
+		},
+		{
+			input:    `sum("hi")`,
+			expected: &object.Error{Message: "argument to `sum` is not supported, got STRING"},
+		},
+		{
+			input:    `sum([1, 4.3, true, -2])`,
+			expected: &object.Error{Message: "unsupported numerical type: BOOLEAN"},
+		},
+	}
+
+	runVMTests(t, tests)
+}
