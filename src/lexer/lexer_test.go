@@ -465,3 +465,168 @@ func TestNextToken(t *testing.T) {
 		}
 	}
 }
+
+func TestLineAndColumnNumbersBasic(t *testing.T) {
+	input := `let;`
+
+	tests := []struct {
+		expectedType         token.TokenType
+		expectedLiteral      string
+		expectedLineNumber   int
+		expectedColumnNumber int
+	}{
+		{token.LET, "let", 1, 0},
+		{token.SEMICOLON, ";", 1, 3},
+
+		{token.EOF, "", 1, 4},
+	}
+
+	l := NewLexer(input)
+
+	for i, test := range tests {
+		tok := l.NextToken()
+
+		if tok.Type != test.expectedType {
+			t.Fatalf("tests[%d] - token type is wrong. expected=%q, got=%q", i, test.expectedType, tok.Type)
+		}
+
+		if tok.Literal != test.expectedLiteral {
+			t.Fatalf("tests[%d] - token literal is wrong. expected=%q, got=%q", i, test.expectedLiteral, tok.Literal)
+		}
+
+		if tok.LineNumber != test.expectedLineNumber {
+			t.Fatalf("tests[%d] - %s token line number is wrong. expected=%d, got=%d", i, tok.Literal, test.expectedLineNumber, tok.LineNumber)
+		}
+
+		if tok.ColumnNumber != test.expectedColumnNumber {
+			t.Fatalf("tests[%d] - %s token column number is wrong. expected=%d, got=%d", i, tok.Literal, test.expectedColumnNumber, tok.ColumnNumber)
+		}
+	}
+}
+
+func TestLineAndColumnNumbers(t *testing.T) {
+	input := `let five = 5;
+let ten = 10;
+
+let add = fn(x, y) {
+	x + y;
+};
+
+let result = add(five, ten);
+
+let arr = [1, 2, 3];
+for (let i = 0; i < len(arr); i++) {
+	puts(arr[i]);
+}
+`
+
+	tests := []struct {
+		expectedType         token.TokenType
+		expectedLiteral      string
+		expectedLineNumber   int
+		expectedColumnNumber int
+	}{
+		{token.LET, "let", 1, 0},
+		{token.IDENT, "five", 1, 4},
+		{token.ASSIGN, "=", 1, 9},
+		{token.INT, "5", 1, 11},
+		{token.SEMICOLON, ";", 1, 12},
+
+		{token.LET, "let", 2, 0},
+		{token.IDENT, "ten", 2, 4},
+		{token.ASSIGN, "=", 2, 8},
+		{token.INT, "10", 2, 10},
+		{token.SEMICOLON, ";", 2, 12},
+
+		{token.LET, "let", 4, 0},
+		{token.IDENT, "add", 4, 4},
+		{token.ASSIGN, "=", 4, 8},
+		{token.FUNCTION, "fn", 4, 10},
+		{token.LPAREN, "(", 4, 12},
+		{token.IDENT, "x", 4, 13},
+		{token.COMMA, ",", 4, 14},
+		{token.IDENT, "y", 4, 16},
+		{token.RPAREN, ")", 4, 17},
+		{token.LBRACE, "{", 4, 19},
+		{token.IDENT, "x", 5, 1},
+		{token.PLUS, "+", 5, 3},
+		{token.IDENT, "y", 5, 5},
+		{token.SEMICOLON, ";", 5, 6},
+		{token.RBRACE, "}", 6, 0},
+		{token.SEMICOLON, ";", 6, 1},
+
+		{token.LET, "let", 8, 0},
+		{token.IDENT, "result", 8, 4},
+		{token.ASSIGN, "=", 8, 11},
+		{token.IDENT, "add", 8, 13},
+		{token.LPAREN, "(", 8, 16},
+		{token.IDENT, "five", 8, 17},
+		{token.COMMA, ",", 8, 21},
+		{token.IDENT, "ten", 8, 23},
+		{token.RPAREN, ")", 8, 26},
+		{token.SEMICOLON, ";", 8, 27},
+
+		{token.LET, "let", 10, 0},
+		{token.IDENT, "arr", 10, 4},
+		{token.ASSIGN, "=", 10, 8},
+		{token.LBRACKET, "[", 10, 10},
+		{token.INT, "1", 10, 11},
+		{token.COMMA, ",", 10, 12},
+		{token.INT, "2", 10, 14},
+		{token.COMMA, ",", 10, 15},
+		{token.INT, "3", 10, 17},
+		{token.RBRACKET, "]", 10, 18},
+		{token.SEMICOLON, ";", 10, 19},
+		{token.FOR, "for", 11, 0},
+		{token.LPAREN, "(", 11, 4},
+		{token.LET, "let", 11, 5},
+		{token.IDENT, "i", 11, 9},
+		{token.ASSIGN, "=", 11, 11},
+		{token.INT, "0", 11, 13},
+		{token.SEMICOLON, ";", 11, 14},
+		{token.IDENT, "i", 11, 16},
+		{token.LT, "<", 11, 18},
+		{token.IDENT, "len", 11, 20},
+		{token.LPAREN, "(", 11, 23},
+		{token.IDENT, "arr", 11, 24},
+		{token.RPAREN, ")", 11, 27},
+		{token.SEMICOLON, ";", 11, 28},
+		{token.IDENT, "i", 11, 30},
+		{token.INCREMENT, "++", 11, 31},
+		{token.RPAREN, ")", 11, 33},
+		{token.LBRACE, "{", 11, 35},
+		{token.IDENT, "puts", 12, 1},
+		{token.LPAREN, "(", 12, 5},
+		{token.IDENT, "arr", 12, 6},
+		{token.LBRACKET, "[", 12, 9},
+		{token.IDENT, "i", 12, 10},
+		{token.RBRACKET, "]", 12, 11},
+		{token.RPAREN, ")", 12, 12},
+		{token.SEMICOLON, ";", 12, 13},
+		{token.RBRACE, "}", 13, 0},
+
+		{token.EOF, "", 14, 0},
+	}
+
+	l := NewLexer(input)
+
+	for i, test := range tests {
+		tok := l.NextToken()
+
+		if tok.Type != test.expectedType {
+			t.Fatalf("tests[%d] - token type is wrong. expected=%q, got=%q", i, test.expectedType, tok.Type)
+		}
+
+		if tok.Literal != test.expectedLiteral {
+			t.Fatalf("tests[%d] - token literal is wrong. expected=%q, got=%q", i, test.expectedLiteral, tok.Literal)
+		}
+
+		if tok.LineNumber != test.expectedLineNumber {
+			t.Fatalf("tests[%d] - %s token line number is wrong. expected=%d, got=%d", i, test.expectedLiteral, test.expectedLineNumber, tok.LineNumber)
+		}
+
+		if tok.ColumnNumber != test.expectedColumnNumber {
+			t.Fatalf("tests[%d] - %s token column number is wrong. expected=%d, got=%d", i, test.expectedLiteral, test.expectedColumnNumber, tok.ColumnNumber)
+		}
+	}
+}

@@ -5,8 +5,10 @@ type TokenType string
 
 // Represents a token in the Monkey programming language.
 type Token struct {
-	Type    TokenType
-	Literal string
+	Type         TokenType
+	Literal      string
+	LineNumber   int
+	ColumnNumber int
 }
 
 const (
