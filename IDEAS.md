@@ -12,7 +12,7 @@ This is a living document storing some ideas for extensions & improvements that 
 - [x] Modulo operator (`%`)
 - [x] Add `//` (integer division) as a separate operator from `/`
 - [x] Support `+=`, `-=`, `*=`, `/=`, `//=` operations
-- [ ] Add exponentiation operation with `**`
+- [x] Add exponentiation operation with `**`
 - [x] Additional comparison operators (`>=` & `<=`)
 - [x] Strings: comparison with `==` & `!=`
 - [x] Arrays: `+` operator

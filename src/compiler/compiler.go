@@ -194,6 +194,8 @@ func (c *Compiler) Compile(node ast.Node) error {
 			c.emit(bytecode.OpDiv)
 		case "//":
 			c.emit(bytecode.OpIntegerDiv)
+		case "**":
+			c.emit(bytecode.OpExp)
 		case "%":
 			c.emit(bytecode.OpMod)
 

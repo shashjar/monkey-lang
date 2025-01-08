@@ -113,6 +113,16 @@ func TestArithmetic(t *testing.T) {
 			expectedConstants: []interface{}{17.213, 6.182},
 		},
 		{
+			input: "4 ** 6",
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpExp),
+				bytecode.Make(bytecode.OpPop),
+			},
+			expectedConstants: []interface{}{4, 6},
+		},
+		{
 			input: "14 % 5",
 			expectedInstructions: []bytecode.Instructions{
 				bytecode.Make(bytecode.OpConstant, 0),

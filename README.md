@@ -116,11 +116,14 @@ The more advanced implementation of Monkey relies on a compiler & virtual machin
 
 The basic arithmetic operations (`+`, `-`, `*`, `/`, `//`) are supported for integers and floats (both 64 bits). The modulo operator `%` is also supported. Operations involving an integer and a float will produce a float, and division between two integers may produce either an integer or a float. Note that both regular division and integer division are supported.
 
+The `**` operator for exponentiation is supported.
+
 ```
 3 + (10 * 2) - (8 / -4);
 22 // 7;
 5 % 3;
 3.87 + 4 * 6.1;
+2**3;
 ```
 
 Additionally, shorthand assignment syntax for each of the basic arithmetic operations is supported. This is done using the tokens `+=`, `-=`, `*=`, `/=`, and `//=`, which perform the respective operation between the identifier on the left and the expression on the right and then reassign that value to the identifier.

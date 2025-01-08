@@ -67,6 +67,8 @@ func (l *Lexer) NextToken() token.Token {
 			char1 := l.char
 			l.readChar()
 			tok = token.Token{Type: token.MUL_ASSIGN, Literal: string(char1) + string(l.char)}
+		} else if l.peekChar() == '*' {
+			tok = l.readTwoCharacterToken(token.EXP)
 		} else {
 			tok = newToken(token.MUL, l.char)
 		}

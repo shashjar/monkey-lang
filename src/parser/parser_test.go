@@ -390,6 +390,7 @@ func TestParsingInfixExpressions(t *testing.T) {
 		{"false || true;", false, "||", true},
 		{"false || false;", false, "||", false},
 		{"5 % 2;", 5, "%", 2},
+		{"2**3;", 2, "**", 3},
 	}
 
 	for _, test := range infixTests {

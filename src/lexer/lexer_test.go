@@ -118,6 +118,8 @@ func TestNextToken(t *testing.T) {
 	i *= 5;
 	i /= 7;
 	i //= 9;
+
+	2**3;
 	`
 
 	tests := []struct {
@@ -439,6 +441,11 @@ func TestNextToken(t *testing.T) {
 		{token.IDENT, "i"},
 		{token.INTEGER_DIV_ASSIGN, "//="},
 		{token.INT, "9"},
+		{token.SEMICOLON, ";"},
+
+		{token.INT, "2"},
+		{token.EXP, "**"},
+		{token.INT, "3"},
 		{token.SEMICOLON, ";"},
 
 		{token.EOF, ""},

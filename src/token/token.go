@@ -36,6 +36,7 @@ const (
 	DIV_ASSIGN         = "/="
 	INTEGER_DIV_ASSIGN = "//="
 
+	EXP    = "**"
 	MODULO = "%"
 
 	BANG = "!"
