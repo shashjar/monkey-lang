@@ -59,6 +59,6 @@ This is a living document storing some ideas for extensions & improvements that 
 ## Housekeeping / Tech Debt
 
 - [ ] Keep [README](README.md) documenting language features & implementation up-to-date
-- [ ] Maybe refactor some code files/split into more files (some files are getting pretty long)
+- [x] Maybe refactor some code files/split into more files (some files are getting pretty long)
 - [x] In the `*ast.InfixExpression` handling in `compiler/compiler.go`, is it worth just adding an `OpLessThan` bytecode instruction so that this case doesn't have to be handled separately from the rest of the logic?
 - [ ] In the AST modification functionality (`ast/modify.go`), implement thorough error-checking
