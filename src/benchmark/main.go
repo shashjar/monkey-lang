@@ -15,10 +15,11 @@ import (
 var engine = flag.String("engine", "vm", "use 'vm' or 'eval'")
 
 var benchmarks = []struct {
-	name  string
-	input string
+	name           string
+	input          string
+	expectedResult string
 }{
-	{name: "fibonacci", input: fibonacciInput},
+	{name: "fibonacci", input: fibonacciInput, expectedResult: "9227465"},
 }
 
 func main() {
@@ -58,10 +59,11 @@ func main() {
 		}
 
 		fmt.Printf(
-			"engine=%s, benchmark=%s, result=%s, duration=%s\n",
+			"engine=%s, benchmark=%s, result=%s, expectedResult=%s, duration=%s\n",
 			*engine,
 			benchmark.name,
 			result.Inspect(),
+			benchmark.expectedResult,
 			duration,
 		)
 	}
