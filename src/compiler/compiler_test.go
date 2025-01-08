@@ -1144,6 +1144,12 @@ func TestAssignStatementsErrors(t *testing.T) {
 		},
 		{
 			input: `
+			one += 1;
+			`,
+			expectedError: `attempting to assign value to identifier 'one' prior to declaration`,
+		},
+		{
+			input: `
 			let num = 10;
 			fn() {
 				num = 20;
@@ -1171,6 +1177,43 @@ func TestAssignStatementsErrors(t *testing.T) {
 	}
 
 	runCompilerErrorTests(t, tests)
+}
+
+func TestOperatorAssignStatements(t *testing.T) {
+	tests := []compilerTestCase{
+		{
+			input: `
+			let num = 55;
+			num += 5;
+			`,
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpSetGlobal, 0),
+				bytecode.Make(bytecode.OpGetGlobal, 0),
+				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpAdd),
+				bytecode.Make(bytecode.OpSetGlobal, 0),
+			},
+			expectedConstants: []interface{}{55, 5},
+		},
+		{
+			input: `
+			let num = 82;
+			num //= 7;
+			`,
+			expectedInstructions: []bytecode.Instructions{
+				bytecode.Make(bytecode.OpConstant, 0),
+				bytecode.Make(bytecode.OpSetGlobal, 0),
+				bytecode.Make(bytecode.OpGetGlobal, 0),
+				bytecode.Make(bytecode.OpConstant, 1),
+				bytecode.Make(bytecode.OpIntegerDiv),
+				bytecode.Make(bytecode.OpSetGlobal, 0),
+			},
+			expectedConstants: []interface{}{82, 7},
+		},
+	}
+
+	runCompilerTests(t, tests)
 }
 
 func TestStringExpressions(t *testing.T) {

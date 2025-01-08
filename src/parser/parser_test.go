@@ -104,6 +104,42 @@ func TestAssignStatements(t *testing.T) {
 	}
 }
 
+func TestOperatorAssignStatements(t *testing.T) {
+	tests := []struct {
+		input              string
+		expectedIdentifier string
+		left               interface{}
+		operator           string
+		right              interface{}
+	}{
+		{"x += 5;", "x", "x", "+", 5},
+		{"y -= 3;", "y", "y", "-", 3},
+		{"a *= 4;", "a", "a", "*", 4},
+		{"b /= 2;", "b", "b", "/", 2},
+		{"z //= 7;", "z", "z", "//", 7},
+	}
+
+	for _, test := range tests {
+		l := lexer.NewLexer(test.input)
+		p := NewParser(l)
+		program := p.ParseProgram()
+		checkParserErrors(t, p)
+		if len(program.Statements) != 1 {
+			t.Fatalf("program contains wrong number of statements. expected=%d, got=%d", 1, len(program.Statements))
+		}
+
+		statement := program.Statements[0]
+		if !testAssignStatement(t, statement, test.expectedIdentifier) {
+			return
+		}
+
+		val := statement.(*ast.AssignStatement).Value
+		if !testInfixExpression(t, val, test.left, test.operator, test.right) {
+			return
+		}
+	}
+}
+
 func TestReturnStatements(t *testing.T) {
 	tests := []struct {
 		input         string

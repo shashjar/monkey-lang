@@ -45,20 +45,45 @@ func (l *Lexer) NextToken() token.Token {
 	case '+':
 		if l.peekChar() == '+' {
 			tok = l.readTwoCharacterToken(token.INCREMENT)
+		} else if l.peekChar() == '=' {
+			char1 := l.char
+			l.readChar()
+			tok = token.Token{Type: token.PLUS_ASSIGN, Literal: string(char1) + string(l.char)}
 		} else {
 			tok = newToken(token.PLUS, l.char)
 		}
 	case '-':
 		if l.peekChar() == '-' {
 			tok = l.readTwoCharacterToken(token.DECREMENT)
+		} else if l.peekChar() == '=' {
+			char1 := l.char
+			l.readChar()
+			tok = token.Token{Type: token.MINUS_ASSIGN, Literal: string(char1) + string(l.char)}
 		} else {
 			tok = newToken(token.MINUS, l.char)
 		}
 	case '*':
-		tok = newToken(token.MUL, l.char)
+		if l.peekChar() == '=' {
+			char1 := l.char
+			l.readChar()
+			tok = token.Token{Type: token.MUL_ASSIGN, Literal: string(char1) + string(l.char)}
+		} else {
+			tok = newToken(token.MUL, l.char)
+		}
 	case '/':
 		if l.peekChar() == '/' {
-			tok = l.readTwoCharacterToken(token.INTEGER_DIV)
+			l.readChar()
+			if l.peekChar() == '=' {
+				char1 := l.char
+				l.readChar()
+				tok = token.Token{Type: token.INTEGER_DIV_ASSIGN, Literal: string(char1) + string(char1) + string(l.char)}
+			} else {
+				tok = token.Token{Type: token.INTEGER_DIV, Literal: string(l.char) + string(l.char)}
+			}
+		} else if l.peekChar() == '=' {
+			char1 := l.char
+			l.readChar()
+			tok = token.Token{Type: token.DIV_ASSIGN, Literal: string(char1) + string(l.char)}
 		} else {
 			tok = newToken(token.DIV, l.char)
 		}

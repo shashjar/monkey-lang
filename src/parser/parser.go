@@ -164,6 +164,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseBindingDeclarationStatement(true)
 	case p.currToken.Type == token.IDENT && p.peekTokenIs(token.ASSIGN):
 		return p.parseAssignStatement()
+	case p.currToken.Type == token.IDENT && p.peekTokenIn(token.OPERATOR_ASSIGNMENTS):
+		return p.parseOperatorAssignStatement()
 	case p.peekTokenIs(token.INCREMENT) || p.peekTokenIs(token.DECREMENT):
 		return p.parsePostfixStatement()
 	case p.currToken.Type == token.RETURN:
@@ -238,6 +240,51 @@ func (p *Parser) parseAssignStatement() ast.Statement {
 	if p.peekTokenIs(token.SEMICOLON) {
 		p.nextToken()
 	}
+
+	return assignStatement
+}
+
+func (p *Parser) parseOperatorAssignStatement() ast.Statement {
+	if !p.currTokenIs(token.IDENT) {
+		return nil
+	}
+
+	assignStatement := &ast.AssignStatement{Token: p.currToken}
+	identifier := &ast.Identifier{Token: p.currToken, Value: p.currToken.Literal}
+	assignStatement.Name = identifier
+
+	p.nextToken()
+
+	operatorAssignmentToken := p.currToken
+
+	p.nextToken()
+
+	rightExpression := p.parseExpression(LOWEST)
+
+	if p.peekTokenIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	var operatorTok token.Token
+	switch operatorAssignmentToken.Type {
+	case token.PLUS_ASSIGN:
+		operatorTok = token.Token{Type: token.PLUS, Literal: "+"}
+	case token.MINUS_ASSIGN:
+		operatorTok = token.Token{Type: token.MINUS, Literal: "-"}
+	case token.MUL_ASSIGN:
+		operatorTok = token.Token{Type: token.MUL, Literal: "*"}
+	case token.DIV_ASSIGN:
+		operatorTok = token.Token{Type: token.DIV, Literal: "/"}
+	case token.INTEGER_DIV_ASSIGN:
+		operatorTok = token.Token{Type: token.INTEGER_DIV, Literal: "//"}
+	default:
+		msg := fmt.Sprintf("received invalid token for operator assignment statement: %s", p.currToken.Literal)
+		p.errors = append(p.errors, msg)
+		return nil
+	}
+
+	valueExpression := ast.InfixExpression{Token: operatorTok, Left: identifier, Operator: operatorTok.Literal, Right: rightExpression}
+	assignStatement.Value = &valueExpression
 
 	return assignStatement
 }
@@ -775,6 +822,15 @@ func (p *Parser) currTokenIn(ts []token.TokenType) bool {
 
 func (p *Parser) peekTokenIs(t token.TokenType) bool {
 	return p.peekToken.Type == t
+}
+
+func (p *Parser) peekTokenIn(ts []token.TokenType) bool {
+	for _, t := range ts {
+		if p.peekTokenIs(t) {
+			return true
+		}
+	}
+	return false
 }
 
 func (p *Parser) createPeekError(t token.TokenType) {

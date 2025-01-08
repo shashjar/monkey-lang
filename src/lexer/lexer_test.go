@@ -112,6 +112,12 @@ func TestNextToken(t *testing.T) {
 	default:
 		puts("hello world");
 	}
+
+	i += 1;
+	i -= 3;
+	i *= 5;
+	i /= 7;
+	i //= 9;
 	`
 
 	tests := []struct {
@@ -413,6 +419,27 @@ func TestNextToken(t *testing.T) {
 		{token.RPAREN, ")"},
 		{token.SEMICOLON, ";"},
 		{token.RBRACE, "}"},
+
+		{token.IDENT, "i"},
+		{token.PLUS_ASSIGN, "+="},
+		{token.INT, "1"},
+		{token.SEMICOLON, ";"},
+		{token.IDENT, "i"},
+		{token.MINUS_ASSIGN, "-="},
+		{token.INT, "3"},
+		{token.SEMICOLON, ";"},
+		{token.IDENT, "i"},
+		{token.MUL_ASSIGN, "*="},
+		{token.INT, "5"},
+		{token.SEMICOLON, ";"},
+		{token.IDENT, "i"},
+		{token.DIV_ASSIGN, "/="},
+		{token.INT, "7"},
+		{token.SEMICOLON, ";"},
+		{token.IDENT, "i"},
+		{token.INTEGER_DIV_ASSIGN, "//="},
+		{token.INT, "9"},
+		{token.SEMICOLON, ";"},
 
 		{token.EOF, ""},
 	}

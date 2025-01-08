@@ -123,6 +123,13 @@ The basic arithmetic operations (`+`, `-`, `*`, `/`, `//`) are supported for int
 3.87 + 4 * 6.1;
 ```
 
+Additionally, shorthand assignment syntax for each of the basic arithmetic operations is supported. This is done using the tokens `+=`, `-=`, `*=`, `/=`, and `//=`, which perform the respective operation between the identifier on the left and the expression on the right and then reassign that value to the identifier.
+
+```
+let x = 5;
+x += 10; // `x` is now 15
+```
+
 ### Booleans
 
 The bang operator `!` and the logical boolean operators `&&` and `||` are supported.

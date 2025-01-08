@@ -30,6 +30,12 @@ const (
 	DIV         = "/"
 	INTEGER_DIV = "//"
 
+	PLUS_ASSIGN        = "+="
+	MINUS_ASSIGN       = "-="
+	MUL_ASSIGN         = "*="
+	DIV_ASSIGN         = "/="
+	INTEGER_DIV_ASSIGN = "//="
+
 	MODULO = "%"
 
 	BANG = "!"
@@ -74,6 +80,14 @@ const (
 	RETURN   = "RETURN"
 	MACRO    = "MACRO"
 )
+
+var OPERATOR_ASSIGNMENTS = []TokenType{
+	PLUS_ASSIGN,
+	MINUS_ASSIGN,
+	MUL_ASSIGN,
+	DIV_ASSIGN,
+	INTEGER_DIV_ASSIGN,
+}
 
 var keywords = map[string]TokenType{
 	"fn":      FUNCTION,

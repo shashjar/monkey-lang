@@ -426,6 +426,44 @@ func TestAssignStatements(t *testing.T) {
 	runVMTests(t, tests)
 }
 
+func TestOperatorAssignStatements(t *testing.T) {
+	tests := []vmTestCase{
+		{"let one = 1; one += 1; one;", 2},
+		{
+			input: `
+			let num = 0;
+			num -= 1;
+			num;
+			`,
+			expected: -1,
+		},
+		{
+			input: `
+			let x = 10;
+			let y = 17 + 4 * x;
+			y += 1;
+			y;
+			`,
+			expected: 58,
+		},
+		{
+			input: `
+			let i = 0;
+			while (i < 14) {
+				i += 1;
+			}
+			i *= 2;
+			i -= 3;
+			i //= 2;
+			i;
+			`,
+			expected: 12,
+		},
+	}
+
+	runVMTests(t, tests)
+}
+
 func TestStringExpressions(t *testing.T) {
 	tests := []vmTestCase{
 		{`"monkey"`, "monkey"},
