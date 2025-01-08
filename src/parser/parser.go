@@ -187,11 +187,11 @@ func (p *Parser) peekTokenIn(ts []token.TokenType) bool {
 }
 
 func (p *Parser) createPeekError(t token.TokenType) {
-	msg := fmt.Sprintf("expected next token to be %s, got %s instead", t, p.peekToken.Type)
+	msg := fmt.Sprintf("line %d, column %d: expected next token to be %s, got %s instead", p.peekToken.LineNumber, p.peekToken.ColumnNumber, t, p.peekToken.Type)
 	p.errors = append(p.errors, msg)
 }
 
 func (p *Parser) createNoPrefixParseFnError(t token.TokenType) {
-	msg := fmt.Sprintf("no prefix parse function for %s found", t)
+	msg := fmt.Sprintf("line %d, column %d: no prefix parse function for %s found", p.currToken.LineNumber, p.currToken.ColumnNumber, t)
 	p.errors = append(p.errors, msg)
 }

@@ -128,7 +128,7 @@ func (p *Parser) parseOperatorAssignStatement() ast.Statement {
 	case token.INTEGER_DIV_ASSIGN:
 		operatorTok = token.Token{Type: token.INTEGER_DIV, Literal: "//"}
 	default:
-		msg := fmt.Sprintf("received invalid token for operator assignment statement: %s", p.currToken.Literal)
+		msg := fmt.Sprintf("line %d, column %d: received invalid token for operator assignment statement: %s", operatorAssignmentToken.LineNumber, operatorAssignmentToken.ColumnNumber, operatorAssignmentToken.Literal)
 		p.errors = append(p.errors, msg)
 		return nil
 	}
@@ -141,7 +141,7 @@ func (p *Parser) parseOperatorAssignStatement() ast.Statement {
 
 func (p *Parser) parsePostfixStatement() ast.Statement {
 	if !p.currTokenIs(token.IDENT) {
-		msg := fmt.Sprintf("expected postfix operator '%s' to be applied to an identifier. got %s instead", p.peekToken.Literal, p.currToken.Literal)
+		msg := fmt.Sprintf("line %d, column %d: expected postfix operator '%s' to be applied to an identifier. got %s instead", p.currToken.LineNumber, p.currToken.ColumnNumber, p.peekToken.Literal, p.currToken.Literal)
 		p.errors = append(p.errors, msg)
 		return nil
 	}

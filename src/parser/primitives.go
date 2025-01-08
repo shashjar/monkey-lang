@@ -12,7 +12,7 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 
 	value, err := strconv.ParseInt(p.currToken.Literal, 0, 64)
 	if err != nil {
-		msg := fmt.Sprintf("could not parse %q as an integer", p.currToken.Literal)
+		msg := fmt.Sprintf("line %d, column %d: could not parse %q as an integer", p.currToken.LineNumber, p.currToken.ColumnNumber, p.currToken.Literal)
 		p.errors = append(p.errors, msg)
 		return nil
 	}
@@ -26,7 +26,7 @@ func (p *Parser) parseFloat() ast.Expression {
 
 	value, err := strconv.ParseFloat(p.currToken.Literal, 64)
 	if err != nil {
-		msg := fmt.Sprintf("could not parse %q as a float", p.currToken.Literal)
+		msg := fmt.Sprintf("line %d, column %d: could not parse %q as a float", p.currToken.LineNumber, p.currToken.ColumnNumber, p.currToken.Literal)
 		p.errors = append(p.errors, msg)
 		return nil
 	}

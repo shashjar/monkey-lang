@@ -151,11 +151,11 @@ func TestPostfixOperatorErrors(t *testing.T) {
 	}{
 		{
 			input:         "3++",
-			expectedError: "expected postfix operator '++' to be applied to an identifier. got 3 instead",
+			expectedError: "line 1, column 0: expected postfix operator '++' to be applied to an identifier. got 3 instead",
 		},
 		{
 			input:         "true--",
-			expectedError: "expected postfix operator '--' to be applied to an identifier. got true instead",
+			expectedError: "line 1, column 0: expected postfix operator '--' to be applied to an identifier. got true instead",
 		},
 	}
 
