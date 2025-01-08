@@ -114,7 +114,7 @@ The more advanced implementation of Monkey relies on a compiler & virtual machin
 
 ### Integers, Floats, and Arithmetic Operations
 
-The basic arithmetic operations (`+`, `-`, `*`, `/`, `//`) are supported for integers and floats (both 64 bits). The modulo operator `%` is also supported. Operations involving an integer and a float will produce a float, and division between two integers may produce either an integer or a float. Note that both regular division and integer division are supported.
+The basic arithmetic operations (`+`, `-`, `*`, `/`, `//`) are supported for integers and floats (both 64 bits). The modulus operator `%` is also supported. Operations involving an integer and a float will produce a float, and division between two integers may produce either an integer or a float. Note that both regular division and integer division are supported.
 
 The `**` operator for exponentiation is supported.
 

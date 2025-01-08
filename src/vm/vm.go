@@ -280,7 +280,7 @@ func (vm *VM) LastPoppedStackElem() object.Object {
 
 func (vm *VM) push(obj object.Object) error {
 	if vm.sp >= StackSize {
-		return fmt.Errorf("stack overflow")
+		return fmt.Errorf("stack overflow - stack of size %d is already full", StackSize)
 	}
 
 	vm.stack[vm.sp] = obj
@@ -396,7 +396,7 @@ func (vm *VM) executeBinaryNumericalOperation(op bytecode.Opcode, left object.Ob
 		result = math.Pow(leftValue, rightValue)
 	case bytecode.OpMod:
 		if isFloatOperation {
-			return fmt.Errorf("modulo operation not supported for float values")
+			return fmt.Errorf("modulus operation not supported for float values")
 		}
 		return vm.push(&object.Integer{Value: int64(leftValue) % int64(rightValue)})
 	default:

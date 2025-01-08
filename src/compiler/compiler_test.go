@@ -186,15 +186,15 @@ func TestPostfixOperatorErrors(t *testing.T) {
 	tests := []compilerErrorTestCase{
 		{
 			input:         "x++",
-			expectedError: "attempting to assign value to identifier 'x' prior to declaration",
+			expectedError: "line 1, column 0: attempting to assign value to identifier 'x' prior to declaration",
 		},
 		{
 			input:         "x--",
-			expectedError: "attempting to assign value to identifier 'x' prior to declaration",
+			expectedError: "line 1, column 0: attempting to assign value to identifier 'x' prior to declaration",
 		},
 		{
 			input:         "const x = 5; x++;",
-			expectedError: "attempting to assign value to constant variable 'x'",
+			expectedError: "line 1, column 13: attempting to assign value to constant variable 'x'",
 		},
 	}
 
@@ -1047,7 +1047,7 @@ func TestConstStatementsErrors(t *testing.T) {
 			const num = 10;
 			num = 20;
 			`,
-			expectedError: `attempting to assign value to constant variable 'num'`,
+			expectedError: `line 3, column 3: attempting to assign value to constant variable 'num'`,
 		},
 		{
 			input: `
@@ -1058,7 +1058,7 @@ func TestConstStatementsErrors(t *testing.T) {
 			}
 			num;
 			`,
-			expectedError: `attempting to assign value to identifier 'num' prior to declaration`,
+			expectedError: `line 4, column 4: attempting to assign value to identifier 'num' prior to declaration`,
 		},
 		{
 			input: `
@@ -1070,35 +1070,35 @@ func TestConstStatementsErrors(t *testing.T) {
 			}
 			num;
 			`,
-			expectedError: `attempting to assign value to constant variable 'num'`,
+			expectedError: `line 5, column 4: attempting to assign value to constant variable 'num'`,
 		},
 		{
 			input: `
 			const num = 10;
 			let num = 20;
 			`,
-			expectedError: `identifier 'num' has already been declared`,
+			expectedError: `line 3, column 3: identifier 'num' has already been declared`,
 		},
 		{
 			input: `
 			let num = 10;
 			const num = 20;
 			`,
-			expectedError: `identifier 'num' has already been declared`,
+			expectedError: `line 3, column 3: identifier 'num' has already been declared`,
 		},
 		{
 			input: `
 			let num = 10;
 			let num = 20;
 			`,
-			expectedError: `identifier 'num' has already been declared`,
+			expectedError: `line 3, column 3: identifier 'num' has already been declared`,
 		},
 		{
 			input: `
 			const num = 10;
 			const num = 20;
 			`,
-			expectedError: `identifier 'num' has already been declared`,
+			expectedError: `line 3, column 3: identifier 'num' has already been declared`,
 		},
 	}
 
@@ -1150,13 +1150,13 @@ func TestAssignStatementsErrors(t *testing.T) {
 			input: `
 			one = 1;
 			`,
-			expectedError: `attempting to assign value to identifier 'one' prior to declaration`,
+			expectedError: `line 2, column 3: attempting to assign value to identifier 'one' prior to declaration`,
 		},
 		{
 			input: `
 			one += 1;
 			`,
-			expectedError: `attempting to assign value to identifier 'one' prior to declaration`,
+			expectedError: `line 2, column 3: attempting to assign value to identifier 'one' prior to declaration`,
 		},
 		{
 			input: `
@@ -1167,7 +1167,7 @@ func TestAssignStatementsErrors(t *testing.T) {
 			}
 			num;
 			`,
-			expectedError: `attempting to assign value to identifier 'num' prior to declaration`,
+			expectedError: `line 4, column 4: attempting to assign value to identifier 'num' prior to declaration`,
 		},
 		{
 			input: `
@@ -1182,7 +1182,7 @@ func TestAssignStatementsErrors(t *testing.T) {
 			};
 			num + f();
 			`,
-			expectedError: `attempting to assign value to identifier 'num' prior to declaration`,
+			expectedError: `line 6, column 5: attempting to assign value to identifier 'num' prior to declaration`,
 		},
 	}
 

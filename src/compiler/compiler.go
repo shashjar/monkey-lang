@@ -94,7 +94,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 	case *ast.LetStatement:
 		symbol, ok := c.symbolTable.store[node.Name.Value] // Only able to declare this variable if it hasn't already been declared
 		if ok && (symbol.Scope == GlobalScope || symbol.Scope == LocalScope) {
-			return fmt.Errorf("identifier '%s' has already been declared", node.Name.Value)
+			return fmt.Errorf("line %d, column %d: identifier '%s' has already been declared", node.Token.LineNumber, node.Token.ColumnNumber, node.Name.Value)
 		}
 
 		symbol = c.symbolTable.Define(node.Name.Value)
@@ -113,7 +113,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 	case *ast.ConstStatement:
 		symbol, ok := c.symbolTable.store[node.Name.Value] // Only able to declare this variable if it hasn't already been declared
 		if ok && (symbol.Scope == GlobalScope || symbol.Scope == LocalScope) {
-			return fmt.Errorf("identifier '%s' has already been declared", node.Name.Value)
+			return fmt.Errorf("line %d, column %d: identifier '%s' has already been declared", node.Token.LineNumber, node.Token.ColumnNumber, node.Name.Value)
 		}
 
 		symbol = c.symbolTable.DefineConst(node.Name.Value)
@@ -132,10 +132,10 @@ func (c *Compiler) Compile(node ast.Node) error {
 	case *ast.AssignStatement:
 		symbol, ok := c.symbolTable.store[node.Name.Value] // Only able to reassign value if the variable was declared in the same scope we're currently in
 		if !ok {
-			return fmt.Errorf("attempting to assign value to identifier '%s' prior to declaration", node.Name.Value)
+			return fmt.Errorf("line %d, column %d: attempting to assign value to identifier '%s' prior to declaration", node.Token.LineNumber, node.Token.ColumnNumber, node.Name.Value)
 		}
 		if symbol.Const {
-			return fmt.Errorf("attempting to assign value to constant variable '%s'", node.Name.Value)
+			return fmt.Errorf("line %d, column %d: attempting to assign value to constant variable '%s'", node.Token.LineNumber, node.Token.ColumnNumber, node.Name.Value)
 		}
 
 		err := c.Compile(node.Value)
@@ -152,7 +152,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 	case *ast.Identifier:
 		symbol, ok := c.symbolTable.Resolve(node.Value)
 		if !ok {
-			return fmt.Errorf("undefined variable: %s", node.Value) // Compile-time error
+			return fmt.Errorf("line %d, column %d: undefined variable: %s", node.Token.LineNumber, node.Token.ColumnNumber, node.Value) // Compile-time error
 		}
 
 		c.loadSymbol(symbol)
@@ -169,7 +169,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 		case "!":
 			c.emit(bytecode.OpBang)
 		default:
-			return fmt.Errorf("unknown operator: %s", node.Operator)
+			return fmt.Errorf("line %d, column %d: unknown operator: %s", node.Token.LineNumber, node.Token.ColumnNumber, node.Operator)
 		}
 
 	case *ast.InfixExpression:
@@ -217,7 +217,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 		case ">=":
 			c.emit(bytecode.OpGreaterThanOrEqualTo)
 		default:
-			return fmt.Errorf("unknown operator: %s", node.Operator)
+			return fmt.Errorf("line %d, column %d: unknown operator: %s", node.Token.LineNumber, node.Token.ColumnNumber, node.Operator)
 		}
 
 	case *ast.IfExpression:
