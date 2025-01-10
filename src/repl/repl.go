@@ -1,18 +1,20 @@
 package repl
 
 import (
-	"bufio"
 	"fmt"
 	"io"
 	"monkey/compiler"
-	"monkey/evaluator"
 	"monkey/lexer"
 	"monkey/object"
 	"monkey/parser"
 	"monkey/vm"
+	"strings"
+
+	"github.com/chzyer/readline"
 )
 
 const PROMPT = ">> "
+const CONTINUE_PROMPT = "... "
 
 const MONKEY_FACE = `            __,__
    .--.  .-"     "-.  .--.
@@ -27,9 +29,31 @@ const MONKEY_FACE = `            __,__
            '-----'
 `
 
-// Starts the REPL for the Monkey programming language compiler & VM for the user to interact with.
-func Start(in io.Reader, out io.Writer) {
-	scanner := bufio.NewScanner(in)
+// The REPL for the Monkey programming language.
+type REPL struct {
+	out         io.Writer
+	rl          *readline.Instance
+	constants   []object.Object
+	symbolTable *compiler.SymbolTable
+	globals     []object.Object
+}
+
+// Creates a new REPL for the user to interact with Monkey at the top level.
+func NewREPL(out io.Writer) (*REPL, error) {
+	// Configure readline with custom settings
+	config := &readline.Config{
+		Prompt:            PROMPT,
+		HistoryFile:       "/tmp/monkey_repl_history.tmp",
+		HistoryLimit:      200,
+		InterruptPrompt:   "^C",
+		EOFPrompt:         "exit",
+		HistorySearchFold: true,
+	}
+
+	rl, err := readline.NewEx(config)
+	if err != nil {
+		return nil, fmt.Errorf("error initializing REPL: %s", err)
+	}
 
 	constants := []object.Object{}
 	symbolTable := compiler.NewSymbolTable()
@@ -38,90 +62,105 @@ func Start(in io.Reader, out io.Writer) {
 	}
 	globals := make([]object.Object, vm.GlobalsSize)
 
+	return &REPL{
+		out:         out,
+		rl:          rl,
+		constants:   constants,
+		symbolTable: symbolTable,
+		globals:     globals,
+	}, nil
+}
+
+// Starts the REPL for the Monkey programming language compiler & VM for the user to interact with.
+func (r *REPL) Start() {
+	defer r.rl.Close()
+
 	for {
-		// Reading Input
-		fmt.Fprint(out, PROMPT)
-		scanned := scanner.Scan()
-		if !scanned {
+		// Read input
+		input, err := r.readMultiLineInput()
+		if err == readline.ErrInterrupt {
+			continue
+		} else if err == io.EOF {
 			return
-		}
-
-		// Lexing
-		line := scanner.Text()
-		l := lexer.NewLexer(line)
-
-		// Parsing
-		p := parser.NewParser(l)
-		program := p.ParseProgram()
-		if len(p.Errors()) != 0 {
-			printParserErrors(out, p.Errors())
+		} else if err != nil {
+			fmt.Fprintf(r.out, "Error reading input on REPL: %s\n", err)
 			continue
 		}
 
-		// Compilation
-		compiler := compiler.NewCompilerWithState(symbolTable, constants)
-		err := compiler.Compile(program)
-		if err != nil {
-			fmt.Fprintf(out, "Whoops! Compilation failed:\n %s\n", err)
+		// Handle exit command
+		if strings.TrimSpace(input) == "exit" {
+			return
 		}
 
-		bytecode := compiler.Bytecode()
-		constants = bytecode.Constants
-
-		// Virtual Machine (VM)
-		vm := vm.NewVMWithGlobalsStore(bytecode, globals)
-		err = vm.Run()
-		if err != nil {
-			fmt.Fprintf(out, "Whoops! Executing bytecode failed:\n %s\n", err)
+		// Skip empty inputs
+		if strings.TrimSpace(input) == "" {
+			continue
 		}
 
-		// Printing Output
-		lastPopped := vm.LastPoppedStackElem()
-		if lastPopped != nil {
-			io.WriteString(out, lastPopped.Inspect())
-			io.WriteString(out, "\n")
-		}
+		r.executeInput(input)
 	}
 }
 
-// Starts the REPL for the Monkey programming language interpreter for the user to interact with.
-func StartInterpreter(in io.Reader, out io.Writer) {
-	scanner := bufio.NewScanner(in)
-	env := object.NewEnvironment()
-	macroEnv := object.NewEnvironment()
+func (r *REPL) readMultiLineInput() (string, error) {
+	var lines []string
+	r.rl.SetPrompt(PROMPT)
 
 	for {
-		// Reading Input
-		fmt.Fprint(out, PROMPT)
-		scanned := scanner.Scan()
-		if !scanned {
-			return
+		line, err := r.rl.Readline()
+		if err != nil {
+			return "", err
 		}
 
-		// Lexing
-		line := scanner.Text()
-		l := lexer.NewLexer(line)
-
-		// Parsing
-		p := parser.NewParser(l)
-		program := p.ParseProgram()
-		if len(p.Errors()) != 0 {
-			printParserErrors(out, p.Errors())
-			continue
+		// Detect multi-line input (i.e. backslash at the end of the line)
+		if !strings.HasSuffix(line, "\\") {
+			lines = append(lines, line)
+			break
 		}
 
-		// Macro Expansion
-		evaluator.DefineMacros(program, macroEnv)
-		expanded := evaluator.ExpandMacros(program, macroEnv)
+		// Remove backslash for proper input handling
+		line = strings.TrimSuffix(line, "\\")
+		lines = append(lines, line)
+		r.rl.SetPrompt(CONTINUE_PROMPT)
+	}
 
-		// Evaluation
-		evaluated := evaluator.Eval(expanded, env)
+	return strings.Join(lines, "\n"), nil
+}
 
-		// Printing Output
-		if evaluated != nil {
-			io.WriteString(out, evaluated.Inspect())
-			io.WriteString(out, "\n")
-		}
+func (r *REPL) executeInput(input string) {
+	// Lexing
+	l := lexer.NewLexer(input)
+
+	// Parsing
+	p := parser.NewParser(l)
+	program := p.ParseProgram()
+	if len(p.Errors()) != 0 {
+		printParserErrors(r.out, p.Errors())
+		return
+	}
+
+	// Compilation
+	compiler := compiler.NewCompilerWithState(r.symbolTable, r.constants)
+	err := compiler.Compile(program)
+	if err != nil {
+		fmt.Fprintf(r.out, "Whoops! Compilation failed:\n %s\n", err)
+	}
+
+	bytecode := compiler.Bytecode()
+	r.constants = bytecode.Constants
+
+	// Virtual Machine (VM)
+	vm := vm.NewVMWithGlobalsStore(bytecode, r.globals)
+	err = vm.Run()
+	if err != nil {
+		fmt.Fprintf(r.out, "Whoops! Executing bytecode failed:\n %s\n", err)
+		return
+	}
+
+	// Printing Output
+	lastPopped := vm.LastPoppedStackElem()
+	if lastPopped != nil {
+		io.WriteString(r.out, lastPopped.Inspect())
+		io.WriteString(r.out, "\n")
 	}
 }
 

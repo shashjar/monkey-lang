@@ -14,9 +14,9 @@ Monkey is a programming language designed to help teach programming language the
 
 Read more about Monkey at the [official site](https://monkeylang.org/).
 
-## Usage
+## Usage (REPL)
 
-To use the Monkey REPL, run:
+To use the Monkey REPL, run the below command. By default, this runs the Monkey compiler & virtual machine, with entrypoint `main.go` into `repl/repl.go`.
 
 ```
 go build -o monkey && ./monkey
@@ -24,7 +24,15 @@ go build -o monkey && ./monkey
 
 <img src="./docs/assets/monkey-usage.png" alt="Monkey Usage" style="box-shadow: 5px 5px 15px rgba(0,0,0,0.3); border-radius: 10px;">
 
-By default, this runs the Monkey compiler & virtual machine, with entrypoint `main.go` into `repl/repl.go`. The engine can be specified via a command-line argument if you want to use the interpreter/evaluator engine instead:
+The REPL has some ergonomic features, courtesy of the `chzyer/readline` package:
+
+- Multi-line input, which can be done by placing a backslash `\` at the end of each line which should be continued onto the next prior to the REPL processing the input
+- Maintained history of past input, which can be navigated via the up and down arrow keys
+- Navigating back-and-forth within REPL input via the left and right arrow keys
+- Closing REPL via `Ctrl+D` or the `exit` command
+- Input interrupt via `Ctrl+C`
+
+The engine can be specified via a command-line argument if you want to use the interpreter/evaluator engine instead:
 
 ```
 go build -o monkey && ./monkey -engine=eval
@@ -36,7 +44,7 @@ Note that the features listed in this document are all supported in the compiler
 
 - [monkey-lang](#monkey-lang)
   - [The Monkey Programming Language](#the-monkey-programming-language)
-  - [Usage](#usage)
+  - [Usage (REPL)](#usage-repl)
   - [Table of Contents](#table-of-contents)
   - [Benchmarks](#benchmarks)
   - [Implementation Details](#implementation-details)

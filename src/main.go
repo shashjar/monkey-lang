@@ -24,7 +24,12 @@ func main() {
 	fmt.Printf("Feel free to type in commands!\n")
 
 	if *engine == "vm" {
-		repl.Start(os.Stdin, os.Stdout)
+		r, err := repl.NewREPL(os.Stdout)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		r.Start()
 	} else if *engine == "eval" {
 		repl.StartInterpreter(os.Stdin, os.Stdout)
 	} else {
