@@ -25,7 +25,7 @@ go build -o monkey && ./monkey
 ```
 
 <p align="center">
-    <img src="./docs/assets/monkey-usage-repl.png" alt="Monkey Usage - REPL" width="550">
+    <img src="./docs/assets/monkey-usage-repl.png" alt="Monkey Usage - REPL" width="750">
 </p>
 
 The REPL has some ergonomic features, courtesy of the `chzyer/readline` package:
@@ -43,7 +43,7 @@ go build -o monkey && ./monkey -engine=eval
 ```
 
 <p align="center">
-    <img src="./docs/assets/monkey-usage-files.png" alt="Monkey Usage - Running Files" width="550">
+    <img src="./docs/assets/monkey-usage-files.png" alt="Monkey Usage - Running Files" width="750">
 </p>
 
 Note that the features listed in this document are all supported in the compiler/VM engine, but the interpreter/evaluator implementation may not be fully up-to-date.
