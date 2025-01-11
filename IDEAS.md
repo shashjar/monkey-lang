@@ -43,7 +43,7 @@ This is a living document storing some ideas for extensions & improvements that 
 
 ## Additional Features
 
-- [ ] Ability to execute Monkey programs from files (`.mo` extensions?) - again, be able to choose engine
+- [x] Ability to execute Monkey programs from files (`.mo` extensions?) - again, be able to choose engine
 - [x] Better error messages that point to line/column numbers for problematic tokens, both at compile-time and run-time
 - [ ] Ability to include comments in Monkey code
 - [ ] Maybe write a UI to interact with Monkey - `wadackel` has written a great example of this: https://github.com/wadackel/rs-monkey-lang

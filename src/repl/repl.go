@@ -8,6 +8,7 @@ import (
 	"monkey/object"
 	"monkey/parser"
 	"monkey/vm"
+	"os"
 	"strings"
 
 	"github.com/chzyer/readline"
@@ -99,6 +100,19 @@ func (r *REPL) Start() {
 
 		r.executeInput(input)
 	}
+}
+
+func (r *REPL) ExecuteFile(filename string) {
+	defer r.rl.Close()
+
+	bytes, err := os.ReadFile(filename)
+	if err != nil {
+		fmt.Fprintf(r.out, "Error reading from file: %s\n", err)
+		return
+	}
+
+	input := string(bytes)
+	r.executeInput(input)
 }
 
 func (r *REPL) readMultiLineInput() (string, error) {

@@ -14,9 +14,11 @@ Monkey is a programming language designed to help teach programming language the
 
 Read more about Monkey at the [official site](https://monkeylang.org/).
 
-## Usage (REPL)
+## Usage
 
-To use the Monkey REPL, run the below command. By default, this runs the Monkey compiler & virtual machine, with entrypoint `main.go` into `repl/repl.go`.
+### REPL
+
+To use the Monkey REPL, run the below command from within the `src` directory. By default, this runs the Monkey compiler & virtual machine, with entrypoint `main.go` into `repl/repl.go`.
 
 ```
 go build -o monkey && ./monkey
@@ -40,11 +42,23 @@ go build -o monkey && ./monkey -engine=eval
 
 Note that the features listed in this document are all supported in the compiler/VM engine, but the interpreter/evaluator implementation may not be fully up-to-date.
 
+### Files
+
+This implementation also supports running Monkey code written in files. The file can be named and use whatever extension you want, but I like using the `.mo` extension. There are a couple of example Monkey files in the `./monkey_files` directory. To run a file, pass its path to the Monkey binary with the `filename` command-line argument. For example, once the Monkey binary is built with the above command, the following command (run from the root directory of this repo) runs `./monkey_files/code.mo`:
+
+```
+./src/monkey --filename=monkey_files/code.mo
+```
+
+Note that files can currently only be run via the compiler/VM engine.
+
 ## Table of Contents
 
 - [monkey-lang](#monkey-lang)
   - [The Monkey Programming Language](#the-monkey-programming-language)
-  - [Usage (REPL)](#usage-repl)
+  - [Usage](#usage)
+    - [REPL](#repl)
+    - [Files](#files)
   - [Table of Contents](#table-of-contents)
   - [Benchmarks](#benchmarks)
   - [Implementation Details](#implementation-details)
