@@ -42,19 +42,19 @@ The engine can be specified via a command-line argument if you want to use the i
 go build -o monkey && ./monkey -engine=eval
 ```
 
-<p align="center">
-    <img src="./docs/assets/monkey-usage-files.png" alt="Monkey Usage - Running Files" width="750">
-</p>
-
 Note that the features listed in this document are all supported in the compiler/VM engine, but the interpreter/evaluator implementation may not be fully up-to-date.
 
-### Files
+### Running Files
 
 This implementation also supports running Monkey code written in files. The file can be named and use whatever extension you want, but I like using the `.mo` extension. There are a couple of example Monkey files in the `./monkey_files` directory. To run a file, pass its path to the Monkey binary with the `filename` command-line argument. For example, once the Monkey binary is built with the above command, the following command (run from the root directory of this repo) runs `./monkey_files/code.mo`:
 
 ```
 ./src/monkey --filename=monkey_files/code.mo
 ```
+
+<p align="center">
+    <img src="./docs/assets/monkey-usage-files.png" alt="Monkey Usage - Running Files" width="750">
+</p>
 
 Note that files can currently only be run via the compiler/VM engine.
 
@@ -64,7 +64,7 @@ Note that files can currently only be run via the compiler/VM engine.
   - [The Monkey Programming Language](#the-monkey-programming-language)
   - [Usage](#usage)
     - [REPL](#repl)
-    - [Files](#files)
+    - [Running Files](#running-files)
   - [Table of Contents](#table-of-contents)
   - [Benchmarks](#benchmarks)
   - [Implementation Details](#implementation-details)
