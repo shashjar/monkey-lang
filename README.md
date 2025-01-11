@@ -24,7 +24,7 @@ To use the Monkey REPL, run the below command from within the `src` directory. B
 go build -o monkey && ./monkey
 ```
 
-<img src="./docs/assets/monkey-usage.png" alt="Monkey Usage" style="box-shadow: 5px 5px 15px rgba(0,0,0,0.3); border-radius: 10px;">
+<img src="./docs/assets/monkey-usage-repl.png" alt="Monkey Usage - REPL">
 
 The REPL has some ergonomic features, courtesy of the `chzyer/readline` package:
 
@@ -39,6 +39,8 @@ The engine can be specified via a command-line argument if you want to use the i
 ```
 go build -o monkey && ./monkey -engine=eval
 ```
+
+<img src="./docs/assets/monkey-usage-files.png" alt="Monkey Usage - Running Files">
 
 Note that the features listed in this document are all supported in the compiler/VM engine, but the interpreter/evaluator implementation may not be fully up-to-date.
 
