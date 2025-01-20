@@ -26,7 +26,7 @@ This is a living document storing some ideas for extensions & improvements that 
 - [ ] The lexer (`lexer/lexer.go`) currently only supports ASCII characters. Maybe extend this to Unicode (see p. 19-20 in WAIIG).
 - [ ] Add support for macros into the compiler/VM engine (supported in interpreter but not yet compiler/VM)
 
-# Builtin Functions
+## Builtin Functions
 
 - [x] Add support for hashmaps in the `len` builtin function
 - [x] Strings: `split` operation
